@@ -1,9 +1,9 @@
 # KLVR Firmware Updater - One-Command Installer & Runner (PowerShell)
-# Usage: iex (iwr -useb https://raw.githubusercontent.com/[repo-url]/install-and-update.ps1)
-# Or: Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/[repo-url]/install-and-update.ps1" -UseBasicParsing).Content
+# Usage: iex (iwr -useb https://raw.githubusercontent.com/KLVR-no/klvr-firmware-updater/main/install-and-update.ps1)
+# Or: Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/KLVR-no/klvr-firmware-updater/main/install-and-update.ps1" -UseBasicParsing).Content
 
 param(
-    [string]$RepoUrl = "https://github.com/stiansagholen/klvr-firmware-updater.git"
+    [string]$RepoUrl = "https://github.com/KLVR-no/klvr-firmware-updater.git"
 )
 
 # Configuration

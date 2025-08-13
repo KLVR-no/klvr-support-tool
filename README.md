@@ -6,12 +6,12 @@ A powerful, interactive firmware updater for KLVR Charger Pro devices with autom
 
 ### macOS/Linux
 ```bash
-curl -sSL https://raw.githubusercontent.com/stiansagholen/klvr-firmware-updater/main/install-and-update.sh | bash
+curl -sSL https://raw.githubusercontent.com/KLVR-no/klvr-firmware-updater/main/install-and-update.sh | bash
 ```
 
 ### Windows (PowerShell)
 ```powershell
-iex (iwr -useb https://raw.githubusercontent.com/stiansagholen/klvr-firmware-updater/main/install-and-update.ps1)
+iex (iwr -useb https://raw.githubusercontent.com/KLVR-no/klvr-firmware-updater/main/install-and-update.ps1)
 ```
 
 That's it! The script will automatically:
@@ -49,7 +49,7 @@ sudo apt-get install nodejs npm git curl
 If you prefer to install manually:
 
 ```bash
-git clone https://github.com/stiansagholen/klvr-firmware-updater.git
+git clone https://github.com/KLVR-no/klvr-firmware-updater.git
 cd klvr-firmware-updater
 npm install
 node firmware-update.js

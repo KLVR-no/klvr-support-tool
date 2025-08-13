@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # KLVR Firmware Updater - One-Command Installer & Runner
-# Usage: curl -sSL https://raw.githubusercontent.com/[repo-url]/install-and-update.sh | bash
-# Or: bash <(curl -sSL https://raw.githubusercontent.com/[repo-url]/install-and-update.sh)
+# Usage: curl -sSL https://raw.githubusercontent.com/KLVR-no/klvr-firmware-updater/main/install-and-update.sh | bash
+# Or: bash <(curl -sSL https://raw.githubusercontent.com/KLVR-no/klvr-firmware-updater/main/install-and-update.sh)
 
 set -e  # Exit on any error
 
 # Configuration
-REPO_URL="https://github.com/stiansagholen/klvr-firmware-updater.git"
+REPO_URL="https://github.com/KLVR-no/klvr-firmware-updater.git"
 TEMP_DIR="/tmp/klvr-firmware-updater-$(date +%s)"
 SCRIPT_NAME="firmware-update.js"
 
