@@ -74,8 +74,11 @@ async function promptForIpAddress() {
 
 // Helper function to extract version from firmware filename
 function extractFirmwareVersion(filename) {
-    // Extract version from patterns like "main_v1.8.3.signed.bin" or "rear_v1.8.4-beta-aa-aaa-detection.signed.bin"
-    const match = filename.match(/_(v\d+\.\d+\.\d+(?:-[^.]+)?)/);
+    // Extract version from patterns like:
+    // "main_v1.8.3.signed.bin" -> "v1.8.3"
+    // "rear_v1.8.4-beta-aa-aaa-detection.signed.bin" -> "v1.8.4-beta-aa-aaa-detection" 
+    // "main_v1.8.3beta-aa-aaa-detection.signed.bin" -> "v1.8.3beta-aa-aaa-detection"
+    const match = filename.match(/_(v\d+\.\d+\.\d+(?:beta|alpha|rc)?(?:-[^.]+)?)\.signed\.bin$/);
     return match ? match[1] : null;
 }
 
