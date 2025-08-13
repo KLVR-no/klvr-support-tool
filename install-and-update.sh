@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # KLVR Firmware Updater - One-Command Installer & Runner
-# Usage: curl -sSL https://raw.githubusercontent.com/KLVR-no/klvr-firmware-updater/main/install-and-update.sh | bash
-# Or: bash <(curl -sSL https://raw.githubusercontent.com/KLVR-no/klvr-firmware-updater/main/install-and-update.sh)
+# Usage: bash <(curl -sSL https://raw.githubusercontent.com/KLVR-no/klvr-firmware-updater/main/install-and-update.sh)
+# Alternative: curl -sSL https://raw.githubusercontent.com/KLVR-no/klvr-firmware-updater/main/install-and-update.sh | bash
 
 set -e  # Exit on any error
 

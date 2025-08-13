@@ -6,6 +6,11 @@ A powerful, interactive firmware updater for KLVR Charger Pro devices with autom
 
 ### macOS/Linux
 ```bash
+bash <(curl -sSL https://raw.githubusercontent.com/KLVR-no/klvr-firmware-updater/main/install-and-update.sh)
+```
+
+**Alternative:**
+```bash
 curl -sSL https://raw.githubusercontent.com/KLVR-no/klvr-firmware-updater/main/install-and-update.sh | bash
 ```
 
