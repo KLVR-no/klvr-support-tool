@@ -20,21 +20,33 @@ iex (iwr -useb https://raw.githubusercontent.com/KLVR-no/klvr-firmware-updater/m
 ```
 
 That's it! The script will automatically:
-- ✅ Check system prerequisites
-- ✅ Download the latest firmware updater
-- ✅ Install dependencies
-- ✅ Start the interactive update process
-- ✅ Show you exactly which firmware version was installed
+- ✅ **Install missing dependencies** (Node.js, npm, git)
+- ✅ **Download the latest firmware updater**
+- ✅ **Install project dependencies**
+- ✅ **Start the interactive update process**
+- ✅ **Show you exactly which firmware version was installed**
+
+**No manual setup required!** The installer handles everything automatically.
 
 ## 📋 Prerequisites
 
-- **Node.js** 14+ (automatically checked)
-- **npm** (comes with Node.js)
-- **git** (for downloading)
+**None!** The installer automatically handles all dependencies:
 
-### Install Prerequisites
+- **Node.js** 14+ (automatically installed if missing)
+- **npm** (comes with Node.js)  
+- **git** (automatically installed if missing)
 
-**macOS (Homebrew):**
+### Supported Installation Methods
+
+**macOS:** Uses Homebrew (installs Homebrew if needed)
+**Linux:** Uses system package manager (apt, yum, dnf, pacman)
+**Windows:** Uses Chocolatey (installs Chocolatey if needed)
+
+### Manual Installation (Optional)
+
+If you prefer to install dependencies manually:
+
+**macOS:**
 ```bash
 brew install node git
 ```
@@ -45,9 +57,9 @@ sudo apt-get install nodejs npm git curl
 ```
 
 **Windows:**
-- Download Node.js from: https://nodejs.org/
-- Download Git from: https://git-scm.com/
-- Or use Chocolatey: `choco install nodejs git`
+```bash
+choco install nodejs git
+```
 
 ## 💻 Manual Installation
 

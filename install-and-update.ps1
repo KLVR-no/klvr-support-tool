@@ -51,44 +51,135 @@ function Test-CommandExists {
     return $?
 }
 
-# Function to check prerequisites
+# Function to check if Chocolatey is installed
+function Test-Chocolatey {
+    return (Test-CommandExists "choco")
+}
+
+# Function to install Chocolatey
+function Install-Chocolatey {
+    Write-Step "Installing Chocolatey package manager..."
+    Write-Info "This requires administrator privileges"
+    
+    try {
+        Set-ExecutionPolicy Bypass -Scope Process -Force
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+        Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+        
+        # Refresh environment variables
+        $env:ChocolateyInstall = Convert-Path "$((Get-Command choco).Path)\..\.."
+        Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+        refreshenv
+        
+        Write-Success "Chocolatey installed successfully"
+        return $true
+    } catch {
+        Write-Warning "Failed to install Chocolatey automatically"
+        Write-Info "Please install Chocolatey manually from: https://chocolatey.org/install"
+        return $false
+    }
+}
+
+# Function to install Node.js via Chocolatey
+function Install-NodeJS {
+    Write-Step "Installing Node.js..."
+    
+    if (-not (Test-Chocolatey)) {
+        Write-Warning "Chocolatey not found. Attempting to install..."
+        if (-not (Install-Chocolatey)) {
+            Write-Error "Cannot install Node.js automatically without Chocolatey"
+            Write-Info "Please install Node.js manually from: https://nodejs.org/"
+            exit 1
+        }
+    }
+    
+    try {
+        Write-Info "Installing Node.js via Chocolatey..."
+        choco install nodejs -y
+        
+        # Refresh environment variables
+        refreshenv
+        
+        Write-Success "Node.js installed successfully"
+    } catch {
+        Write-Error "Failed to install Node.js via Chocolatey"
+        Write-Info "Please install Node.js manually from: https://nodejs.org/"
+        exit 1
+    }
+}
+
+# Function to install Git via Chocolatey
+function Install-Git {
+    Write-Step "Installing Git..."
+    
+    if (-not (Test-Chocolatey)) {
+        Write-Warning "Chocolatey not found. Attempting to install..."
+        if (-not (Install-Chocolatey)) {
+            Write-Error "Cannot install Git automatically without Chocolatey"
+            Write-Info "Please install Git manually from: https://git-scm.com/"
+            exit 1
+        }
+    }
+    
+    try {
+        Write-Info "Installing Git via Chocolatey..."
+        choco install git -y
+        
+        # Refresh environment variables
+        refreshenv
+        
+        Write-Success "Git installed successfully"
+    } catch {
+        Write-Error "Failed to install Git via Chocolatey"
+        Write-Info "Please install Git manually from: https://git-scm.com/"
+        exit 1
+    }
+}
+
+# Function to check and install prerequisites
 function Test-Prerequisites {
     Write-Step "Checking system prerequisites..."
     
-    $missingDeps = @()
+    $needsNodeJS = $false
+    $needsGit = $false
     
     # Check for Node.js
     if (-not (Test-CommandExists "node")) {
-        $missingDeps += "Node.js"
+        Write-Warning "Node.js not found - will install automatically"
+        $needsNodeJS = $true
     } else {
         try {
             $nodeVersion = (node --version) -replace 'v', ''
             $majorVersion = [int]($nodeVersion -split '\.')[0]
             if ($majorVersion -lt 14) {
-                $missingDeps += "Node.js (version 14+ required, found $nodeVersion)"
+                Write-Warning "Node.js version $nodeVersion found, but version 14+ required - will update"
+                $needsNodeJS = $true
             } else {
                 Write-Success "Node.js $nodeVersion found"
             }
         } catch {
-            $missingDeps += "Node.js (unable to determine version)"
+            Write-Warning "Node.js found but unable to determine version - will reinstall"
+            $needsNodeJS = $true
         }
     }
     
-    # Check for npm
-    if (-not (Test-CommandExists "npm")) {
-        $missingDeps += "npm"
-    } else {
+    # Check for npm (usually comes with Node.js)
+    if (-not (Test-CommandExists "npm") -and -not $needsNodeJS) {
+        Write-Warning "npm not found - will install with Node.js"
+        $needsNodeJS = $true
+    } elseif (Test-CommandExists "npm") {
         try {
             $npmVersion = npm --version
             Write-Success "npm $npmVersion found"
         } catch {
-            $missingDeps += "npm (unable to determine version)"
+            Write-Success "npm found"
         }
     }
     
     # Check for git
     if (-not (Test-CommandExists "git")) {
-        $missingDeps += "git"
+        Write-Warning "Git not found - will install automatically"
+        $needsGit = $true
     } else {
         try {
             $gitVersion = (git --version) -split ' ' | Select-Object -Last 1
@@ -98,20 +189,34 @@ function Test-Prerequisites {
         }
     }
     
-    if ($missingDeps.Count -gt 0) {
-        Write-Error "Missing required dependencies:"
-        foreach ($dep in $missingDeps) {
-            Write-Host "  • $dep" -ForegroundColor Red
+    # Install missing dependencies
+    if ($needsNodeJS) {
+        Install-NodeJS
+        
+        # Verify installation
+        if (Test-CommandExists "node") {
+            $nodeVersion = (node --version)
+            Write-Success "Node.js $nodeVersion installed successfully"
+        } else {
+            Write-Error "Failed to install Node.js"
+            exit 1
         }
-        Write-Host ""
-        Write-Info "Please install the missing dependencies and try again."
-        Write-Info "Download Node.js from: https://nodejs.org/"
-        Write-Info "Download Git from: https://git-scm.com/"
-        Write-Info "Or use a package manager like Chocolatey: choco install nodejs git"
-        exit 1
     }
     
-    Write-Success "All prerequisites met!"
+    if ($needsGit) {
+        Install-Git
+        
+        # Verify installation
+        if (Test-CommandExists "git") {
+            $gitVersion = (git --version) -split ' ' | Select-Object -Last 1
+            Write-Success "Git $gitVersion installed successfully"
+        } else {
+            Write-Error "Failed to install Git"
+            exit 1
+        }
+    }
+    
+    Write-Success "All prerequisites ready!"
     Write-Host ""
 }
 

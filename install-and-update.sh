@@ -46,60 +46,179 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Function to check prerequisites
+# Function to detect the operating system
+detect_os() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        echo "macos"
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        if command_exists apt-get; then
+            echo "debian"
+        elif command_exists yum; then
+            echo "rhel"
+        elif command_exists dnf; then
+            echo "fedora"
+        elif command_exists pacman; then
+            echo "arch"
+        else
+            echo "linux"
+        fi
+    else
+        echo "unknown"
+    fi
+}
+
+# Function to install Node.js based on OS
+install_nodejs() {
+    local os=$(detect_os)
+    print_step "📦 Installing Node.js..."
+    
+    case $os in
+        "macos")
+            if command_exists brew; then
+                print_info "Installing Node.js via Homebrew..."
+                brew install node
+            else
+                print_error "Homebrew not found. Please install Homebrew first:"
+                print_info "Visit: https://brew.sh/"
+                print_info "Then run: brew install node"
+                exit 1
+            fi
+            ;;
+        "debian")
+            print_info "Installing Node.js via apt..."
+            sudo apt-get update
+            sudo apt-get install -y nodejs npm
+            ;;
+        "rhel")
+            print_info "Installing Node.js via yum..."
+            sudo yum install -y nodejs npm
+            ;;
+        "fedora")
+            print_info "Installing Node.js via dnf..."
+            sudo dnf install -y nodejs npm
+            ;;
+        "arch")
+            print_info "Installing Node.js via pacman..."
+            sudo pacman -S nodejs npm
+            ;;
+        *)
+            print_error "Unsupported operating system. Please install Node.js manually:"
+            print_info "Visit: https://nodejs.org/"
+            exit 1
+            ;;
+    esac
+}
+
+# Function to install git based on OS
+install_git() {
+    local os=$(detect_os)
+    print_step "📦 Installing Git..."
+    
+    case $os in
+        "macos")
+            if command_exists brew; then
+                print_info "Installing Git via Homebrew..."
+                brew install git
+            else
+                print_error "Homebrew not found. Git should be available via Xcode Command Line Tools:"
+                print_info "Run: xcode-select --install"
+                exit 1
+            fi
+            ;;
+        "debian")
+            print_info "Installing Git via apt..."
+            sudo apt-get update
+            sudo apt-get install -y git
+            ;;
+        "rhel")
+            print_info "Installing Git via yum..."
+            sudo yum install -y git
+            ;;
+        "fedora")
+            print_info "Installing Git via dnf..."
+            sudo dnf install -y git
+            ;;
+        "arch")
+            print_info "Installing Git via pacman..."
+            sudo pacman -S git
+            ;;
+        *)
+            print_error "Unsupported operating system. Please install Git manually:"
+            print_info "Visit: https://git-scm.com/"
+            exit 1
+            ;;
+    esac
+}
+
+# Function to check and install prerequisites
 check_prerequisites() {
     print_step "🔍 Checking system prerequisites..."
     
-    local missing_deps=()
+    local needs_nodejs=false
+    local needs_git=false
     
     # Check for Node.js
     if ! command_exists node; then
-        missing_deps+=("Node.js")
+        print_warning "Node.js not found - will install automatically"
+        needs_nodejs=true
     else
         local node_version=$(node --version | sed 's/v//')
         local major_version=$(echo $node_version | cut -d. -f1)
         if [ "$major_version" -lt 14 ]; then
-            missing_deps+=("Node.js (version 14+ required, found $node_version)")
+            print_warning "Node.js version $node_version found, but version 14+ required - will update"
+            needs_nodejs=true
         else
             print_success "Node.js $node_version found"
         fi
     fi
     
-    # Check for npm
-    if ! command_exists npm; then
-        missing_deps+=("npm")
-    else
+    # Check for npm (usually comes with Node.js)
+    if ! command_exists npm && ! $needs_nodejs; then
+        print_warning "npm not found - will install with Node.js"
+        needs_nodejs=true
+    elif command_exists npm; then
         print_success "npm $(npm --version) found"
     fi
     
     # Check for git
     if ! command_exists git; then
-        missing_deps+=("git")
+        print_warning "Git not found - will install automatically"
+        needs_git=true
     else
         print_success "git $(git --version | cut -d' ' -f3) found"
     fi
     
-    # Check for curl
+    # Check for curl (usually pre-installed)
     if ! command_exists curl; then
-        missing_deps+=("curl")
+        print_warning "curl not found, but continuing (git clone will work)"
     else
         print_success "curl found"
     fi
     
-    if [ ${#missing_deps[@]} -ne 0 ]; then
-        print_error "Missing required dependencies:"
-        for dep in "${missing_deps[@]}"; do
-            echo -e "  ${RED}• $dep${NC}"
-        done
-        echo ""
-        print_info "Please install the missing dependencies and try again."
-        print_info "On macOS: brew install node git"
-        print_info "On Ubuntu/Debian: sudo apt-get install nodejs npm git curl"
-        print_info "On CentOS/RHEL: sudo yum install nodejs npm git curl"
-        exit 1
+    # Install missing dependencies
+    if $needs_nodejs; then
+        install_nodejs
+        # Verify installation
+        if command_exists node; then
+            print_success "Node.js $(node --version) installed successfully"
+        else
+            print_error "Failed to install Node.js"
+            exit 1
+        fi
     fi
     
-    print_success "All prerequisites met!"
+    if $needs_git; then
+        install_git
+        # Verify installation
+        if command_exists git; then
+            print_success "Git $(git --version | cut -d' ' -f3) installed successfully"
+        else
+            print_error "Failed to install Git"
+            exit 1
+        fi
+    fi
+    
+    print_success "All prerequisites ready!"
     echo ""
 }
 
