@@ -285,19 +285,47 @@ async function discoverKLVRDevices() {
     });
 }
 
-async function testDeviceConnection(ip) {
-    console.log(`🔗 Testing connection to ${ip}...`);
+// Helper function to parse target into connection options
+function parseTarget(target) {
+    // Handle full URLs like https://abc123.trycloudflare.com
+    if (target.startsWith('http://') || target.startsWith('https://')) {
+        const url = new URL(target);
+        return {
+            isUrl: true,
+            protocol: url.protocol,
+            hostname: url.hostname,
+            port: url.port || (url.protocol === 'https:' ? 443 : 80),
+            baseUrl: target
+        };
+    }
+    
+    // Handle IP addresses like 10.110.73.155
+    return {
+        isUrl: false,
+        protocol: 'http:',
+        hostname: target,
+        port: CONFIG.DEFAULT_PORT,
+        baseUrl: `http://${target}:${CONFIG.DEFAULT_PORT}`
+    };
+}
+
+async function testDeviceConnection(target) {
+    const parsed = parseTarget(target);
+    console.log(`🔗 Testing connection to ${parsed.baseUrl}...`);
     
     return new Promise((resolve) => {
         const options = {
-            hostname: ip,
-            port: CONFIG.DEFAULT_PORT,
+            hostname: parsed.hostname,
+            port: parsed.port,
             path: CONFIG.ENDPOINTS.INFO,
             method: 'GET',
             timeout: DISCOVERY_CONFIG.TIMEOUT
         };
 
-        const req = http.request(options, (res) => {
+        // Use https for tunnel URLs
+        const httpModule = parsed.protocol === 'https:' ? require('https') : require('http');
+
+        const req = httpModule.request(options, (res) => {
             let data = '';
             res.on('data', (chunk) => data += chunk);
             res.on('end', () => {
@@ -337,18 +365,20 @@ async function testDeviceConnection(ip) {
     });
 }
 
-async function getDeviceInfo(deviceIp) {
+async function getDeviceInfo(target) {
     return new Promise((resolve, reject) => {
+        const parsed = parseTarget(target);
         const options = {
-            hostname: deviceIp,
-            port: CONFIG.DEFAULT_PORT,
+            hostname: parsed.hostname,
+            port: parsed.port,
             path: CONFIG.ENDPOINTS.INFO,
             method: 'GET'
         };
 
-        console.log(`[FIRMWARE] Getting device info from ${deviceIp}...`);
+        console.log(`[FIRMWARE] Getting device info from ${parsed.baseUrl}...`);
 
-        const req = http.request(options, (res) => {
+        const httpModule = parsed.protocol === 'https:' ? require('https') : require('http');
+        const req = httpModule.request(options, (res) => {
             let data = '';
             res.on('data', (chunk) => data += chunk);
             res.on('end', () => {
@@ -371,14 +401,15 @@ async function getDeviceInfo(deviceIp) {
     });
 }
 
-async function uploadFirmware(deviceIp, firmware, isMainBoard) {
+async function uploadFirmware(target, firmware, isMainBoard) {
     return new Promise((resolve, reject) => {
+        const parsed = parseTarget(target);
         const path = isMainBoard ? CONFIG.ENDPOINTS.FIRMWARE_CHARGER : CONFIG.ENDPOINTS.FIRMWARE_REAR;
         const boardType = isMainBoard ? 'main' : 'rear';
         
         const options = {
-            hostname: deviceIp,
-            port: CONFIG.DEFAULT_PORT,
+            hostname: parsed.hostname,
+            port: parsed.port,
             path: path,
             method: 'POST',
             headers: {
@@ -386,9 +417,10 @@ async function uploadFirmware(deviceIp, firmware, isMainBoard) {
             }
         };
 
-        console.log(`[FIRMWARE] Uploading ${boardType} firmware to: ${deviceIp}, size: ${firmware.length} bytes`);
+        console.log(`[FIRMWARE] Uploading ${boardType} firmware to: ${parsed.baseUrl}, size: ${firmware.length} bytes`);
 
-        const req = http.request(options, (res) => {
+        const httpModule = parsed.protocol === 'https:' ? require('https') : require('http');
+        const req = httpModule.request(options, (res) => {
             console.log(`[FIRMWARE] Upload response status: ${res.statusCode}`);
             
             let data = '';
@@ -418,11 +450,12 @@ async function uploadFirmware(deviceIp, firmware, isMainBoard) {
     });
 }
 
-async function rebootDevice(deviceIp, board) {
+async function rebootDevice(target, board) {
     return new Promise((resolve, reject) => {
+        const parsed = parseTarget(target);
         const options = {
-            hostname: deviceIp,
-            port: CONFIG.DEFAULT_PORT,
+            hostname: parsed.hostname,
+            port: parsed.port,
             path: `${CONFIG.ENDPOINTS.REBOOT}?board=${board}`,
             method: 'POST',
             headers: {
@@ -430,9 +463,10 @@ async function rebootDevice(deviceIp, board) {
             }
         };
 
-        console.log(`[FIRMWARE] Rebooting ${board} board on device: ${deviceIp}`);
+        console.log(`[FIRMWARE] Rebooting ${board} board on device: ${parsed.baseUrl}`);
 
-        const req = http.request(options, (res) => {
+        const httpModule = parsed.protocol === 'https:' ? require('https') : require('http');
+        const req = httpModule.request(options, (res) => {
             let data = '';
             res.on('data', (chunk) => data += chunk);
             res.on('end', () => {
@@ -456,7 +490,7 @@ async function rebootDevice(deviceIp, board) {
     });
 }
 
-async function executeFirmwareUpdate(deviceIp, mainFirmwarePath, rearFirmwarePath) {
+async function executeFirmwareUpdate(target, mainFirmwarePath, rearFirmwarePath) {
     let installedVersion = null;
     let oldVersion = null;
     
@@ -470,7 +504,7 @@ async function executeFirmwareUpdate(deviceIp, mainFirmwarePath, rearFirmwarePat
         
         // 1. Get device info first (like the app does)
         console.log('📋 Step 1/10: Getting device info...');
-        const deviceInfo = await getDeviceInfo(deviceIp);
+        const deviceInfo = await getDeviceInfo(target);
         oldVersion = deviceInfo.firmwareVersion;
         console.log(`   Current firmware version: ${oldVersion}`);
         if (targetVersion) {
@@ -486,7 +520,7 @@ async function executeFirmwareUpdate(deviceIp, mainFirmwarePath, rearFirmwarePat
 
         // 3. Update main board first (furthest from computer)
         console.log('\n⚡ Step 3/10: Uploading main board firmware...');
-        const mainResponse = await uploadFirmware(deviceIp, mainFirmware, true);
+        const mainResponse = await uploadFirmware(target, mainFirmware, true);
         if (!mainResponse.ok) {
             throw new Error(`Main board firmware upload failed: ${mainResponse.status}`);
         }
@@ -499,7 +533,7 @@ async function executeFirmwareUpdate(deviceIp, mainFirmwarePath, rearFirmwarePat
 
         // 5. Reboot main board
         console.log('\n🔄 Step 5/10: Rebooting main board...');
-        const mainRebootResponse = await rebootDevice(deviceIp, 'main');
+        const mainRebootResponse = await rebootDevice(target, 'main');
         if (!mainRebootResponse.ok) {
             throw new Error(`Main board reboot failed: ${mainRebootResponse.status}`);
         }
@@ -512,7 +546,7 @@ async function executeFirmwareUpdate(deviceIp, mainFirmwarePath, rearFirmwarePat
 
         // 7. Immediately proceed with rear board update
         console.log('\n⚡ Step 7/10: Uploading rear board firmware...');
-        const rearResponse = await uploadFirmware(deviceIp, rearFirmware, false);
+        const rearResponse = await uploadFirmware(target, rearFirmware, false);
         if (!rearResponse.ok) {
             throw new Error(`Rear board firmware upload failed: ${rearResponse.status}`);
         }
@@ -525,7 +559,7 @@ async function executeFirmwareUpdate(deviceIp, mainFirmwarePath, rearFirmwarePat
 
         // 9. Reboot rear board
         console.log('\n🔄 Step 9/10: Rebooting rear board...');
-        const rearRebootResponse = await rebootDevice(deviceIp, 'rear');
+        const rearRebootResponse = await rebootDevice(target, 'rear');
         if (!rearRebootResponse.ok) {
             throw new Error(`Rear board reboot failed: ${rearRebootResponse.status}`);
         }
@@ -543,7 +577,7 @@ async function executeFirmwareUpdate(deviceIp, mainFirmwarePath, rearFirmwarePat
         
         // Try to get new version
         try {
-            const newDeviceInfo = await getDeviceInfo(deviceIp);
+            const newDeviceInfo = await getDeviceInfo(target);
             installedVersion = newDeviceInfo.firmwareVersion;
             console.log(`📊 Firmware updated: ${oldVersion} → ${installedVersion}`);
             
@@ -589,9 +623,13 @@ if (require.main === module) {
             console.log('  node firmware-update.js                    # Interactive prompts for IP and firmware selection');
             console.log('');
             console.log('Non-Interactive Mode:');
-            console.log('  node firmware-update.js [target-ip]                                     # Auto-find firmware, target specific IP');
+            console.log('  node firmware-update.js [target-ip|url]                                 # Auto-find firmware, target specific IP or URL');
             console.log('  node firmware-update.js [main-firmware.bin] [rear-firmware.bin]        # Specify firmware files, discover devices');
             console.log('  node firmware-update.js [main-firmware.bin] [rear-firmware.bin] [ip]   # Specify everything');
+            console.log('');
+            console.log('Examples:');
+            console.log('  node firmware-update.js 10.110.73.155                                   # Direct IP access');
+            console.log('  node firmware-update.js https://abc123.trycloudflare.com               # Tunnel URL access');
             console.log('');
             console.log('Options:');
             console.log('  --help, -h    Show this help message');
@@ -613,16 +651,16 @@ if (require.main === module) {
                 
                 // Select firmware files interactively
                 const firmwareFiles = await findAndSelectFirmwareFiles(true);
-                mainFirmwarePath = firmwareFiles.main;
-                rearFirmwarePath = firmwareFiles.rear;
+            mainFirmwarePath = firmwareFiles.main;
+            rearFirmwarePath = firmwareFiles.rear;
                 
             } else {
                 // Non-interactive mode: parse arguments
-                if (args.length === 1) {
-                    // One argument: could be IP address
+                                if (args.length === 1) {
+                    // One argument: could be IP address or URL
                     const arg = args[0];
-                    if (arg.match(/^\d+\.\d+\.\d+\.\d+$/)) {
-                        // It's an IP address
+                    if (arg.match(/^\d+\.\d+\.\d+\.\d+$/) || arg.startsWith('http://') || arg.startsWith('https://')) {
+                        // It's an IP address or URL
                         targetIp = arg;
                         const firmwareFiles = await findLatestFirmwareFiles();
                         mainFirmwarePath = firmwareFiles.main;
@@ -632,16 +670,16 @@ if (require.main === module) {
                         process.exit(1);
                     }
                 } else if (args.length === 2) {
-                    // Two arguments: main firmware and rear firmware
-                    mainFirmwarePath = args[0];
-                    rearFirmwarePath = args[1];
-                } else if (args.length === 3) {
-                    // Three arguments: main firmware, rear firmware, and target IP
-                    mainFirmwarePath = args[0];
-                    rearFirmwarePath = args[1];
-                    targetIp = args[2];
+            // Two arguments: main firmware and rear firmware
+            mainFirmwarePath = args[0];
+            rearFirmwarePath = args[1];
+        } else if (args.length === 3) {
+            // Three arguments: main firmware, rear firmware, and target IP
+            mainFirmwarePath = args[0];
+            rearFirmwarePath = args[1];
+            targetIp = args[2];
                 }
-            }
+        }
 
             // Validate firmware files exist
             await fs.access(mainFirmwarePath);
@@ -736,7 +774,8 @@ if (require.main === module) {
                 console.log(`🎯 Target: ${device.deviceName} at ${device.ip}`);
                 
                 try {
-                    const result = await executeFirmwareUpdate(device.ip, mainFirmwarePath, rearFirmwarePath);
+                    const deviceTarget = targetIp || device.ip;
+                    const result = await executeFirmwareUpdate(deviceTarget, mainFirmwarePath, rearFirmwarePath);
                     successCount++;
                     updateResults.push({
                         device: device,
