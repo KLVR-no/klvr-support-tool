@@ -1,5 +1,59 @@
 {
+  "name": "klvr-support-tool",
+  "version": "2.0.0",
+  "description": "Professional support tools for KLVR Charger Pro devices - firmware updates, remote access, and diagnostics",
+  "main": "src/cli/klvr-tool.js",
+  "bin": {
+    "klvr-tool": "./src/cli/klvr-tool.js"
+  },
+  "scripts": {
+    "start": "node src/cli/end-user-cli.js",
+    "support": "node src/cli/support-cli.js",
+    "firmware-update": "node src/cli/klvr-tool.js firmware-update",
+    "battery-monitor": "python3 tools/battery-monitor.py",
+    "remote-support": "node src/cli/klvr-tool.js remote-support",
+    "device-info": "node src/cli/klvr-tool.js device-info",
+    "install": "node scripts/post-install.js",
+    "test": "node src/utils/system-test.js"
+  },
+  "keywords": [
+    "klvr",
+    "support-tool",
+    "firmware",
+    "charger",
+    "battery",
+    "remote-support",
+    "diagnostics",
+    "cloudflare-tunnel"
+  ],
+  "author": "KLVR",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KLVR-no/klvr-support-tool.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KLVR-no/klvr-support-tool/issues"
+  },
+  "homepage": "https://github.com/KLVR-no/klvr-support-tool#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "dependencies": {
-    "bonjour": "^3.5.0"
-  }
+    "bonjour": "^3.5.0",
+    "commander": "^9.4.1",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "inquirer": "^8.2.5"
+  },
+  "devDependencies": {
+    "eslint": "^8.28.0"
+  },
+  "files": [
+    "src/",
+    "tools/",
+    "firmware/",
+    "installers/",
+    "README.md"
+  ]
 }

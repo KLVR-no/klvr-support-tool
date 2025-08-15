@@ -608,6 +608,18 @@ async function executeFirmwareUpdate(target, mainFirmwarePath, rearFirmwarePath)
     }
 }
 
+// Export functions for use in other modules
+module.exports = {
+    discoverKLVRDevices,
+    testDeviceConnection,
+    getDeviceInfo,
+    uploadFirmware,
+    rebootDevice,
+    executeFirmwareUpdate,
+    findAndSelectFirmwareFiles,
+    parseTarget
+};
+
 // Command line interface
 if (require.main === module) {
     (async () => {
@@ -636,23 +648,56 @@ if (require.main === module) {
             process.exit(0);
         }
 
-        let mainFirmwarePath, rearFirmwarePath, targetIp;
+                let mainFirmwarePath, rearFirmwarePath, targetIp;
         let interactiveMode = args.length === 0;
         
         try {
             if (interactiveMode) {
-                // Interactive mode: prompt for everything
+                // Interactive mode: show main menu
                 console.log('='.repeat(60));
-                console.log('    KLVR Firmware Updater - Interactive Mode');
+                console.log('    KLVR Charger Pro Tools');
                 console.log('='.repeat(60));
+                console.log('Please select an option:');
+                console.log('');
+                console.log('  1. 🔄 Firmware Update (Local)');
+                console.log('  2. 🌐 Remote Support Session');
+                console.log('  3. 🔍 Battery Detection Monitor (Local)');
+                console.log('');
+                console.log('-'.repeat(60));
                 
-                // Prompt for IP address
-                targetIp = await promptForIpAddress();
+                const menuChoice = await promptUser('Select option (1/2/3): ');
                 
-                // Select firmware files interactively
-                const firmwareFiles = await findAndSelectFirmwareFiles(true);
-            mainFirmwarePath = firmwareFiles.main;
-            rearFirmwarePath = firmwareFiles.rear;
+                if (menuChoice === '2') {
+                    // Remote support session
+                    const { startRemoteSupportSession } = require('./remote-support.js');
+                    await startRemoteSupportSession();
+                    return;
+                } else if (menuChoice === '3') {
+                    // Battery detection monitor
+                    console.log('\n🔍 Starting Battery Detection Monitor...');
+                    console.log('Please run the monitor script:');
+                    console.log('  python3 monitor_detection.py [IP_ADDRESS] [TEST_TYPE]');
+                    console.log('');
+                    console.log('Example:');
+                    console.log('  python3 monitor_detection.py 10.110.73.155 aa');
+                    return;
+                } else if (menuChoice === '1') {
+                    // Continue with firmware update
+                    console.log('\n='.repeat(60));
+                    console.log('    Firmware Update - Interactive Mode');
+                    console.log('='.repeat(60));
+                    
+                    // Prompt for IP address
+                    targetIp = await promptForIpAddress();
+                    
+                    // Select firmware files interactively
+                    const firmwareFiles = await findAndSelectFirmwareFiles(true);
+                    mainFirmwarePath = firmwareFiles.main;
+                    rearFirmwarePath = firmwareFiles.rear;
+                } else {
+                    console.error('❌ Invalid option. Please select 1, 2, or 3.');
+                    process.exit(1);
+                }
                 
             } else {
                 // Non-interactive mode: parse arguments

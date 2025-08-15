@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# KLVR Firmware Updater - One-Command Installer & Runner
-# Usage: bash <(curl -sSL https://raw.githubusercontent.com/KLVR-no/klvr-firmware-updater/main/install-and-update.sh)
-# Alternative: curl -sSL https://raw.githubusercontent.com/KLVR-no/klvr-firmware-updater/main/install-and-update.sh | bash
+# KLVR Support Tool - One-Command Installer & Runner
+# Usage: bash <(curl -sSL https://raw.githubusercontent.com/KLVR-no/klvr-support-tool/main/install-and-update.sh)
+# Alternative: curl -sSL https://raw.githubusercontent.com/KLVR-no/klvr-support-tool/main/install-and-update.sh | bash
 
 set -e  # Exit on any error
 
 # Configuration
-REPO_URL="https://github.com/KLVR-no/klvr-firmware-updater.git"
-TEMP_DIR="/tmp/klvr-firmware-updater-$(date +%s)"
-SCRIPT_NAME="firmware-update.js"
+REPO_URL="https://github.com/KLVR-no/klvr-support-tool.git"
+TEMP_DIR="/tmp/klvr-support-tool-$(date +%s)"
+SCRIPT_NAME="src/cli/klvr-tool.js"
 
 # Colors for output
 RED='\033[0;31m'
@@ -224,7 +224,7 @@ check_prerequisites() {
 
 # Function to download and setup the firmware updater
 setup_firmware_updater() {
-    print_step "📥 Downloading KLVR Firmware Updater..."
+    print_step "📥 Downloading KLVR Support Tool..."
     
     # Create temporary directory
     mkdir -p "$TEMP_DIR"
@@ -255,17 +255,17 @@ setup_firmware_updater() {
 
 # Function to run the firmware updater
 run_firmware_updater() {
-    print_step "🚀 Starting KLVR Firmware Updater..."
+    print_step "🚀 Starting KLVR Support Tool..."
     echo ""
     
     # Check if the script exists
     if [ ! -f "$SCRIPT_NAME" ]; then
-        print_error "Firmware update script not found: $SCRIPT_NAME"
+        print_error "KLVR Support Tool script not found: $SCRIPT_NAME"
         exit 1
     fi
     
-    # Make sure we're in the right directory and run the updater
-    node "$SCRIPT_NAME"
+    # Make sure we're in the right directory and run the tool
+    node "$SCRIPT_NAME" interactive
 }
 
 # Function to cleanup
@@ -281,12 +281,12 @@ cleanup() {
 show_header() {
     echo ""
     echo -e "${PURPLE}============================================================${NC}"
-    echo -e "${PURPLE}    KLVR Firmware Updater - One-Command Installer${NC}"
+    echo -e "${PURPLE}    KLVR Support Tool - One-Command Installer${NC}"
     echo -e "${PURPLE}============================================================${NC}"
     echo -e "${CYAN}This script will:${NC}"
-    echo -e "${CYAN}  1. Download the latest firmware updater${NC}"
+    echo -e "${CYAN}  1. Download the latest KLVR support tools${NC}"
     echo -e "${CYAN}  2. Install required dependencies${NC}"
-    echo -e "${CYAN}  3. Start the interactive firmware update process${NC}"
+    echo -e "${CYAN}  3. Start the interactive support tool interface${NC}"
     echo ""
     echo -e "${YELLOW}Press Ctrl+C at any time to cancel${NC}"
     echo -e "${PURPLE}============================================================${NC}"
@@ -297,12 +297,12 @@ show_header() {
 show_completion() {
     echo ""
     echo -e "${PURPLE}============================================================${NC}"
-    echo -e "${GREEN}🎉 KLVR Firmware Updater Installation Complete! 🎉${NC}"
+    echo -e "${GREEN}🎉 KLVR Support Tool Installation Complete! 🎉${NC}"
     echo -e "${PURPLE}============================================================${NC}"
     echo ""
-    echo -e "${CYAN}To run the firmware updater again in the future, you can:${NC}"
+    echo -e "${CYAN}To run the support tool again in the future, you can:${NC}"
     echo -e "${CYAN}  1. Use this one-command installer again, or${NC}"
-    echo -e "${CYAN}  2. Clone the repository manually and run: node firmware-update.js${NC}"
+    echo -e "${CYAN}  2. Clone the repository manually and run: node src/cli/klvr-tool.js${NC}"
     echo ""
     echo -e "${YELLOW}Repository: $REPO_URL${NC}"
     echo -e "${PURPLE}============================================================${NC}"
