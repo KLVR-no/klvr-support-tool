@@ -2,7 +2,7 @@
 """
 Real-time AA/AAA Battery Detection Monitor
 Monitors the KLVR charger for battery detection changes in real-time.
-Usage: python3 scripts/monitor_detection.py [IP_ADDRESS|FULL_URL] [TEST_TYPE]
+Usage: python3 tools/battery-monitor.py [IP_ADDRESS|FULL_URL] [TEST_TYPE]
 
 TEST_TYPE options:
   aa    - Test AA battery detection (highlights misdetections as AAA)
@@ -10,12 +10,12 @@ TEST_TYPE options:
   both  - Monitor both types (default)
 
 Examples:
-  python3 scripts/monitor_detection.py 10.110.73.155 aa
-  python3 scripts/monitor_detection.py 10.110.73.155 aaa
-  python3 scripts/monitor_detection.py 10.110.73.155 both
+  python3 tools/battery-monitor.py 10.110.73.155 aa
+  python3 tools/battery-monitor.py 10.110.73.155 aaa
+  python3 tools/battery-monitor.py 10.110.73.155 both
 
 With a tunneled URL (e.g., via Cloudflare Tunnel or SSH reverse proxy):
-  python3 scripts/monitor_detection.py https://abcd-1234.trycloudflare.com aa
+  python3 tools/battery-monitor.py https://abcd-1234.trycloudflare.com aa
 
 """
 
@@ -173,7 +173,7 @@ def main():
         # Validate test type
         if test_type not in ['aa', 'aaa', 'both']:
             print("❌ Invalid test type. Use: aa, aaa, or both")
-            print("Usage: python3 scripts/monitor_detection.py [IP_ADDRESS] [TEST_TYPE]")
+            print("Usage: python3 tools/battery-monitor.py [IP_ADDRESS] [TEST_TYPE]")
             sys.exit(1)
     else:
         test_type = get_test_mode()
@@ -209,7 +209,7 @@ def main():
         with open(log_filename, 'w') as log_file:
             # Write header to log
             log_file.write(f"KLVR Charger Detection Monitor - Started {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-            log_file.write(f"Monitoring: {ip_address}\n")
+            log_file.write(f"Monitoring: {base_url}\n")
             log_file.write("=" * 60 + "\n\n")
             log_file.flush()
             

@@ -43,14 +43,14 @@ echo "📥 Downloading KLVR Firmware Updater..."
 cd "$TEMP_DIR"
 
 # Clone the repository
-if git clone https://github.com/KLVR-no/klvr-firmware-updater.git . 2>/dev/null; then
+if git clone https://github.com/KLVR-no/klvr-support-tool.git . 2>/dev/null; then
     echo "✅ Repository downloaded successfully"
 else
     echo "❌ Failed to download repository."
     echo ""
     echo "You can manually download and run:"
-    echo "  git clone https://github.com/KLVR-no/klvr-firmware-updater.git"
-    echo "  cd klvr-firmware-updater"
+    echo "  git clone https://github.com/KLVR-no/klvr-support-tool.git"
+    echo "  cd klvr-support-tool"
     echo "  npm install"
     echo "  node firmware-update.js"
     exit 1
@@ -70,8 +70,8 @@ echo ""
 echo "🚀 Starting KLVR Firmware Updater..."
 echo ""
 
-# Run the firmware updater
-node firmware-update.js
+# Run the support tool
+node src/cli/klvr-tool.js interactive
 
 # Cleanup
 echo ""
@@ -81,5 +81,5 @@ rm -rf "$TEMP_DIR"
 
 echo ""
 echo "============================================================"
-echo "🎉 KLVR Firmware Updater session completed!"
+echo "🎉 KLVR Support Tool session completed!"
 echo "============================================================"

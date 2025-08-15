@@ -3,12 +3,12 @@
 # Alternative: Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/KLVR-no/klvr-firmware-updater/main/install-and-update.ps1" -UseBasicParsing).Content
 
 param(
-    [string]$RepoUrl = "https://github.com/KLVR-no/klvr-firmware-updater.git"
+    [string]$RepoUrl = "https://github.com/KLVR-no/klvr-support-tool.git"
 )
 
 # Configuration
-$TempDir = "$env:TEMP\klvr-firmware-updater-$(Get-Date -Format 'yyyyMMddHHmmss')"
-$ScriptName = "firmware-update.js"
+$TempDir = "$env:TEMP\klvr-support-tool-$(Get-Date -Format 'yyyyMMddHHmmss')"
+$ScriptName = "src/cli/klvr-tool.js"
 
 # Function to write colored output
 function Write-ColoredOutput {
@@ -265,8 +265,8 @@ function Start-FirmwareUpdater {
         exit 1
     }
     
-    # Run the updater
-    node $ScriptName
+    # Run the support tool
+    node $ScriptName interactive
 }
 
 # Function to cleanup
@@ -307,7 +307,7 @@ function Show-Completion {
     Write-Host ""
     Write-ColoredOutput "To run the firmware updater again in the future, you can:" "Cyan"
     Write-ColoredOutput "  1. Use this one-command installer again, or" "Cyan"
-    Write-ColoredOutput "  2. Clone the repository manually and run: node firmware-update.js" "Cyan"
+    Write-ColoredOutput "  2. Clone the repository manually and run: node src/cli/klvr-tool.js" "Cyan"
     Write-Host ""
     Write-ColoredOutput "Repository: $RepoUrl" "Yellow"
     Write-ColoredOutput "============================================================" "Magenta"
