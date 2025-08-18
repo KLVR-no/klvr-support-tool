@@ -42,6 +42,11 @@ class EndUserCLI {
                         short: 'Allow KLVR support to access your device remotely'
                     },
                     { 
+                        name: '🔗 Start Persistent Remote Support (Same URL)', 
+                        value: 'persistent-remote',
+                        short: 'Create consistent URL that stays the same each time'
+                    },
+                    { 
                         name: '🔍 Check Device Status', 
                         value: 'info',
                         short: 'View information about your KLVR device'
@@ -66,6 +71,9 @@ class EndUserCLI {
                     break;
                 case 'remote':
                     await this.handleRemoteSupport();
+                    break;
+                case 'persistent-remote':
+                    await this.handleRemoteSupport({ persistent: true });
                     break;
                 case 'info':
                     await this.handleDeviceInfo();
@@ -96,12 +104,41 @@ class EndUserCLI {
         // Discover device
         const device = await deviceDiscovery.discoverAndSelect();
         
+        // Get available firmware versions
+        const availableVersions = await this._getAvailableFirmwareVersions(firmwareManager);
+        
+        if (availableVersions.length === 0) {
+            this.logger.error('No firmware files found in firmware directory');
+            return;
+        }
+        
+        // Let user select firmware version
+        const { selectedVersion } = await inquirer.prompt([
+            {
+                type: 'list',
+                name: 'selectedVersion',
+                message: 'Select firmware version to install:',
+                choices: availableVersions.map((version, index) => ({
+                    name: `${version.version} ${index === 0 ? chalk.green('(Latest)') : ''}`,
+                    value: version,
+                    short: version.version
+                }))
+            }
+        ]);
+        
+        // Show firmware details
+        console.log('\n' + chalk.cyan('📋 Firmware Details:'));
+        console.log(`   Version: ${chalk.white(selectedVersion.version)}`);
+        console.log(`   Main: ${chalk.gray(selectedVersion.main.file)}`);
+        console.log(`   Rear: ${chalk.gray(selectedVersion.rear.file)}`);
+        console.log(`   Modified: ${chalk.gray(selectedVersion.mtime.toLocaleString())}`);
+        
         // Confirm update
         const { confirm } = await inquirer.prompt([
             {
                 type: 'confirm',
                 name: 'confirm',
-                message: `Update firmware on ${device.deviceName}?`,
+                message: `Install ${selectedVersion.version} firmware on ${device.deviceName}?`,
                 default: false
             }
         ]);
@@ -111,15 +148,110 @@ class EndUserCLI {
             return;
         }
 
-        // Perform update
-        await firmwareManager.updateDevice(device);
+        // Perform update with selected version
+        const firmwareFiles = {
+            main: selectedVersion.mainPath,
+            rear: selectedVersion.rearPath
+        };
+        
+        await firmwareManager.executeFirmwareUpdate(device, firmwareFiles);
         this.logger.success('Firmware update completed successfully!');
     }
 
-    async handleRemoteSupport() {
+    /**
+     * Get available firmware versions for user selection
+     */
+    async _getAvailableFirmwareVersions(firmwareManager) {
+        try {
+            const firmwareDir = path.join(__dirname, '../../firmware');
+            const fs = require('fs').promises;
+            const files = await fs.readdir(firmwareDir);
+            
+            // Filter for signed binary files
+            const mainFiles = files.filter(file => file.startsWith('main_') && file.endsWith('.signed.bin'));
+            const rearFiles = files.filter(file => file.startsWith('rear_') && file.endsWith('.signed.bin'));
+            
+            if (mainFiles.length === 0 || rearFiles.length === 0) {
+                return [];
+            }
+            
+            // Sort by modification time and add stats
+            const sortFiles = async (fileList) => {
+                const filesWithStats = await Promise.all(
+                    fileList.map(async (file) => {
+                        const filePath = path.join(firmwareDir, file);
+                        const stats = await fs.stat(filePath);
+                        return { file, mtime: stats.mtime };
+                    })
+                );
+                return filesWithStats.sort((a, b) => b.mtime - a.mtime);
+            };
+            
+            const sortedMainFiles = await sortFiles(mainFiles);
+            const sortedRearFiles = await sortFiles(rearFiles);
+            
+            // Find matched firmware pairs using the same logic as firmware manager
+            const matchedPairs = this._findMatchedFirmwarePairs(sortedMainFiles, sortedRearFiles, firmwareDir);
+            
+            return matchedPairs;
+            
+        } catch (error) {
+            this.logger.error(`Failed to get firmware versions: ${error.message}`);
+            return [];
+        }
+    }
+
+    /**
+     * Find matched firmware pairs (same logic as firmware manager)
+     */
+    _findMatchedFirmwarePairs(mainFiles, rearFiles, firmwareDir) {
+        const pairs = [];
+        
+        for (const mainFile of mainFiles) {
+            const version = this._extractFirmwareVersion(mainFile.file);
+            if (!version) continue;
+            
+            const matchingRear = rearFiles.find(rearFile => {
+                const rearVersion = this._extractFirmwareVersion(rearFile.file);
+                return rearVersion === version;
+            });
+            
+            if (matchingRear) {
+                pairs.push({
+                    version: version,
+                    main: mainFile,
+                    rear: matchingRear,
+                    mtime: mainFile.mtime > matchingRear.mtime ? mainFile.mtime : matchingRear.mtime,
+                    mainPath: path.join(firmwareDir, mainFile.file),
+                    rearPath: path.join(firmwareDir, matchingRear.file)
+                });
+            }
+        }
+        
+        return pairs.sort((a, b) => b.mtime - a.mtime);
+    }
+
+    /**
+     * Extract version from firmware filename (same logic as firmware manager)
+     */
+    _extractFirmwareVersion(filename) {
+        const match = filename.match(/_(v\d+\.\d+\.\d+(?:beta|alpha|rc)?(?:-[^.]+)?)\.signed\.bin$/);
+        return match ? match[1] : null;
+    }
+
+    async handleRemoteSupport(options = {}) {
+        const sessionType = options.persistent ? 'Persistent Remote Support Session' : 'Remote Support Session';
+        const sessionIcon = options.persistent ? '🔗' : '🌐';
+        
         console.log('\n' + chalk.green('='.repeat(60)));
-        console.log(chalk.green('    Remote Support Session'));
+        console.log(chalk.green(`    ${sessionType}`));
         console.log(chalk.green('='.repeat(60)));
+        
+        if (options.persistent) {
+            console.log(chalk.yellow('📌 This will create a consistent URL that stays the same each time you run this.'));
+            console.log(chalk.yellow('   Perfect for repeated support sessions with the same support engineer.'));
+            console.log('');
+        }
         
         const deviceDiscovery = new DeviceDiscovery(this.logger);
         const tunnelManager = new TunnelManager(this.logger);
@@ -127,15 +259,21 @@ class EndUserCLI {
         // Discover device
         const device = await deviceDiscovery.discoverAndSelect();
         
-        // Create tunnel
-        const tunnel = await tunnelManager.createTunnel(device);
+        // Create tunnel with persistence option
+        const tunnel = await tunnelManager.createTunnel(device, options);
         
         console.log('\n' + chalk.green('='.repeat(60)));
-        console.log(chalk.green('🎉 REMOTE SUPPORT SESSION ACTIVE'));
+        console.log(chalk.green(`🎉 ${sessionType.toUpperCase()} ACTIVE`));
         console.log(chalk.green('='.repeat(60)));
         console.log(`📍 Device: ${device.deviceName} at ${device.ip}`);
-        console.log(`🌐 Tunnel URL: ${chalk.cyan(tunnel.url)}`);
+        console.log(`${sessionIcon} Tunnel URL: ${chalk.cyan(tunnel.url)}`);
         console.log(`⏰ Session started at ${new Date().toLocaleTimeString()}`);
+        
+        if (tunnel.persistent) {
+            console.log(`🔗 Tunnel Name: ${chalk.magenta(tunnel.name)}`);
+            console.log(chalk.green('✨ This URL will be the same every time you start a persistent session!'));
+        }
+        
         console.log('');
         console.log(chalk.yellow('🔗 Share this URL with KLVR support:'));
         console.log(`   ${chalk.cyan.bold(tunnel.url)}`);

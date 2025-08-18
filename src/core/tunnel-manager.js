@@ -29,7 +29,12 @@ class TunnelManager {
         const provider = options.tunnelProvider || 'cloudflare';
         
         if (provider === 'cloudflare') {
-            return await this._createCloudflaredTunnel(device, options);
+            // Check if we should use persistent tunnel
+            if (options.persistent || options.customDomain) {
+                return await this._createPersistentTunnel(device, options);
+            } else {
+                return await this._createCloudflaredTunnel(device, options);
+            }
         } else {
             throw new Error(`Unsupported tunnel provider: ${provider}`);
         }
@@ -57,7 +62,160 @@ class TunnelManager {
     }
 
     /**
-     * Create Cloudflare tunnel
+     * Create persistent Cloudflare tunnel with consistent URL
+     */
+    async _createPersistentTunnel(device, options = {}) {
+        // Check if cloudflared is installed
+        const hasCloudflared = await this._checkCloudflaredInstalled();
+        if (!hasCloudflared) {
+            this.logger.step('Installing cloudflared...');
+            await this._installCloudflared();
+        }
+
+        const targetUrl = device.url || `http://${device.ip}:8000`;
+        
+        // Generate consistent tunnel name based on device
+        const tunnelName = options.customDomain || 
+            `klvr-${device.deviceName?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'device'}-${device.ip?.replace(/\./g, '-') || 'local'}`;
+        
+        this.logger.step(`Creating persistent tunnel: ${tunnelName}`);
+        this.logger.debug(`Target URL: ${targetUrl}`);
+
+        try {
+            // First, try to create/get the tunnel
+            await this._ensureTunnelExists(tunnelName);
+            
+            // Then run the tunnel
+            return await this._runPersistentTunnel(tunnelName, targetUrl, device);
+            
+        } catch (error) {
+            this.logger.warn(`Persistent tunnel failed, falling back to quick tunnel: ${error.message}`);
+            return await this._createCloudflaredTunnel(device, options);
+        }
+    }
+
+    /**
+     * Ensure tunnel exists in Cloudflare
+     */
+    async _ensureTunnelExists(tunnelName) {
+        this.logger.debug(`Checking if tunnel ${tunnelName} exists...`);
+        
+        try {
+            // Try to create the tunnel (will fail if it already exists, which is fine)
+            await this._execAsync(`cloudflared tunnel create ${tunnelName}`);
+            this.logger.debug(`Created new tunnel: ${tunnelName}`);
+        } catch (error) {
+            // Tunnel might already exist, check if we can list it
+            try {
+                const result = await this._execAsync(`cloudflared tunnel list`);
+                if (result.includes(tunnelName)) {
+                    this.logger.debug(`Using existing tunnel: ${tunnelName}`);
+                } else {
+                    throw new Error(`Tunnel ${tunnelName} not found and could not be created`);
+                }
+            } catch (listError) {
+                throw new Error(`Failed to verify tunnel existence: ${listError.message}`);
+            }
+        }
+    }
+
+    /**
+     * Run persistent tunnel
+     */
+    async _runPersistentTunnel(tunnelName, targetUrl, device) {
+        return new Promise((resolve, reject) => {
+            this.logger.step(`Starting persistent tunnel: ${tunnelName}`);
+            
+            const tunnelProcess = spawn('cloudflared', [
+                'tunnel',
+                '--name', tunnelName,
+                '--url', targetUrl,
+                'run',
+                tunnelName
+            ]);
+
+            let tunnelUrl = null;
+            let startupComplete = false;
+            const tunnelId = `persistent-${tunnelName}`;
+
+            tunnelProcess.stdout.on('data', (data) => {
+                const output = data.toString();
+                this.logger.debug(`[PERSISTENT-TUNNEL] ${output.trim()}`);
+
+                // Look for the tunnel URL - persistent tunnels show different format
+                const urlMatch = output.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/) ||
+                                output.match(/https:\/\/[a-z0-9-]+\.[a-z0-9-]+\.cloudflareaccess\.com/);
+                
+                if (urlMatch && !tunnelUrl) {
+                    tunnelUrl = urlMatch[0];
+                    startupComplete = true;
+                    
+                    const tunnel = {
+                        id: tunnelId,
+                        name: tunnelName,
+                        url: tunnelUrl,
+                        process: tunnelProcess,
+                        device: device,
+                        provider: 'cloudflare',
+                        persistent: true
+                    };
+                    
+                    this.activeTunnels.set(tunnelId, tunnel);
+                    resolve(tunnel);
+                }
+            });
+
+            tunnelProcess.stderr.on('data', (data) => {
+                const output = data.toString();
+                this.logger.debug(`[PERSISTENT-TUNNEL] ${output.trim()}`);
+
+                // Also check stderr for URL
+                const urlMatch = output.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/) ||
+                                output.match(/https:\/\/[a-z0-9-]+\.[a-z0-9-]+\.cloudflareaccess\.com/);
+                
+                if (urlMatch && !tunnelUrl) {
+                    tunnelUrl = urlMatch[0];
+                    startupComplete = true;
+                    
+                    const tunnel = {
+                        id: tunnelId,
+                        name: tunnelName,
+                        url: tunnelUrl,
+                        process: tunnelProcess,
+                        device: device,
+                        provider: 'cloudflare',
+                        persistent: true
+                    };
+                    
+                    this.activeTunnels.set(tunnelId, tunnel);
+                    resolve(tunnel);
+                }
+            });
+
+            tunnelProcess.on('close', (code) => {
+                if (!startupComplete) {
+                    reject(new Error(`Persistent tunnel process exited with code ${code}`));
+                }
+            });
+
+            tunnelProcess.on('error', (error) => {
+                if (!startupComplete) {
+                    reject(new Error(`Failed to start persistent tunnel: ${error.message}`));
+                }
+            });
+
+            // Timeout after 45 seconds (persistent tunnels take longer)
+            setTimeout(() => {
+                if (!startupComplete) {
+                    tunnelProcess.kill();
+                    reject(new Error('Timeout waiting for persistent tunnel to start'));
+                }
+            }, 45000);
+        });
+    }
+
+    /**
+     * Create Cloudflare quick tunnel (original implementation)
      */
     async _createCloudflaredTunnel(device, options = {}) {
         // Check if cloudflared is installed
@@ -246,12 +404,22 @@ class TunnelManager {
     async _execAsync(command) {
         return new Promise((resolve, reject) => {
             const process = spawn('bash', ['-c', command]);
+            let stdout = '';
+            let stderr = '';
+            
+            process.stdout.on('data', (data) => {
+                stdout += data.toString();
+            });
+            
+            process.stderr.on('data', (data) => {
+                stderr += data.toString();
+            });
             
             process.on('close', (code) => {
                 if (code === 0) {
-                    resolve();
+                    resolve(stdout);
                 } else {
-                    reject(new Error(`Command failed with code ${code}: ${command}`));
+                    reject(new Error(`Command failed with code ${code}: ${command}\nStderr: ${stderr}`));
                 }
             });
             
