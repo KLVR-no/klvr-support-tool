@@ -248,8 +248,9 @@ class EndUserCLI {
         console.log(chalk.green('='.repeat(60)));
         
         if (options.persistent) {
-            console.log(chalk.yellow('📌 This will create a consistent URL that stays the same each time you run this.'));
-            console.log(chalk.yellow('   Perfect for repeated support sessions with the same support engineer.'));
+            console.log(chalk.yellow('📌 Attempting to create a consistent URL...'));
+            console.log(chalk.yellow('   Note: True persistent tunnels require Cloudflare account setup.'));
+            console.log(chalk.yellow('   For now, we\'ll create a secure quick tunnel with session tracking.'));
             console.log('');
         }
         
@@ -269,9 +270,15 @@ class EndUserCLI {
         console.log(`${sessionIcon} Tunnel URL: ${chalk.cyan(tunnel.url)}`);
         console.log(`⏰ Session started at ${new Date().toLocaleTimeString()}`);
         
-        if (tunnel.persistent) {
-            console.log(`🔗 Tunnel Name: ${chalk.magenta(tunnel.name)}`);
-            console.log(chalk.green('✨ This URL will be the same every time you start a persistent session!'));
+        if (options.persistent) {
+            if (tunnel.sessionInfo && !tunnel.sessionInfo.persistent) {
+                console.log(chalk.yellow('📝 Session Tracking Enabled'));
+                console.log(chalk.yellow('   This URL is for this specific support session.'));
+                console.log(chalk.yellow('   💡 Tip: Save this URL to reuse during the same support case!'));
+            } else if (tunnel.persistent) {
+                console.log(`🔗 Tunnel Name: ${chalk.magenta(tunnel.name)}`);
+                console.log(chalk.green('✨ This URL will be the same every time you start a persistent session!'));
+            }
         }
         
         console.log('');

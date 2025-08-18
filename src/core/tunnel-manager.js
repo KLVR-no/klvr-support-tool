@@ -63,35 +63,30 @@ class TunnelManager {
 
     /**
      * Create persistent Cloudflare tunnel with consistent URL
+     * Uses a simpler approach that doesn't require authentication
      */
     async _createPersistentTunnel(device, options = {}) {
-        // Check if cloudflared is installed
-        const hasCloudflared = await this._checkCloudflaredInstalled();
-        if (!hasCloudflared) {
-            this.logger.step('Installing cloudflared...');
-            await this._installCloudflared();
-        }
-
-        const targetUrl = device.url || `http://${device.ip}:8000`;
+        this.logger.warn('⚠️  Persistent tunnels require Cloudflare account setup.');
+        this.logger.info('📝 For now, using quick tunnel with session info for consistency.');
+        this.logger.info('💡 Quick tunnels are still secure and work great for support sessions!');
         
-        // Generate consistent tunnel name based on device
-        const tunnelName = options.customDomain || 
-            `klvr-${device.deviceName?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'device'}-${device.ip?.replace(/\./g, '-') || 'local'}`;
+        // For now, fall back to quick tunnel but add session tracking
+        const tunnel = await this._createCloudflaredTunnel(device, options);
         
-        this.logger.step(`Creating persistent tunnel: ${tunnelName}`);
-        this.logger.debug(`Target URL: ${targetUrl}`);
-
-        try {
-            // First, try to create/get the tunnel
-            await this._ensureTunnelExists(tunnelName);
+        // Add session info to help with consistency
+        if (tunnel) {
+            tunnel.sessionInfo = {
+                deviceName: device.deviceName,
+                deviceIP: device.ip,
+                timestamp: new Date().toISOString(),
+                persistent: false // Mark as not truly persistent
+            };
             
-            // Then run the tunnel
-            return await this._runPersistentTunnel(tunnelName, targetUrl, device);
-            
-        } catch (error) {
-            this.logger.warn(`Persistent tunnel failed, falling back to quick tunnel: ${error.message}`);
-            return await this._createCloudflaredTunnel(device, options);
+            this.logger.info(`📋 Session Info: ${device.deviceName} at ${device.ip}`);
+            this.logger.info('💾 Save this URL for this support session!');
         }
+        
+        return tunnel;
     }
 
     /**
