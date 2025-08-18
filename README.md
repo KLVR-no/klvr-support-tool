@@ -23,20 +23,36 @@ That's it! The script will automatically:
 
 **No manual setup required!** The installer handles everything automatically.
 
+## 📊 Current Status
+
+### ✅ **Latest Updates (December 2024)**
+- **🔄 Manual Firmware Selection**: Removed auto-selection - users now choose firmware version
+- **📱 Simplified End-User Interface**: Clean 3-option menu (Update Firmware, Remote Support, Exit)
+- **🛠️ Enhanced Support Tools**: Interactive firmware selection for support engineers
+- **📦 Latest Firmware**: v1.8.3 (stable), v1.8.3-beta4 (testing)
+- **🌐 Tunnel Support**: Cloudflare quick tunnels with session tracking
+- **🔋 Battery Monitoring**: AA/AAA detection with detailed voltage logging
+
+### 🎯 **Key Improvements**
+- **No "Latest" Labels**: Clean firmware selection without auto-highlighting
+- **Manual Control**: Users have full control over firmware version selection
+- **Session Consistency**: Tunnel URLs tracked for better user experience
+- **Comprehensive Testing**: Full system validation and error handling
+
 ## 🎯 Features
 
 ### ✨ **For End Users:**
-- **🔄 Firmware Updates**: Interactive firmware update with version selection
+- **🔄 Firmware Updates**: Interactive firmware version selection (no auto-selection)
 - **🌐 Remote Support**: Share secure tunnel with KLVR support team
-- **🔍 Device Status**: Check device health and information
-- **🔋 Battery Monitoring**: Monitor battery detection in real-time
+- **📱 Simple Interface**: Clean 3-option menu (Firmware Update, Remote Support, Exit)
 
 ### 🛠️ **For Support Engineers:**
-- **Command-line interface** for all operations
-- **Remote device access** via secure tunnels
-- **Battery detection diagnostics** with detailed logging
-- **Firmware validation** and deployment tools
-- **Session logging** and export capabilities
+- **🔧 Advanced CLI**: Full command-line interface for all operations
+- **🌐 Remote Access**: Connect to devices via secure tunnels
+- **🔋 Battery Diagnostics**: Detailed AA/AAA detection monitoring with logging
+- **📊 Firmware Management**: Interactive version selection with validation
+- **📝 Session Tracking**: Comprehensive logging and export capabilities
+- **🔍 Device Diagnostics**: Complete device health and status reporting
 
 ## 💻 Usage
 
@@ -63,7 +79,7 @@ klvr-tool firmware-update 10.110.73.155
 klvr-tool firmware-update https://abc123.trycloudflare.com
 
 # Force update with specific firmware files
-klvr-tool firmware-update --main main_v1.8.4.bin --rear rear_v1.8.4.bin --force
+klvr-tool firmware-update --main firmware/main_v1.8.3-beta4.signed.bin --rear firmware/rear_v1.8.3-beta4.signed.bin --force
 ```
 
 #### Remote Support Sessions
@@ -122,14 +138,27 @@ export KLVR_TUNNEL_PROVIDER=cloudflare  # Default tunnel provider
 klvr-support-tool/
 ├── 📁 src/
 │   ├── core/                   # Core functionality modules
+│   │   ├── device-discovery.js # Device discovery and connection
+│   │   ├── firmware-manager.js # Firmware update management
+│   │   ├── tunnel-manager.js   # Remote tunnel management
+│   │   └── logger.js           # Centralized logging
 │   ├── cli/                    # Command-line interfaces
+│   │   ├── klvr-tool.js        # Main CLI (end-users)
+│   │   └── support-cli.js      # Advanced CLI (support engineers)
 │   └── utils/                  # Utility functions
+│       └── system-test.js      # System validation tests
 ├── 📁 tools/                   # Diagnostic tools
 │   └── battery-monitor.py      # Battery detection monitor
 ├── 📁 firmware/                # Firmware files directory
+│   ├── main_v1.8.3.signed.bin # Stable main firmware
+│   ├── rear_v1.8.3.signed.bin # Stable rear firmware
+│   ├── main_v1.8.3-beta4.signed.bin # Beta main firmware
+│   └── rear_v1.8.3-beta4.signed.bin # Beta rear firmware
 ├── 📁 logs/                    # Session logs (auto-created)
-├── 📁 installers/              # Platform-specific installers
+├── 📁 scripts/                 # Build and deployment scripts
 ├── 📦 package.json             # npm package configuration
+├── 🔧 install-and-update.sh    # macOS/Linux installer
+├── 🔧 install-and-update.ps1   # Windows PowerShell installer
 └── 📖 README.md                # This file
 ```
 
@@ -186,11 +215,7 @@ klvr-support-tool/
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-Contributions are welcome! Please read our [contributing guidelines](CONTRIBUTING.md) before submitting pull requests.
+MIT License - Internal KLVR tool for support operations.
 
 ## 📧 Support
 
