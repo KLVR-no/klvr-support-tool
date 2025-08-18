@@ -156,7 +156,6 @@ class PostInstaller {
         // Check CLI modules
         const cliModules = [
             'src/cli/klvr-tool.js',
-            'src/cli/end-user-cli.js',
             'src/cli/support-cli.js'
         ];
 

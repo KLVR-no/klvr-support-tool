@@ -96,10 +96,10 @@ systemTest.addTest('Core module imports', async () => {
 
 // Test: CLI module imports
 systemTest.addTest('CLI module imports', async () => {
-    const EndUserCLI = require('../cli/end-user-cli');
+    const klvrTool = require('../cli/klvr-tool');
     const supportCLI = require('../cli/support-cli');
     
-    if (!EndUserCLI || !supportCLI) {
+    if (!klvrTool || !supportCLI) {
         throw new Error('Failed to import CLI modules');
     }
 });
@@ -204,7 +204,6 @@ systemTest.addTest('File structure validation', async () => {
         'src/core/firmware-manager.js',
         'src/core/tunnel-manager.js',
         'src/cli/klvr-tool.js',
-        'src/cli/end-user-cli.js',
         'src/cli/support-cli.js'
     ];
     

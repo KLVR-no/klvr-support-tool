@@ -7,7 +7,7 @@
     "klvr-tool": "./src/cli/klvr-tool.js"
   },
   "scripts": {
-    "start": "node src/cli/end-user-cli.js",
+    "start": "node src/cli/klvr-tool.js interactive",
     "support": "node src/cli/support-cli.js",
     "firmware-update": "node src/cli/klvr-tool.js firmware-update",
     "battery-monitor": "python3 tools/battery-monitor.py",
