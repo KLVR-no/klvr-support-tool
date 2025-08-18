@@ -240,12 +240,20 @@ class EndUserCLI {
     }
 
     async handleRemoteSupport(options = {}) {
+        // Enable session reuse by default for consistent URLs
+        const useSessionReuse = options.reuseSession !== false;
         const sessionType = options.persistent ? 'Persistent Remote Support Session' : 'Remote Support Session';
         const sessionIcon = options.persistent ? '🔗' : '🌐';
         
         console.log('\n' + chalk.green('='.repeat(60)));
         console.log(chalk.green(`    ${sessionType}`));
         console.log(chalk.green('='.repeat(60)));
+        
+        if (useSessionReuse) {
+            console.log(chalk.blue('🔄 Checking for existing tunnel session...'));
+            console.log(chalk.blue('   This ensures you get the same URL each time!'));
+            console.log('');
+        }
         
         if (options.persistent) {
             console.log(chalk.yellow('📌 Attempting to create a consistent URL...'));
@@ -260,8 +268,12 @@ class EndUserCLI {
         // Discover device
         const device = await deviceDiscovery.discoverAndSelect();
         
-        // Create tunnel with persistence option
-        const tunnel = await tunnelManager.createTunnel(device, options);
+        // Create tunnel with session reuse enabled by default
+        const tunnelOptions = {
+            ...options,
+            reuseSession: useSessionReuse
+        };
+        const tunnel = await tunnelManager.createTunnel(device, tunnelOptions);
         
         console.log('\n' + chalk.green('='.repeat(60)));
         console.log(chalk.green(`🎉 ${sessionType.toUpperCase()} ACTIVE`));

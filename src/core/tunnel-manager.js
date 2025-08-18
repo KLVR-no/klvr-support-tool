@@ -1,6 +1,7 @@
 const { spawn, exec } = require('child_process');
 const fs = require('fs').promises;
 const path = require('path');
+const os = require('os');
 
 /**
  * Tunnel Manager
@@ -11,6 +12,8 @@ class TunnelManager {
     constructor(logger) {
         this.logger = logger;
         this.activeTunnels = new Map();
+        this.sessionDir = path.join(os.homedir(), '.klvr-support');
+        this.sessionFile = path.join(this.sessionDir, 'tunnel-sessions.json');
         this.cloudflaredConfig = {
             downloadUrls: {
                 'darwin-x64': 'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-darwin-amd64.tgz',
@@ -29,11 +32,32 @@ class TunnelManager {
         const provider = options.tunnelProvider || 'cloudflare';
         
         if (provider === 'cloudflare') {
+            // Check for existing session first
+            const existingSession = await this._getExistingSession(device);
+            if (existingSession && options.reuseSession !== false) {
+                this.logger.info('🔄 Found existing tunnel session');
+                this.logger.success(`📋 Reusing tunnel URL: ${existingSession.url}`);
+                this.logger.info('💡 This is the same URL as before - share it with support!');
+                
+                // Verify the tunnel is still working
+                if (await this._verifyTunnelActive(existingSession.url)) {
+                    return existingSession;
+                } else {
+                    this.logger.warn('⚠️  Previous tunnel appears inactive, creating new one...');
+                    await this._removeSession(device);
+                }
+            }
+            
             // Check if we should use persistent tunnel
             if (options.persistent || options.customDomain) {
                 return await this._createPersistentTunnel(device, options);
             } else {
-                return await this._createCloudflaredTunnel(device, options);
+                const tunnel = await this._createCloudflaredTunnel(device, options);
+                // Save session for reuse
+                if (tunnel) {
+                    await this._saveSession(device, tunnel);
+                }
+                return tunnel;
             }
         } else {
             throw new Error(`Unsupported tunnel provider: ${provider}`);
@@ -57,6 +81,112 @@ class TunnelManager {
             return true;
         } catch (error) {
             this.logger.warn(`Error closing tunnel: ${error.message}`);
+            return false;
+        }
+    }
+
+    /**
+     * Get existing tunnel session for a device
+     */
+    async _getExistingSession(device) {
+        try {
+            await fs.mkdir(this.sessionDir, { recursive: true });
+            const sessionData = await fs.readFile(this.sessionFile, 'utf8');
+            const sessions = JSON.parse(sessionData);
+            
+            const deviceKey = this._getDeviceKey(device);
+            const session = sessions[deviceKey];
+            
+            if (session && this._isSessionValid(session)) {
+                return session;
+            }
+        } catch (error) {
+            // File doesn't exist or is invalid, that's ok
+        }
+        return null;
+    }
+
+    /**
+     * Save tunnel session for a device
+     */
+    async _saveSession(device, tunnel) {
+        try {
+            await fs.mkdir(this.sessionDir, { recursive: true });
+            
+            let sessions = {};
+            try {
+                const sessionData = await fs.readFile(this.sessionFile, 'utf8');
+                sessions = JSON.parse(sessionData);
+            } catch (error) {
+                // File doesn't exist, start with empty sessions
+            }
+            
+            const deviceKey = this._getDeviceKey(device);
+            sessions[deviceKey] = {
+                url: tunnel.url,
+                deviceName: device.deviceName || device.name,
+                deviceIP: device.ip,
+                created: new Date().toISOString(),
+                lastUsed: new Date().toISOString(),
+                tunnelId: tunnel.id
+            };
+            
+            await fs.writeFile(this.sessionFile, JSON.stringify(sessions, null, 2));
+            this.logger.debug(`Session saved for device: ${deviceKey}`);
+        } catch (error) {
+            this.logger.warn(`Failed to save session: ${error.message}`);
+        }
+    }
+
+    /**
+     * Remove session for a device
+     */
+    async _removeSession(device) {
+        try {
+            const sessionData = await fs.readFile(this.sessionFile, 'utf8');
+            const sessions = JSON.parse(sessionData);
+            
+            const deviceKey = this._getDeviceKey(device);
+            delete sessions[deviceKey];
+            
+            await fs.writeFile(this.sessionFile, JSON.stringify(sessions, null, 2));
+            this.logger.debug(`Session removed for device: ${deviceKey}`);
+        } catch (error) {
+            // File doesn't exist or other error, that's ok
+        }
+    }
+
+    /**
+     * Generate a unique key for a device
+     */
+    _getDeviceKey(device) {
+        // Use IP as primary identifier, fallback to name
+        return device.ip || device.deviceName || device.name || 'unknown';
+    }
+
+    /**
+     * Check if a session is still valid (not too old)
+     */
+    _isSessionValid(session) {
+        const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+        const created = new Date(session.created);
+        const now = new Date();
+        return (now - created) < maxAge;
+    }
+
+    /**
+     * Verify if a tunnel URL is still active
+     */
+    async _verifyTunnelActive(url) {
+        try {
+            // Try to make a simple request to the tunnel
+            const { exec } = require('child_process');
+            const { promisify } = require('util');
+            const execAsync = promisify(exec);
+            
+            await execAsync(`curl -s --max-time 5 "${url}/api/v2/device/info" > /dev/null`);
+            return true;
+        } catch (error) {
             return false;
         }
     }
