@@ -1,6 +1,6 @@
-# KLVR Firmware Updater - One-Command Installer & Runner (PowerShell)
-# Usage: iex (iwr -useb https://raw.githubusercontent.com/KLVR-no/klvr-firmware-updater/main/install-and-update.ps1)
-# Alternative: Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/KLVR-no/klvr-firmware-updater/main/install-and-update.ps1" -UseBasicParsing).Content
+# KLVR Support Tool - One-Command Installer & Runner (PowerShell)
+# Usage: iex (iwr -useb https://raw.githubusercontent.com/KLVR-no/klvr-support-tool/main/install-and-update.ps1)
+# Alternative: Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/KLVR-no/klvr-support-tool/main/install-and-update.ps1" -UseBasicParsing).Content
 
 param(
     [string]$RepoUrl = "https://github.com/KLVR-no/klvr-support-tool.git"
@@ -220,9 +220,9 @@ function Test-Prerequisites {
     Write-Host ""
 }
 
-# Function to download and setup the firmware updater
-function Install-FirmwareUpdater {
-    Write-Step "Downloading KLVR Firmware Updater..."
+# Function to download and setup the support tool
+function Install-SupportTool {
+    Write-Step "Downloading KLVR Support Tool..."
     
     try {
         # Create temporary directory
@@ -248,20 +248,20 @@ function Install-FirmwareUpdater {
         Write-Host ""
         
     } catch {
-        Write-Error "Failed to setup firmware updater: $($_.Exception.Message)"
+        Write-Error "Failed to setup support tool: $($_.Exception.Message)"
         Write-Info "Please check your internet connection and repository URL"
         exit 1
     }
 }
 
-# Function to run the firmware updater
-function Start-FirmwareUpdater {
-    Write-Step "Starting KLVR Firmware Updater..."
+# Function to run the support tool
+function Start-SupportTool {
+    Write-Step "Starting KLVR Support Tool..."
     Write-Host ""
     
     # Check if the script exists
     if (-not (Test-Path $ScriptName)) {
-        Write-Error "Firmware update script not found: $ScriptName"
+        Write-Error "Support tool script not found: $ScriptName"
         exit 1
     }
     
@@ -286,12 +286,12 @@ function Remove-TempFiles {
 function Show-Header {
     Write-Host ""
     Write-ColoredOutput "============================================================" "Magenta"
-    Write-ColoredOutput "    KLVR Firmware Updater - One-Command Installer" "Magenta"
+    Write-ColoredOutput "    KLVR Support Tool - One-Command Installer" "Magenta"
     Write-ColoredOutput "============================================================" "Magenta"
     Write-ColoredOutput "This script will:" "Cyan"
-    Write-ColoredOutput "  1. Download the latest firmware updater" "Cyan"
+    Write-ColoredOutput "  1. Download the latest KLVR support tools" "Cyan"
     Write-ColoredOutput "  2. Install required dependencies" "Cyan"
-    Write-ColoredOutput "  3. Start the interactive firmware update process" "Cyan"
+    Write-ColoredOutput "  3. Start the interactive support tool interface" "Cyan"
     Write-Host ""
     Write-ColoredOutput "Press Ctrl+C at any time to cancel" "Yellow"
     Write-ColoredOutput "============================================================" "Magenta"
@@ -302,10 +302,10 @@ function Show-Header {
 function Show-Completion {
     Write-Host ""
     Write-ColoredOutput "============================================================" "Magenta"
-    Write-ColoredOutput "🎉 KLVR Firmware Updater Installation Complete! 🎉" "Green"
+    Write-ColoredOutput "🎉 KLVR Support Tool Installation Complete! 🎉" "Green"
     Write-ColoredOutput "============================================================" "Magenta"
     Write-Host ""
-    Write-ColoredOutput "To run the firmware updater again in the future, you can:" "Cyan"
+    Write-ColoredOutput "To run the support tool again in the future, you can:" "Cyan"
     Write-ColoredOutput "  1. Use this one-command installer again, or" "Cyan"
     Write-ColoredOutput "  2. Clone the repository manually and run: node src/cli/klvr-tool.js" "Cyan"
     Write-Host ""
@@ -322,8 +322,8 @@ function Main {
         
         # Run the installation process
         Test-Prerequisites
-        Install-FirmwareUpdater
-        Start-FirmwareUpdater
+        Install-SupportTool
+        Start-SupportTool
         
         # Show completion message
         Show-Completion
