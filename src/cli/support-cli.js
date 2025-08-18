@@ -7,6 +7,8 @@
 
 const { Command } = require('commander');
 const chalk = require('chalk');
+const inquirer = require('inquirer');
+const fs = require('fs').promises;
 const Logger = require('../core/logger');
 const DeviceDiscovery = require('../core/device-discovery');
 const FirmwareManager = require('../core/firmware-manager');
@@ -64,8 +66,70 @@ program
         return;
       }
       
-      // Perform update
-      const result = await firmwareManager.updateDevice(device, options);
+      // If specific firmware files are provided, use them directly
+      if (options.main && options.rear) {
+        logger.info('Using specified firmware files');
+        const result = await firmwareManager.updateDevice(device, options);
+        logger.success('✅ Advanced firmware update completed!');
+        
+        if (result.oldVersion && result.newVersion) {
+          logger.info(`📊 Version Change: ${result.oldVersion} → ${result.newVersion}`);
+        }
+        return;
+      }
+      
+      // Get available firmware versions for selection
+      const availableVersions = await getAvailableFirmwareVersions(firmwareManager);
+      
+      if (availableVersions.length === 0) {
+        logger.error('No firmware files found in firmware directory');
+        process.exit(1);
+      }
+      
+      // Let support engineer select firmware version
+      const { selectedVersion } = await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'selectedVersion',
+          message: 'Select firmware version to install:',
+          choices: availableVersions.map((version) => ({
+            name: version.version,
+            value: version,
+            short: version.version
+          }))
+        }
+      ]);
+      
+      // Show firmware details
+      console.log('\n' + chalk.cyan('📋 Firmware Details:'));
+      console.log(`   Version: ${chalk.white(selectedVersion.version)}`);
+      console.log(`   Main: ${chalk.gray(selectedVersion.main.file)}`);
+      console.log(`   Rear: ${chalk.gray(selectedVersion.rear.file)}`);
+      console.log(`   Modified: ${chalk.gray(selectedVersion.mtime.toLocaleString())}`);
+      
+      // Confirm update
+      const { confirm } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'confirm',
+          message: `Install ${selectedVersion.version} firmware on ${device.deviceName}?`,
+          default: false
+        }
+      ]);
+      
+      if (!confirm) {
+        logger.info('Firmware update cancelled by user');
+        return;
+      }
+      
+      // Update firmware with selected version
+      const firmwareOptions = {
+        ...options,
+        main: selectedVersion.mainPath,
+        rear: selectedVersion.rearPath
+      };
+      
+      const result = await firmwareManager.updateDevice(device, firmwareOptions);
       logger.success('✅ Advanced firmware update completed!');
       
       // Log detailed results
@@ -305,6 +369,80 @@ program
       logger.info(`   Log file: ${logger.logFile || 'Console only'}`);
     }
   });
+
+// Helper function to get available firmware versions
+async function getAvailableFirmwareVersions(firmwareManager) {
+  try {
+    const firmwareDir = path.join(__dirname, '../../firmware');
+    const files = await fs.readdir(firmwareDir);
+    
+    // Filter for signed binary files
+    const mainFiles = files.filter(file => file.startsWith('main_') && file.endsWith('.signed.bin'));
+    const rearFiles = files.filter(file => file.startsWith('rear_') && file.endsWith('.signed.bin'));
+    
+    if (mainFiles.length === 0 || rearFiles.length === 0) {
+      return [];
+    }
+    
+    // Sort by modification time (newest first) and add stats
+    const sortFiles = async (fileList) => {
+      const filesWithStats = await Promise.all(
+        fileList.map(async (file) => {
+          const filePath = path.join(firmwareDir, file);
+          const stats = await fs.stat(filePath);
+          return { file, mtime: stats.mtime };
+        })
+      );
+      return filesWithStats.sort((a, b) => b.mtime - a.mtime);
+    };
+    
+    const sortedMainFiles = await sortFiles(mainFiles);
+    const sortedRearFiles = await sortFiles(rearFiles);
+    
+    // Find matched firmware pairs using the same logic as firmware manager
+    const matchedPairs = findMatchedFirmwarePairs(sortedMainFiles, sortedRearFiles, firmwareDir);
+    
+    return matchedPairs;
+    
+  } catch (error) {
+    console.error(`Failed to get firmware versions: ${error.message}`);
+    return [];
+  }
+}
+
+// Helper function to find matched firmware pairs
+function findMatchedFirmwarePairs(mainFiles, rearFiles, firmwareDir) {
+  const pairs = [];
+  
+  for (const mainFile of mainFiles) {
+    const version = extractFirmwareVersion(mainFile.file);
+    if (!version) continue;
+    
+    const matchingRear = rearFiles.find(rearFile => {
+      const rearVersion = extractFirmwareVersion(rearFile.file);
+      return rearVersion === version;
+    });
+    
+    if (matchingRear) {
+      pairs.push({
+        version: version,
+        main: mainFile,
+        rear: matchingRear,
+        mtime: mainFile.mtime > matchingRear.mtime ? mainFile.mtime : matchingRear.mtime,
+        mainPath: path.join(firmwareDir, mainFile.file),
+        rearPath: path.join(firmwareDir, matchingRear.file)
+      });
+    }
+  }
+  
+  return pairs.sort((a, b) => b.mtime - a.mtime);
+}
+
+// Helper function to extract firmware version from filename
+function extractFirmwareVersion(filename) {
+  const match = filename.match(/_(v\d+\.\d+\.\d+(?:beta|alpha|rc)?(?:-[^.]+)?)\.signed\.bin$/);
+  return match ? match[1] : null;
+}
 
 // Parse arguments only if called directly
 if (require.main === module) {

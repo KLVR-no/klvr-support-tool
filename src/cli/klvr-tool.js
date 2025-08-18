@@ -61,8 +61,8 @@ program
           type: 'list',
           name: 'selectedVersion',
           message: 'Select firmware version to install:',
-          choices: availableVersions.map((version, index) => ({
-            name: `${version.version} ${index === 0 ? chalk.green('(Latest)') : ''}`,
+          choices: availableVersions.map((version) => ({
+            name: version.version,
             value: version,
             short: version.version
           }))
