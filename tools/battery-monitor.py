@@ -85,7 +85,8 @@ def analyze_detection(data, test_type='both'):
                     'voltageAAA_mv': debug.get('voltageAAA_mv', 0),
                     'voltageAA_mv': debug.get('voltageAA_mv', 0), 
                     'voltageDelta_mv': debug.get('voltageDelta_mv', 0),
-                    'lastDetection_ms': debug.get('lastDetection_ms', 0)
+                    'lastDetection_ms': debug.get('lastDetection_ms', 0),
+                    'retryCount': debug.get('retryCount', 0)
                 }
                 all_debug_info.append(debug_entry)
                 
@@ -124,15 +125,19 @@ def format_detection_line(reading_num, analysis):
     misdetection_count = len(analysis['misdetections'])
     correct_count = len(analysis['correct_detections'])
     
+    # Count slots that required retries
+    retry_count = len([d for d in analysis['all_debug_info'] if d['retryCount'] > 0])
+    retry_info = f" | Retries: {retry_count}"  # Always show retry count, even if 0
+    
     if test_type == 'aa':
         # AA test mode - focus on AA misdetections
         status = "🚨 MISDETECTION!" if misdetection_count > 0 else "✅ All correct"
-        return f"#{reading_num:3d} {timestamp} | [AA TEST] Total: {analysis['total']:2d} | Correct AA: {correct_count:2d} | Misdetected as AAA: {misdetection_count:2d} | {status}"
+        return f"#{reading_num:3d} {timestamp} | [AA TEST] Total: {analysis['total']:2d} | Correct AA: {correct_count:2d} | Misdetected as AAA: {misdetection_count:2d}{retry_info} | {status}"
     
     elif test_type == 'aaa':
         # AAA test mode - focus on AAA detection failures  
         status = "🚨 DETECTION FAILED!" if misdetection_count > 0 else "✅ All detected"
-        return f"#{reading_num:3d} {timestamp} | [AAA TEST] Total: {analysis['total']:2d} | Detected AAA: {correct_count:2d} | Failed to detect: {misdetection_count:2d} | {status}"
+        return f"#{reading_num:3d} {timestamp} | [AAA TEST] Total: {analysis['total']:2d} | Detected AAA: {correct_count:2d} | Failed to detect: {misdetection_count:2d}{retry_info} | {status}"
     
     else:
         # Both mode - general monitoring
@@ -233,7 +238,8 @@ def main():
                         else:
                             indicator = "📊"
                         
-                        voltage_line = f"    {indicator} SLOT {debug['slot']:2d}: {debug['detected_type']:8} | AAA_ON={debug['voltageAAA_mv']:4d}mV | AAA_OFF={debug['voltageAA_mv']:4d}mV | Δ={debug['voltageDelta_mv']:4d}mV"
+                        retry_info = f" | Retries={debug['retryCount']}" if debug['retryCount'] > 0 else ""
+                        voltage_line = f"    {indicator} SLOT {debug['slot']:2d}: {debug['detected_type']:8} | AAA_ON={debug['voltageAAA_mv']:4d}mV | AAA_OFF={debug['voltageAA_mv']:4d}mV | Δ={debug['voltageDelta_mv']:4d}mV{retry_info}"
                         print(voltage_line)
                         log_file.write(voltage_line + "\n")
                 
@@ -251,7 +257,8 @@ def main():
                     
                     # Show detailed info for each misdetection
                     for debug in analysis['misdetections']:
-                        detail_msg = f"    🔬 SLOT {debug['slot']} DETAILS: Detected={debug['detected_type']} | AAA_ON={debug['voltageAAA_mv']}mV | AAA_OFF={debug['voltageAA_mv']}mV | Δ={debug['voltageDelta_mv']}mV"
+                        retry_info = f" | Retries={debug['retryCount']}" if debug['retryCount'] > 0 else ""
+                        detail_msg = f"    🔬 SLOT {debug['slot']} DETAILS: Detected={debug['detected_type']} | AAA_ON={debug['voltageAAA_mv']}mV | AAA_OFF={debug['voltageAA_mv']}mV | Δ={debug['voltageDelta_mv']}mV{retry_info}"
                         print(detail_msg)
                         log_file.write(detail_msg + "\n")
                 
