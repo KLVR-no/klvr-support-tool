@@ -261,7 +261,7 @@ class FirmwareManager {
      */
     async _getDeviceInfo(device) {
         const response = await this._makeRequest(device, this.config.endpoints.info, 'GET');
-        return JSON.parse(response);
+        return JSON.parse(response.data);
     }
 
     /**
@@ -280,7 +280,7 @@ class FirmwareManager {
             }
         });
         
-        return { ok: true, data: response };
+        return response; // Return the actual response with status info
     }
 
     /**
@@ -296,7 +296,7 @@ class FirmwareManager {
             }
         });
         
-        return { ok: true, data: response };
+        return response; // Return the actual response with status info
     }
 
     /**
@@ -319,11 +319,13 @@ class FirmwareManager {
                 let data = '';
                 res.on('data', (chunk) => data += chunk);
                 res.on('end', () => {
-                    if (res.statusCode >= 200 && res.statusCode < 300) {
-                        resolve(data);
-                    } else {
-                        reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
-                    }
+                    // Return response object with status info like original
+                    resolve({
+                        ok: res.statusCode >= 200 && res.statusCode < 300,
+                        status: res.statusCode,
+                        statusText: res.statusMessage,
+                        data: data
+                    });
                 });
             });
 
