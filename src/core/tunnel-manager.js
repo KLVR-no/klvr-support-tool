@@ -32,20 +32,15 @@ class TunnelManager {
         const provider = options.tunnelProvider || 'cloudflare';
         
         if (provider === 'cloudflare') {
-            // Check for existing session first
+            // Check for existing session (for informational purposes)
             const existingSession = await this._getExistingSession(device);
             if (existingSession && options.reuseSession !== false) {
-                this.logger.info('🔄 Found existing tunnel session');
-                this.logger.success(`📋 Reusing tunnel URL: ${existingSession.url}`);
-                this.logger.info('💡 This is the same URL as before - share it with support!');
+                this.logger.info('📋 Found previous tunnel session');
+                this.logger.info(`   Previous URL: ${existingSession.url}`);
+                this.logger.info('💡 Creating new tunnel (quick tunnels generate new URLs each time)');
                 
-                // Verify the tunnel is still working
-                if (await this._verifyTunnelActive(existingSession.url)) {
-                    return existingSession;
-                } else {
-                    this.logger.warn('⚠️  Previous tunnel appears inactive, creating new one...');
-                    await this._removeSession(device);
-                }
+                // Clean up old session
+                await this._removeSession(device);
             }
             
             // Check if we should use persistent tunnel

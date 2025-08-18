@@ -250,8 +250,9 @@ class EndUserCLI {
         console.log(chalk.green('='.repeat(60)));
         
         if (useSessionReuse) {
-            console.log(chalk.blue('🔄 Checking for existing tunnel session...'));
-            console.log(chalk.blue('   This ensures you get the same URL each time!'));
+            console.log(chalk.blue('🔄 Checking for previous tunnel sessions...'));
+            console.log(chalk.yellow('   Note: Each session creates a new URL (Cloudflare limitation)'));
+            console.log(chalk.blue('   💡 For consistent URLs, contact support about persistent tunnels'));
             console.log('');
         }
         
