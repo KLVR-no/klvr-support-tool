@@ -199,8 +199,7 @@ program
         choices: [
           { name: '🔄 Update Firmware', value: 'firmware' },
           { name: '🌐 Start Remote Support Session', value: 'remote' },
-          { name: '🔍 Check Device Status', value: 'info' },
-          { name: '🔋 Monitor Battery Detection', value: 'monitor' }
+          { name: '❌ Exit', value: 'exit' }
         ]
       }
     ]);
@@ -212,11 +211,9 @@ program
       case 'remote':
         await program.parseAsync(['node', 'klvr-tool', 'remote-support']);
         break;
-      case 'info':
-        await program.parseAsync(['node', 'klvr-tool', 'device-info']);
-        break;
-      case 'monitor':
-        await program.parseAsync(['node', 'klvr-tool', 'battery-monitor']);
+      case 'exit':
+        console.log('👋 Goodbye!');
+        process.exit(0);
         break;
     }
   });
