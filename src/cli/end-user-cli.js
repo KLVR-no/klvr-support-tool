@@ -46,16 +46,6 @@ class EndUserCLI {
                         value: 'persistent-remote',
                         short: 'Create consistent URL that stays the same each time'
                     },
-                    { 
-                        name: '🔍 Check Device Status', 
-                        value: 'info',
-                        short: 'View information about your KLVR device'
-                    },
-                    { 
-                        name: '🔋 Monitor Battery Detection', 
-                        value: 'monitor',
-                        short: 'Test battery detection functionality'
-                    },
                     {
                         name: '❌ Exit',
                         value: 'exit'
@@ -74,12 +64,6 @@ class EndUserCLI {
                     break;
                 case 'persistent-remote':
                     await this.handleRemoteSupport({ persistent: true });
-                    break;
-                case 'info':
-                    await this.handleDeviceInfo();
-                    break;
-                case 'monitor':
-                    await this.handleBatteryMonitor();
                     break;
                 case 'exit':
                     console.log('👋 Goodbye!');
