@@ -41,11 +41,6 @@ class EndUserCLI {
                         value: 'remote',
                         short: 'Allow KLVR support to access your device remotely'
                     },
-                    { 
-                        name: '🔗 Start Persistent Remote Support (Same URL)', 
-                        value: 'persistent-remote',
-                        short: 'Create consistent URL that stays the same each time'
-                    },
                     {
                         name: '❌ Exit',
                         value: 'exit'
@@ -61,9 +56,6 @@ class EndUserCLI {
                     break;
                 case 'remote':
                     await this.handleRemoteSupport();
-                    break;
-                case 'persistent-remote':
-                    await this.handleRemoteSupport({ persistent: true });
                     break;
                 case 'exit':
                     console.log('👋 Goodbye!');
@@ -299,70 +291,9 @@ class EndUserCLI {
         await new Promise(() => {});
     }
 
-    async handleDeviceInfo() {
-        console.log('\n' + chalk.cyan('='.repeat(60)));
-        console.log(chalk.cyan('    Device Information'));
-        console.log(chalk.cyan('='.repeat(60)));
-        
-        const deviceDiscovery = new DeviceDiscovery(this.logger);
-        
-        // Discover device
-        const device = await deviceDiscovery.discoverAndSelect();
-        
-        // Get detailed info
-        const info = await deviceDiscovery.getDetailedInfo(device);
-        
-        console.log('\n📊 Device Information:');
-        console.table(info);
-    }
 
-    async handleBatteryMonitor() {
-        console.log('\n' + chalk.magenta('='.repeat(60)));
-        console.log(chalk.magenta('    Battery Detection Monitor'));
-        console.log(chalk.magenta('='.repeat(60)));
-        
-        const deviceDiscovery = new DeviceDiscovery(this.logger);
-        
-        // Discover device
-        const device = await deviceDiscovery.discoverAndSelect();
-        
-        // Get test type
-        const { testType } = await inquirer.prompt([
-            {
-                type: 'list',
-                name: 'testType',
-                message: 'What type of batteries are you testing?',
-                choices: [
-                    { name: 'AA batteries', value: 'aa' },
-                    { name: 'AAA batteries', value: 'aaa' },
-                    { name: 'Both types (general monitoring)', value: 'both' }
-                ]
-            }
-        ]);
-        
-        const targetUrl = device.url || `http://${device.ip}:8000`;
-        
-        // Launch Python monitor
-        console.log(`\n🔍 Starting battery detection monitor for ${testType.toUpperCase()} batteries...`);
-        console.log('Press Ctrl+C to stop monitoring\n');
-        
-        const monitor = spawn('python3', [
-            path.join(__dirname, '../../tools/battery-monitor.py'),
-            targetUrl,
-            testType
-        ], { stdio: 'inherit' });
-        
-        process.on('SIGINT', () => {
-            monitor.kill();
-            console.log('\n🛑 Monitor stopped');
-            process.exit(0);
-        });
-        
-        // Wait for monitor to finish
-        await new Promise((resolve) => {
-            monitor.on('close', resolve);
-        });
-    }
+
+
 }
 
 // Run if called directly
