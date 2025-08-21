@@ -1,0 +1,55 @@
+KLVR Charger Detection Monitor - Started 2025-08-21 19:31:50
+Monitoring: http://10.110.73.155:8000
+============================================================
+
+#  1 19:31:50 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+    ✅ SLOT  0: KLVR-AA  | AAA_ON=1556mV | AAA_OFF=1554mV | Δ=   2mV
+    ✅ SLOT  1: KLVR-AA  | AAA_ON=1552mV | AAA_OFF=1552mV | Δ=   0mV
+    ✅ SLOT  2: KLVR-AA  | AAA_ON=1540mV | AAA_OFF=1532mV | Δ=   8mV
+    ✅ SLOT  3: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1596mV | Δ= -36mV
+    ✅ SLOT  4: KLVR-AA  | AAA_ON=1548mV | AAA_OFF=1558mV | Δ= -10mV
+    ✅ SLOT  5: KLVR-AA  | AAA_ON=1546mV | AAA_OFF=1542mV | Δ=   4mV
+    ✅ SLOT  6: KLVR-AA  | AAA_ON=1544mV | AAA_OFF=1546mV | Δ=  -2mV
+    ✅ SLOT  7: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1548mV | Δ=  12mV
+    ✅ SLOT  8: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1552mV | Δ=  18mV
+    ✅ SLOT  9: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1588mV | Δ= -30mV
+    ✅ SLOT 10: KLVR-AA  | AAA_ON=1556mV | AAA_OFF=1564mV | Δ=  -8mV
+    ✅ SLOT 11: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1568mV | Δ=   2mV
+    ✅ SLOT 12: KLVR-AA  | AAA_ON=1542mV | AAA_OFF=1582mV | Δ= -40mV
+    ✅ SLOT 13: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1556mV | Δ=   4mV
+    ✅ SLOT 14: KLVR-AA  | AAA_ON=1542mV | AAA_OFF=1572mV | Δ= -30mV
+    ✅ SLOT 15: KLVR-AA  | AAA_ON=1424mV | AAA_OFF=1430mV | Δ=  -6mV
+    ✅ SLOT 16: KLVR-AA  | AAA_ON=1410mV | AAA_OFF=1408mV | Δ=   2mV
+    ✅ SLOT 17: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1598mV | Δ= -32mV
+    ✅ SLOT 18: KLVR-AA  | AAA_ON=1556mV | AAA_OFF=1554mV | Δ=   2mV
+    ✅ SLOT 19: KLVR-AA  | AAA_ON=1546mV | AAA_OFF=1582mV | Δ= -36mV
+    ✅ SLOT 20: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1560mV | Δ=   8mV
+    ✅ SLOT 21: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1586mV | Δ= -16mV
+    ✅ SLOT 22: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1568mV | Δ=   0mV
+    ✅ SLOT 23: KLVR-AA  | AAA_ON=1542mV | AAA_OFF=1544mV | Δ=  -2mV
+    ✅ SLOT 24: KLVR-AA  | AAA_ON=1440mV | AAA_OFF=1410mV | Δ=  30mV
+    ✅ SLOT 25: KLVR-AA  | AAA_ON=1416mV | AAA_OFF=1416mV | Δ=   0mV
+    ✅ SLOT 26: KLVR-AA  | AAA_ON=1422mV | AAA_OFF=1420mV | Δ=   2mV
+    ✅ SLOT 27: KLVR-AA  | AAA_ON=1432mV | AAA_OFF=1396mV | Δ=  36mV
+    ✅ SLOT 28: KLVR-AA  | AAA_ON=1400mV | AAA_OFF=1398mV | Δ=   2mV
+    ✅ SLOT 29: KLVR-AA  | AAA_ON=1422mV | AAA_OFF=1432mV | Δ= -10mV
+    ✅ SLOT 30: KLVR-AA  | AAA_ON=1420mV | AAA_OFF=1416mV | Δ=   4mV
+    ✅ SLOT 31: KLVR-AA  | AAA_ON=1416mV | AAA_OFF=1416mV | Δ=   0mV
+    ✅ SLOT 32: KLVR-AA  | AAA_ON=1390mV | AAA_OFF=1400mV | Δ= -10mV
+    ✅ SLOT 33: KLVR-AA  | AAA_ON=1398mV | AAA_OFF=1404mV | Δ=  -6mV
+    ✅ SLOT 34: KLVR-AA  | AAA_ON=1406mV | AAA_OFF=1402mV | Δ=   4mV
+    ✅ SLOT 35: KLVR-AA  | AAA_ON=1418mV | AAA_OFF=1420mV | Δ=  -2mV
+    ✅ SLOT 36: KLVR-AA  | AAA_ON=1402mV | AAA_OFF=1400mV | Δ=   2mV
+    ✅ SLOT 37: KLVR-AA  | AAA_ON=1418mV | AAA_OFF=1412mV | Δ=   6mV
+    ✅ SLOT 38: KLVR-AA  | AAA_ON=1416mV | AAA_OFF=1416mV | Δ=   0mV
+    ✅ SLOT 39: KLVR-AA  | AAA_ON=1406mV | AAA_OFF=1440mV | Δ= -34mV
+    ✅ SLOT 40: KLVR-AA  | AAA_ON=1586mV | AAA_OFF=1570mV | Δ=  16mV
+    ✅ SLOT 41: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1552mV | Δ=   8mV
+    ✅ SLOT 42: KLVR-AA  | AAA_ON=1420mV | AAA_OFF=1422mV | Δ=  -2mV
+    ✅ SLOT 43: KLVR-AA  | AAA_ON=1422mV | AAA_OFF=1420mV | Δ=   2mV
+    ✅ SLOT 44: KLVR-AA  | AAA_ON=1414mV | AAA_OFF=1402mV | Δ=  12mV
+    ✅ SLOT 45: KLVR-AA  | AAA_ON=1446mV | AAA_OFF=1426mV | Δ=  20mV
+    ✅ SLOT 46: KLVR-AA  | AAA_ON=1414mV | AAA_OFF=1432mV | Δ= -18mV
+    ✅ SLOT 47: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1564mV | Δ=  -6mV
+#  2 19:31:51 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#  3 19:31:51 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
