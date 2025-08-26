@@ -1,0 +1,1046 @@
+KLVR Charger Detection Monitor - Started 2025-08-26 13:28:13
+Monitoring: http://10.110.73.155:8000
+============================================================
+
+#  1 13:28:13 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+    ✅ SLOT  0: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1574mV | Δ=  -6mV
+    ✅ SLOT  1: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1514mV | Δ=  24mV
+    ✅ SLOT  2: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1580mV | Δ= -30mV
+    ✅ SLOT  3: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1558mV | Δ=   6mV
+    ✅ SLOT  4: KLVR-AA  | AAA_ON=1586mV | AAA_OFF=1574mV | Δ=  12mV
+    ✅ SLOT  5: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1554mV | Δ=  14mV
+    ✅ SLOT  6: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1576mV | Δ= -18mV
+    ✅ SLOT  7: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1488mV | Δ=   0mV
+    ✅ SLOT  8: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1504mV | Δ=   4mV
+    ✅ SLOT  9: KLVR-AA  | AAA_ON=1490mV | AAA_OFF=1480mV | Δ=  10mV
+    ✅ SLOT 10: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1548mV | Δ=  18mV
+    ✅ SLOT 11: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1596mV | Δ= -28mV
+    ✅ SLOT 12: KLVR-AA  | AAA_ON=1600mV | AAA_OFF=1558mV | Δ=  42mV
+    ✅ SLOT 13: KLVR-AA  | AAA_ON=1580mV | AAA_OFF=1558mV | Δ=  22mV
+    ✅ SLOT 14: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1568mV | Δ=  -2mV
+    ✅ SLOT 15: KLVR-AA  | AAA_ON=1482mV | AAA_OFF=1458mV | Δ=  24mV
+    ✅ SLOT 16: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1544mV | Δ=  -6mV
+    ✅ SLOT 17: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1568mV | Δ=  -6mV
+    ✅ SLOT 18: KLVR-AA  | AAA_ON=1540mV | AAA_OFF=1530mV | Δ=  10mV
+    ✅ SLOT 19: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1564mV | Δ=  -2mV
+    ✅ SLOT 20: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1512mV | Δ=  -4mV
+    ✅ SLOT 21: KLVR-AA  | AAA_ON=1592mV | AAA_OFF=1568mV | Δ=  24mV
+    ✅ SLOT 22: KLVR-AA  | AAA_ON=1574mV | AAA_OFF=1580mV | Δ=  -6mV
+    ✅ SLOT 23: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1570mV | Δ=   0mV
+    ✅ SLOT 24: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1536mV | Δ=  32mV
+    ✅ SLOT 25: KLVR-AA  | AAA_ON=1582mV | AAA_OFF=1548mV | Δ=  34mV
+    ✅ SLOT 26: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 27: KLVR-AA  | AAA_ON=1588mV | AAA_OFF=1568mV | Δ=  20mV
+    ✅ SLOT 28: KLVR-AA  | AAA_ON=1552mV | AAA_OFF=1556mV | Δ=  -4mV
+    ✅ SLOT 29: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1560mV | Δ=  -2mV
+    ✅ SLOT 30: KLVR-AA  | AAA_ON=1590mV | AAA_OFF=1628mV | Δ= -38mV
+    ✅ SLOT 31: KLVR-AA  | AAA_ON=1548mV | AAA_OFF=1552mV | Δ=  -4mV
+    ✅ SLOT 32: KLVR-AA  | AAA_ON=1492mV | AAA_OFF=1480mV | Δ=  12mV
+    ✅ SLOT 33: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1554mV | Δ=   4mV
+    ✅ SLOT 34: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1464mV | Δ=  24mV
+    ✅ SLOT 35: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 36: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1534mV | Δ=  16mV
+    ✅ SLOT 37: KLVR-AA  | AAA_ON=1536mV | AAA_OFF=1492mV | Δ=  44mV
+    ✅ SLOT 38: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1574mV | Δ= -10mV
+    ✅ SLOT 39: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1568mV | Δ=   0mV
+    ✅ SLOT 40: KLVR-AA  | AAA_ON=1474mV | AAA_OFF=1466mV | Δ=   8mV
+    ✅ SLOT 41: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1560mV | Δ=   8mV
+    ✅ SLOT 42: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1618mV | Δ= -48mV
+    ✅ SLOT 43: KLVR-AA  | AAA_ON=1578mV | AAA_OFF=1586mV | Δ=  -8mV
+    ✅ SLOT 44: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1582mV | Δ= -22mV
+    ✅ SLOT 45: KLVR-AA  | AAA_ON=1576mV | AAA_OFF=1582mV | Δ=  -6mV
+    ✅ SLOT 46: KLVR-AA  | AAA_ON=1518mV | AAA_OFF=1536mV | Δ= -18mV
+    ✅ SLOT 47: KLVR-AA  | AAA_ON=1516mV | AAA_OFF=1518mV | Δ=  -2mV
+#  2 13:28:13 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#  3 13:28:14 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#  4 13:28:14 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#  5 13:28:15 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#  6 13:28:15 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#  7 13:28:16 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#  8 13:28:16 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#  9 13:28:17 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 10 13:28:17 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 11 13:28:18 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+    ✅ SLOT  0: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1574mV | Δ=  -6mV
+    ✅ SLOT  1: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1514mV | Δ=  24mV
+    ✅ SLOT  2: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1580mV | Δ= -30mV
+    ✅ SLOT  3: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1558mV | Δ=   6mV
+    ✅ SLOT  4: KLVR-AA  | AAA_ON=1586mV | AAA_OFF=1574mV | Δ=  12mV
+    ✅ SLOT  5: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1554mV | Δ=  14mV
+    ✅ SLOT  6: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1576mV | Δ= -18mV
+    ✅ SLOT  7: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1488mV | Δ=   0mV
+    ✅ SLOT  8: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1504mV | Δ=   4mV
+    ✅ SLOT  9: KLVR-AA  | AAA_ON=1490mV | AAA_OFF=1480mV | Δ=  10mV
+    ✅ SLOT 10: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1548mV | Δ=  18mV
+    ✅ SLOT 11: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1596mV | Δ= -28mV
+    ✅ SLOT 12: KLVR-AA  | AAA_ON=1600mV | AAA_OFF=1558mV | Δ=  42mV
+    ✅ SLOT 13: KLVR-AA  | AAA_ON=1580mV | AAA_OFF=1558mV | Δ=  22mV
+    ✅ SLOT 14: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1568mV | Δ=  -2mV
+    ✅ SLOT 15: KLVR-AA  | AAA_ON=1482mV | AAA_OFF=1458mV | Δ=  24mV
+    ✅ SLOT 16: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1544mV | Δ=  -6mV
+    ✅ SLOT 17: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1568mV | Δ=  -6mV
+    ✅ SLOT 18: KLVR-AA  | AAA_ON=1540mV | AAA_OFF=1530mV | Δ=  10mV
+    ✅ SLOT 19: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1564mV | Δ=  -2mV
+    ✅ SLOT 20: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1512mV | Δ=  -4mV
+    ✅ SLOT 21: KLVR-AA  | AAA_ON=1592mV | AAA_OFF=1568mV | Δ=  24mV
+    ✅ SLOT 22: KLVR-AA  | AAA_ON=1574mV | AAA_OFF=1580mV | Δ=  -6mV
+    ✅ SLOT 23: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1570mV | Δ=   0mV
+    ✅ SLOT 24: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1536mV | Δ=  32mV
+    ✅ SLOT 25: KLVR-AA  | AAA_ON=1582mV | AAA_OFF=1548mV | Δ=  34mV
+    ✅ SLOT 26: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 27: KLVR-AA  | AAA_ON=1588mV | AAA_OFF=1568mV | Δ=  20mV
+    ✅ SLOT 28: KLVR-AA  | AAA_ON=1552mV | AAA_OFF=1556mV | Δ=  -4mV
+    ✅ SLOT 29: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1560mV | Δ=  -2mV
+    ✅ SLOT 30: KLVR-AA  | AAA_ON=1590mV | AAA_OFF=1628mV | Δ= -38mV
+    ✅ SLOT 31: KLVR-AA  | AAA_ON=1548mV | AAA_OFF=1552mV | Δ=  -4mV
+    ✅ SLOT 32: KLVR-AA  | AAA_ON=1492mV | AAA_OFF=1480mV | Δ=  12mV
+    ✅ SLOT 33: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1554mV | Δ=   4mV
+    ✅ SLOT 34: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1464mV | Δ=  24mV
+    ✅ SLOT 35: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 36: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1534mV | Δ=  16mV
+    ✅ SLOT 37: KLVR-AA  | AAA_ON=1536mV | AAA_OFF=1492mV | Δ=  44mV
+    ✅ SLOT 38: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1574mV | Δ= -10mV
+    ✅ SLOT 39: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1568mV | Δ=   0mV
+    ✅ SLOT 40: KLVR-AA  | AAA_ON=1474mV | AAA_OFF=1466mV | Δ=   8mV
+    ✅ SLOT 41: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1560mV | Δ=   8mV
+    ✅ SLOT 42: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1618mV | Δ= -48mV
+    ✅ SLOT 43: KLVR-AA  | AAA_ON=1578mV | AAA_OFF=1586mV | Δ=  -8mV
+    ✅ SLOT 44: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1582mV | Δ= -22mV
+    ✅ SLOT 45: KLVR-AA  | AAA_ON=1576mV | AAA_OFF=1582mV | Δ=  -6mV
+    ✅ SLOT 46: KLVR-AA  | AAA_ON=1518mV | AAA_OFF=1536mV | Δ= -18mV
+    ✅ SLOT 47: KLVR-AA  | AAA_ON=1516mV | AAA_OFF=1518mV | Δ=  -2mV
+# 12 13:28:19 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 13 13:28:19 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 14 13:28:20 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 15 13:28:20 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 16 13:28:21 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 17 13:28:21 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 18 13:28:22 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 19 13:28:22 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 20 13:28:23 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 21 13:28:23 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+    ✅ SLOT  0: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1574mV | Δ=  -6mV
+    ✅ SLOT  1: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1514mV | Δ=  24mV
+    ✅ SLOT  2: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1580mV | Δ= -30mV
+    ✅ SLOT  3: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1558mV | Δ=   6mV
+    ✅ SLOT  4: KLVR-AA  | AAA_ON=1586mV | AAA_OFF=1574mV | Δ=  12mV
+    ✅ SLOT  5: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1554mV | Δ=  14mV
+    ✅ SLOT  6: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1576mV | Δ= -18mV
+    ✅ SLOT  7: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1488mV | Δ=   0mV
+    ✅ SLOT  8: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1504mV | Δ=   4mV
+    ✅ SLOT  9: KLVR-AA  | AAA_ON=1490mV | AAA_OFF=1480mV | Δ=  10mV
+    ✅ SLOT 10: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1548mV | Δ=  18mV
+    ✅ SLOT 11: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1596mV | Δ= -28mV
+    ✅ SLOT 12: KLVR-AA  | AAA_ON=1600mV | AAA_OFF=1558mV | Δ=  42mV
+    ✅ SLOT 13: KLVR-AA  | AAA_ON=1580mV | AAA_OFF=1558mV | Δ=  22mV
+    ✅ SLOT 14: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1568mV | Δ=  -2mV
+    ✅ SLOT 15: KLVR-AA  | AAA_ON=1482mV | AAA_OFF=1458mV | Δ=  24mV
+    ✅ SLOT 16: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1544mV | Δ=  -6mV
+    ✅ SLOT 17: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1568mV | Δ=  -6mV
+    ✅ SLOT 18: KLVR-AA  | AAA_ON=1540mV | AAA_OFF=1530mV | Δ=  10mV
+    ✅ SLOT 19: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1564mV | Δ=  -2mV
+    ✅ SLOT 20: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1512mV | Δ=  -4mV
+    ✅ SLOT 21: KLVR-AA  | AAA_ON=1592mV | AAA_OFF=1568mV | Δ=  24mV
+    ✅ SLOT 22: KLVR-AA  | AAA_ON=1574mV | AAA_OFF=1580mV | Δ=  -6mV
+    ✅ SLOT 23: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1570mV | Δ=   0mV
+    ✅ SLOT 24: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1536mV | Δ=  32mV
+    ✅ SLOT 25: KLVR-AA  | AAA_ON=1582mV | AAA_OFF=1548mV | Δ=  34mV
+    ✅ SLOT 26: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 27: KLVR-AA  | AAA_ON=1588mV | AAA_OFF=1568mV | Δ=  20mV
+    ✅ SLOT 28: KLVR-AA  | AAA_ON=1552mV | AAA_OFF=1556mV | Δ=  -4mV
+    ✅ SLOT 29: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1560mV | Δ=  -2mV
+    ✅ SLOT 30: KLVR-AA  | AAA_ON=1590mV | AAA_OFF=1628mV | Δ= -38mV
+    ✅ SLOT 31: KLVR-AA  | AAA_ON=1548mV | AAA_OFF=1552mV | Δ=  -4mV
+    ✅ SLOT 32: KLVR-AA  | AAA_ON=1492mV | AAA_OFF=1480mV | Δ=  12mV
+    ✅ SLOT 33: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1554mV | Δ=   4mV
+    ✅ SLOT 34: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1464mV | Δ=  24mV
+    ✅ SLOT 35: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 36: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1534mV | Δ=  16mV
+    ✅ SLOT 37: KLVR-AA  | AAA_ON=1536mV | AAA_OFF=1492mV | Δ=  44mV
+    ✅ SLOT 38: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1574mV | Δ= -10mV
+    ✅ SLOT 39: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1568mV | Δ=   0mV
+    ✅ SLOT 40: KLVR-AA  | AAA_ON=1474mV | AAA_OFF=1466mV | Δ=   8mV
+    ✅ SLOT 41: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1560mV | Δ=   8mV
+    ✅ SLOT 42: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1618mV | Δ= -48mV
+    ✅ SLOT 43: KLVR-AA  | AAA_ON=1578mV | AAA_OFF=1586mV | Δ=  -8mV
+    ✅ SLOT 44: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1582mV | Δ= -22mV
+    ✅ SLOT 45: KLVR-AA  | AAA_ON=1576mV | AAA_OFF=1582mV | Δ=  -6mV
+    ✅ SLOT 46: KLVR-AA  | AAA_ON=1518mV | AAA_OFF=1536mV | Δ= -18mV
+    ✅ SLOT 47: KLVR-AA  | AAA_ON=1516mV | AAA_OFF=1518mV | Δ=  -2mV
+# 22 13:28:24 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 23 13:28:24 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 24 13:28:25 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 25 13:28:25 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 26 13:28:26 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 27 13:28:27 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 28 13:28:27 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 29 13:28:28 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 30 13:28:28 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 31 13:28:29 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+    ✅ SLOT  0: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1574mV | Δ=  -6mV
+    ✅ SLOT  1: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1514mV | Δ=  24mV
+    ✅ SLOT  2: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1580mV | Δ= -30mV
+    ✅ SLOT  3: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1558mV | Δ=   6mV
+    ✅ SLOT  4: KLVR-AA  | AAA_ON=1586mV | AAA_OFF=1574mV | Δ=  12mV
+    ✅ SLOT  5: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1554mV | Δ=  14mV
+    ✅ SLOT  6: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1576mV | Δ= -18mV
+    ✅ SLOT  7: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1488mV | Δ=   0mV
+    ✅ SLOT  8: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1504mV | Δ=   4mV
+    ✅ SLOT  9: KLVR-AA  | AAA_ON=1490mV | AAA_OFF=1480mV | Δ=  10mV
+    ✅ SLOT 10: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1548mV | Δ=  18mV
+    ✅ SLOT 11: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1596mV | Δ= -28mV
+    ✅ SLOT 12: KLVR-AA  | AAA_ON=1600mV | AAA_OFF=1558mV | Δ=  42mV
+    ✅ SLOT 13: KLVR-AA  | AAA_ON=1580mV | AAA_OFF=1558mV | Δ=  22mV
+    ✅ SLOT 14: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1568mV | Δ=  -2mV
+    ✅ SLOT 15: KLVR-AA  | AAA_ON=1482mV | AAA_OFF=1458mV | Δ=  24mV
+    ✅ SLOT 16: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1544mV | Δ=  -6mV
+    ✅ SLOT 17: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1568mV | Δ=  -6mV
+    ✅ SLOT 18: KLVR-AA  | AAA_ON=1540mV | AAA_OFF=1530mV | Δ=  10mV
+    ✅ SLOT 19: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1564mV | Δ=  -2mV
+    ✅ SLOT 20: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1512mV | Δ=  -4mV
+    ✅ SLOT 21: KLVR-AA  | AAA_ON=1592mV | AAA_OFF=1568mV | Δ=  24mV
+    ✅ SLOT 22: KLVR-AA  | AAA_ON=1574mV | AAA_OFF=1580mV | Δ=  -6mV
+    ✅ SLOT 23: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1570mV | Δ=   0mV
+    ✅ SLOT 24: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1536mV | Δ=  32mV
+    ✅ SLOT 25: KLVR-AA  | AAA_ON=1582mV | AAA_OFF=1548mV | Δ=  34mV
+    ✅ SLOT 26: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 27: KLVR-AA  | AAA_ON=1588mV | AAA_OFF=1568mV | Δ=  20mV
+    ✅ SLOT 28: KLVR-AA  | AAA_ON=1552mV | AAA_OFF=1556mV | Δ=  -4mV
+    ✅ SLOT 29: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1560mV | Δ=  -2mV
+    ✅ SLOT 30: KLVR-AA  | AAA_ON=1590mV | AAA_OFF=1628mV | Δ= -38mV
+    ✅ SLOT 31: KLVR-AA  | AAA_ON=1548mV | AAA_OFF=1552mV | Δ=  -4mV
+    ✅ SLOT 32: KLVR-AA  | AAA_ON=1492mV | AAA_OFF=1480mV | Δ=  12mV
+    ✅ SLOT 33: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1554mV | Δ=   4mV
+    ✅ SLOT 34: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1464mV | Δ=  24mV
+    ✅ SLOT 35: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 36: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1534mV | Δ=  16mV
+    ✅ SLOT 37: KLVR-AA  | AAA_ON=1536mV | AAA_OFF=1492mV | Δ=  44mV
+    ✅ SLOT 38: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1574mV | Δ= -10mV
+    ✅ SLOT 39: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1568mV | Δ=   0mV
+    ✅ SLOT 40: KLVR-AA  | AAA_ON=1474mV | AAA_OFF=1466mV | Δ=   8mV
+    ✅ SLOT 41: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1560mV | Δ=   8mV
+    ✅ SLOT 42: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1618mV | Δ= -48mV
+    ✅ SLOT 43: KLVR-AA  | AAA_ON=1578mV | AAA_OFF=1586mV | Δ=  -8mV
+    ✅ SLOT 44: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1582mV | Δ= -22mV
+    ✅ SLOT 45: KLVR-AA  | AAA_ON=1576mV | AAA_OFF=1582mV | Δ=  -6mV
+    ✅ SLOT 46: KLVR-AA  | AAA_ON=1518mV | AAA_OFF=1536mV | Δ= -18mV
+    ✅ SLOT 47: KLVR-AA  | AAA_ON=1516mV | AAA_OFF=1518mV | Δ=  -2mV
+# 32 13:28:29 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 33 13:28:30 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 34 13:28:30 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 35 13:28:31 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 36 13:28:31 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 37 13:28:32 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 38 13:28:33 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 39 13:28:33 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 40 13:28:34 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 41 13:28:34 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+    ✅ SLOT  0: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1574mV | Δ=  -6mV
+    ✅ SLOT  1: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1514mV | Δ=  24mV
+    ✅ SLOT  2: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1580mV | Δ= -30mV
+    ✅ SLOT  3: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1558mV | Δ=   6mV
+    ✅ SLOT  4: KLVR-AA  | AAA_ON=1586mV | AAA_OFF=1574mV | Δ=  12mV
+    ✅ SLOT  5: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1554mV | Δ=  14mV
+    ✅ SLOT  6: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1576mV | Δ= -18mV
+    ✅ SLOT  7: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1488mV | Δ=   0mV
+    ✅ SLOT  8: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1504mV | Δ=   4mV
+    ✅ SLOT  9: KLVR-AA  | AAA_ON=1490mV | AAA_OFF=1480mV | Δ=  10mV
+    ✅ SLOT 10: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1548mV | Δ=  18mV
+    ✅ SLOT 11: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1596mV | Δ= -28mV
+    ✅ SLOT 12: KLVR-AA  | AAA_ON=1600mV | AAA_OFF=1558mV | Δ=  42mV
+    ✅ SLOT 13: KLVR-AA  | AAA_ON=1580mV | AAA_OFF=1558mV | Δ=  22mV
+    ✅ SLOT 14: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1568mV | Δ=  -2mV
+    ✅ SLOT 15: KLVR-AA  | AAA_ON=1482mV | AAA_OFF=1458mV | Δ=  24mV
+    ✅ SLOT 16: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1544mV | Δ=  -6mV
+    ✅ SLOT 17: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1568mV | Δ=  -6mV
+    ✅ SLOT 18: KLVR-AA  | AAA_ON=1540mV | AAA_OFF=1530mV | Δ=  10mV
+    ✅ SLOT 19: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1564mV | Δ=  -2mV
+    ✅ SLOT 20: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1512mV | Δ=  -4mV
+    ✅ SLOT 21: KLVR-AA  | AAA_ON=1592mV | AAA_OFF=1568mV | Δ=  24mV
+    ✅ SLOT 22: KLVR-AA  | AAA_ON=1574mV | AAA_OFF=1580mV | Δ=  -6mV
+    ✅ SLOT 23: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1570mV | Δ=   0mV
+    ✅ SLOT 24: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1536mV | Δ=  32mV
+    ✅ SLOT 25: KLVR-AA  | AAA_ON=1582mV | AAA_OFF=1548mV | Δ=  34mV
+    ✅ SLOT 26: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 27: KLVR-AA  | AAA_ON=1588mV | AAA_OFF=1568mV | Δ=  20mV
+    ✅ SLOT 28: KLVR-AA  | AAA_ON=1552mV | AAA_OFF=1556mV | Δ=  -4mV
+    ✅ SLOT 29: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1560mV | Δ=  -2mV
+    ✅ SLOT 30: KLVR-AA  | AAA_ON=1590mV | AAA_OFF=1628mV | Δ= -38mV
+    ✅ SLOT 31: KLVR-AA  | AAA_ON=1548mV | AAA_OFF=1552mV | Δ=  -4mV
+    ✅ SLOT 32: KLVR-AA  | AAA_ON=1492mV | AAA_OFF=1480mV | Δ=  12mV
+    ✅ SLOT 33: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1554mV | Δ=   4mV
+    ✅ SLOT 34: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1464mV | Δ=  24mV
+    ✅ SLOT 35: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 36: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1534mV | Δ=  16mV
+    ✅ SLOT 37: KLVR-AA  | AAA_ON=1536mV | AAA_OFF=1492mV | Δ=  44mV
+    ✅ SLOT 38: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1574mV | Δ= -10mV
+    ✅ SLOT 39: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1568mV | Δ=   0mV
+    ✅ SLOT 40: KLVR-AA  | AAA_ON=1474mV | AAA_OFF=1466mV | Δ=   8mV
+    ✅ SLOT 41: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1560mV | Δ=   8mV
+    ✅ SLOT 42: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1618mV | Δ= -48mV
+    ✅ SLOT 43: KLVR-AA  | AAA_ON=1578mV | AAA_OFF=1586mV | Δ=  -8mV
+    ✅ SLOT 44: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1582mV | Δ= -22mV
+    ✅ SLOT 45: KLVR-AA  | AAA_ON=1576mV | AAA_OFF=1582mV | Δ=  -6mV
+    ✅ SLOT 46: KLVR-AA  | AAA_ON=1518mV | AAA_OFF=1536mV | Δ= -18mV
+    ✅ SLOT 47: KLVR-AA  | AAA_ON=1516mV | AAA_OFF=1518mV | Δ=  -2mV
+# 42 13:28:35 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 43 13:28:35 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 44 13:28:36 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 45 13:28:36 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 46 13:28:37 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 47 13:28:38 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 48 13:28:38 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 49 13:28:39 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 50 13:28:39 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 51 13:28:40 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+    ✅ SLOT  0: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1574mV | Δ=  -6mV
+    ✅ SLOT  1: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1514mV | Δ=  24mV
+    ✅ SLOT  2: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1580mV | Δ= -30mV
+    ✅ SLOT  3: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1558mV | Δ=   6mV
+    ✅ SLOT  4: KLVR-AA  | AAA_ON=1586mV | AAA_OFF=1574mV | Δ=  12mV
+    ✅ SLOT  5: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1554mV | Δ=  14mV
+    ✅ SLOT  6: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1576mV | Δ= -18mV
+    ✅ SLOT  7: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1488mV | Δ=   0mV
+    ✅ SLOT  8: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1504mV | Δ=   4mV
+    ✅ SLOT  9: KLVR-AA  | AAA_ON=1490mV | AAA_OFF=1480mV | Δ=  10mV
+    ✅ SLOT 10: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1548mV | Δ=  18mV
+    ✅ SLOT 11: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1596mV | Δ= -28mV
+    ✅ SLOT 12: KLVR-AA  | AAA_ON=1600mV | AAA_OFF=1558mV | Δ=  42mV
+    ✅ SLOT 13: KLVR-AA  | AAA_ON=1580mV | AAA_OFF=1558mV | Δ=  22mV
+    ✅ SLOT 14: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1568mV | Δ=  -2mV
+    ✅ SLOT 15: KLVR-AA  | AAA_ON=1482mV | AAA_OFF=1458mV | Δ=  24mV
+    ✅ SLOT 16: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1544mV | Δ=  -6mV
+    ✅ SLOT 17: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1568mV | Δ=  -6mV
+    ✅ SLOT 18: KLVR-AA  | AAA_ON=1540mV | AAA_OFF=1530mV | Δ=  10mV
+    ✅ SLOT 19: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1564mV | Δ=  -2mV
+    ✅ SLOT 20: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1512mV | Δ=  -4mV
+    ✅ SLOT 21: KLVR-AA  | AAA_ON=1592mV | AAA_OFF=1568mV | Δ=  24mV
+    ✅ SLOT 22: KLVR-AA  | AAA_ON=1574mV | AAA_OFF=1580mV | Δ=  -6mV
+    ✅ SLOT 23: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1570mV | Δ=   0mV
+    ✅ SLOT 24: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1536mV | Δ=  32mV
+    ✅ SLOT 25: KLVR-AA  | AAA_ON=1582mV | AAA_OFF=1548mV | Δ=  34mV
+    ✅ SLOT 26: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 27: KLVR-AA  | AAA_ON=1588mV | AAA_OFF=1568mV | Δ=  20mV
+    ✅ SLOT 28: KLVR-AA  | AAA_ON=1552mV | AAA_OFF=1556mV | Δ=  -4mV
+    ✅ SLOT 29: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1560mV | Δ=  -2mV
+    ✅ SLOT 30: KLVR-AA  | AAA_ON=1590mV | AAA_OFF=1628mV | Δ= -38mV
+    ✅ SLOT 31: KLVR-AA  | AAA_ON=1548mV | AAA_OFF=1552mV | Δ=  -4mV
+    ✅ SLOT 32: KLVR-AA  | AAA_ON=1492mV | AAA_OFF=1480mV | Δ=  12mV
+    ✅ SLOT 33: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1554mV | Δ=   4mV
+    ✅ SLOT 34: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1464mV | Δ=  24mV
+    ✅ SLOT 35: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 36: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1534mV | Δ=  16mV
+    ✅ SLOT 37: KLVR-AA  | AAA_ON=1536mV | AAA_OFF=1492mV | Δ=  44mV
+    ✅ SLOT 38: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1574mV | Δ= -10mV
+    ✅ SLOT 39: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1568mV | Δ=   0mV
+    ✅ SLOT 40: KLVR-AA  | AAA_ON=1474mV | AAA_OFF=1466mV | Δ=   8mV
+    ✅ SLOT 41: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1560mV | Δ=   8mV
+    ✅ SLOT 42: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1618mV | Δ= -48mV
+    ✅ SLOT 43: KLVR-AA  | AAA_ON=1578mV | AAA_OFF=1586mV | Δ=  -8mV
+    ✅ SLOT 44: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1582mV | Δ= -22mV
+    ✅ SLOT 45: KLVR-AA  | AAA_ON=1576mV | AAA_OFF=1582mV | Δ=  -6mV
+    ✅ SLOT 46: KLVR-AA  | AAA_ON=1518mV | AAA_OFF=1536mV | Δ= -18mV
+    ✅ SLOT 47: KLVR-AA  | AAA_ON=1516mV | AAA_OFF=1518mV | Δ=  -2mV
+# 52 13:28:40 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 53 13:28:41 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 54 13:28:41 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 55 13:28:42 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 56 13:28:42 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 57 13:28:43 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 58 13:28:44 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 59 13:28:44 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 60 13:28:45 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 61 13:28:45 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+    ✅ SLOT  0: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1574mV | Δ=  -6mV
+    ✅ SLOT  1: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1514mV | Δ=  24mV
+    ✅ SLOT  2: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1580mV | Δ= -30mV
+    ✅ SLOT  3: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1558mV | Δ=   6mV
+    ✅ SLOT  4: KLVR-AA  | AAA_ON=1586mV | AAA_OFF=1574mV | Δ=  12mV
+    ✅ SLOT  5: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1554mV | Δ=  14mV
+    ✅ SLOT  6: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1576mV | Δ= -18mV
+    ✅ SLOT  7: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1488mV | Δ=   0mV
+    ✅ SLOT  8: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1504mV | Δ=   4mV
+    ✅ SLOT  9: KLVR-AA  | AAA_ON=1490mV | AAA_OFF=1480mV | Δ=  10mV
+    ✅ SLOT 10: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1548mV | Δ=  18mV
+    ✅ SLOT 11: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1596mV | Δ= -28mV
+    ✅ SLOT 12: KLVR-AA  | AAA_ON=1600mV | AAA_OFF=1558mV | Δ=  42mV
+    ✅ SLOT 13: KLVR-AA  | AAA_ON=1580mV | AAA_OFF=1558mV | Δ=  22mV
+    ✅ SLOT 14: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1568mV | Δ=  -2mV
+    ✅ SLOT 15: KLVR-AA  | AAA_ON=1482mV | AAA_OFF=1458mV | Δ=  24mV
+    ✅ SLOT 16: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1544mV | Δ=  -6mV
+    ✅ SLOT 17: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1568mV | Δ=  -6mV
+    ✅ SLOT 18: KLVR-AA  | AAA_ON=1540mV | AAA_OFF=1530mV | Δ=  10mV
+    ✅ SLOT 19: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1564mV | Δ=  -2mV
+    ✅ SLOT 20: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1512mV | Δ=  -4mV
+    ✅ SLOT 21: KLVR-AA  | AAA_ON=1592mV | AAA_OFF=1568mV | Δ=  24mV
+    ✅ SLOT 22: KLVR-AA  | AAA_ON=1574mV | AAA_OFF=1580mV | Δ=  -6mV
+    ✅ SLOT 23: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1570mV | Δ=   0mV
+    ✅ SLOT 24: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1536mV | Δ=  32mV
+    ✅ SLOT 25: KLVR-AA  | AAA_ON=1582mV | AAA_OFF=1548mV | Δ=  34mV
+    ✅ SLOT 26: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 27: KLVR-AA  | AAA_ON=1588mV | AAA_OFF=1568mV | Δ=  20mV
+    ✅ SLOT 28: KLVR-AA  | AAA_ON=1552mV | AAA_OFF=1556mV | Δ=  -4mV
+    ✅ SLOT 29: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1560mV | Δ=  -2mV
+    ✅ SLOT 30: KLVR-AA  | AAA_ON=1590mV | AAA_OFF=1628mV | Δ= -38mV
+    ✅ SLOT 31: KLVR-AA  | AAA_ON=1548mV | AAA_OFF=1552mV | Δ=  -4mV
+    ✅ SLOT 32: KLVR-AA  | AAA_ON=1492mV | AAA_OFF=1480mV | Δ=  12mV
+    ✅ SLOT 33: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1554mV | Δ=   4mV
+    ✅ SLOT 34: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1464mV | Δ=  24mV
+    ✅ SLOT 35: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 36: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1534mV | Δ=  16mV
+    ✅ SLOT 37: KLVR-AA  | AAA_ON=1536mV | AAA_OFF=1492mV | Δ=  44mV
+    ✅ SLOT 38: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1574mV | Δ= -10mV
+    ✅ SLOT 39: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1568mV | Δ=   0mV
+    ✅ SLOT 40: KLVR-AA  | AAA_ON=1474mV | AAA_OFF=1466mV | Δ=   8mV
+    ✅ SLOT 41: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1560mV | Δ=   8mV
+    ✅ SLOT 42: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1618mV | Δ= -48mV
+    ✅ SLOT 43: KLVR-AA  | AAA_ON=1578mV | AAA_OFF=1586mV | Δ=  -8mV
+    ✅ SLOT 44: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1582mV | Δ= -22mV
+    ✅ SLOT 45: KLVR-AA  | AAA_ON=1576mV | AAA_OFF=1582mV | Δ=  -6mV
+    ✅ SLOT 46: KLVR-AA  | AAA_ON=1518mV | AAA_OFF=1536mV | Δ= -18mV
+    ✅ SLOT 47: KLVR-AA  | AAA_ON=1516mV | AAA_OFF=1518mV | Δ=  -2mV
+# 62 13:28:46 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 63 13:28:46 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 64 13:28:47 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 65 13:28:48 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 66 13:28:48 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 67 13:28:49 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 68 13:28:49 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 69 13:28:50 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 70 13:28:50 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 71 13:28:51 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+    ✅ SLOT  0: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1574mV | Δ=  -6mV
+    ✅ SLOT  1: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1514mV | Δ=  24mV
+    ✅ SLOT  2: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1580mV | Δ= -30mV
+    ✅ SLOT  3: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1558mV | Δ=   6mV
+    ✅ SLOT  4: KLVR-AA  | AAA_ON=1586mV | AAA_OFF=1574mV | Δ=  12mV
+    ✅ SLOT  5: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1554mV | Δ=  14mV
+    ✅ SLOT  6: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1576mV | Δ= -18mV
+    ✅ SLOT  7: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1488mV | Δ=   0mV
+    ✅ SLOT  8: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1504mV | Δ=   4mV
+    ✅ SLOT  9: KLVR-AA  | AAA_ON=1490mV | AAA_OFF=1480mV | Δ=  10mV
+    ✅ SLOT 10: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1548mV | Δ=  18mV
+    ✅ SLOT 11: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1596mV | Δ= -28mV
+    ✅ SLOT 12: KLVR-AA  | AAA_ON=1600mV | AAA_OFF=1558mV | Δ=  42mV
+    ✅ SLOT 13: KLVR-AA  | AAA_ON=1580mV | AAA_OFF=1558mV | Δ=  22mV
+    ✅ SLOT 14: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1568mV | Δ=  -2mV
+    ✅ SLOT 15: KLVR-AA  | AAA_ON=1482mV | AAA_OFF=1458mV | Δ=  24mV
+    ✅ SLOT 16: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1544mV | Δ=  -6mV
+    ✅ SLOT 17: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1568mV | Δ=  -6mV
+    ✅ SLOT 18: KLVR-AA  | AAA_ON=1540mV | AAA_OFF=1530mV | Δ=  10mV
+    ✅ SLOT 19: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1564mV | Δ=  -2mV
+    ✅ SLOT 20: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1512mV | Δ=  -4mV
+    ✅ SLOT 21: KLVR-AA  | AAA_ON=1592mV | AAA_OFF=1568mV | Δ=  24mV
+    ✅ SLOT 22: KLVR-AA  | AAA_ON=1574mV | AAA_OFF=1580mV | Δ=  -6mV
+    ✅ SLOT 23: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1570mV | Δ=   0mV
+    ✅ SLOT 24: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1536mV | Δ=  32mV
+    ✅ SLOT 25: KLVR-AA  | AAA_ON=1582mV | AAA_OFF=1548mV | Δ=  34mV
+    ✅ SLOT 26: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 27: KLVR-AA  | AAA_ON=1588mV | AAA_OFF=1568mV | Δ=  20mV
+    ✅ SLOT 28: KLVR-AA  | AAA_ON=1552mV | AAA_OFF=1556mV | Δ=  -4mV
+    ✅ SLOT 29: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1560mV | Δ=  -2mV
+    ✅ SLOT 30: KLVR-AA  | AAA_ON=1590mV | AAA_OFF=1628mV | Δ= -38mV
+    ✅ SLOT 31: KLVR-AA  | AAA_ON=1548mV | AAA_OFF=1552mV | Δ=  -4mV
+    ✅ SLOT 32: KLVR-AA  | AAA_ON=1492mV | AAA_OFF=1480mV | Δ=  12mV
+    ✅ SLOT 33: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1554mV | Δ=   4mV
+    ✅ SLOT 34: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1464mV | Δ=  24mV
+    ✅ SLOT 35: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 36: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1534mV | Δ=  16mV
+    ✅ SLOT 37: KLVR-AA  | AAA_ON=1536mV | AAA_OFF=1492mV | Δ=  44mV
+    ✅ SLOT 38: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1574mV | Δ= -10mV
+    ✅ SLOT 39: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1568mV | Δ=   0mV
+    ✅ SLOT 40: KLVR-AA  | AAA_ON=1474mV | AAA_OFF=1466mV | Δ=   8mV
+    ✅ SLOT 41: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1560mV | Δ=   8mV
+    ✅ SLOT 42: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1618mV | Δ= -48mV
+    ✅ SLOT 43: KLVR-AA  | AAA_ON=1578mV | AAA_OFF=1586mV | Δ=  -8mV
+    ✅ SLOT 44: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1582mV | Δ= -22mV
+    ✅ SLOT 45: KLVR-AA  | AAA_ON=1576mV | AAA_OFF=1582mV | Δ=  -6mV
+    ✅ SLOT 46: KLVR-AA  | AAA_ON=1518mV | AAA_OFF=1536mV | Δ= -18mV
+    ✅ SLOT 47: KLVR-AA  | AAA_ON=1516mV | AAA_OFF=1518mV | Δ=  -2mV
+# 72 13:28:51 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 73 13:28:52 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 74 13:28:52 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 75 13:28:53 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 76 13:28:53 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 77 13:28:54 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 78 13:28:55 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 79 13:28:55 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 80 13:28:56 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 81 13:28:56 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+    ✅ SLOT  0: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1574mV | Δ=  -6mV
+    ✅ SLOT  1: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1514mV | Δ=  24mV
+    ✅ SLOT  2: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1580mV | Δ= -30mV
+    ✅ SLOT  3: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1558mV | Δ=   6mV
+    ✅ SLOT  4: KLVR-AA  | AAA_ON=1586mV | AAA_OFF=1574mV | Δ=  12mV
+    ✅ SLOT  5: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1554mV | Δ=  14mV
+    ✅ SLOT  6: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1576mV | Δ= -18mV
+    ✅ SLOT  7: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1488mV | Δ=   0mV
+    ✅ SLOT  8: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1504mV | Δ=   4mV
+    ✅ SLOT  9: KLVR-AA  | AAA_ON=1490mV | AAA_OFF=1480mV | Δ=  10mV
+    ✅ SLOT 10: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1548mV | Δ=  18mV
+    ✅ SLOT 11: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1596mV | Δ= -28mV
+    ✅ SLOT 12: KLVR-AA  | AAA_ON=1600mV | AAA_OFF=1558mV | Δ=  42mV
+    ✅ SLOT 13: KLVR-AA  | AAA_ON=1580mV | AAA_OFF=1558mV | Δ=  22mV
+    ✅ SLOT 14: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1568mV | Δ=  -2mV
+    ✅ SLOT 15: KLVR-AA  | AAA_ON=1482mV | AAA_OFF=1458mV | Δ=  24mV
+    ✅ SLOT 16: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1544mV | Δ=  -6mV
+    ✅ SLOT 17: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1568mV | Δ=  -6mV
+    ✅ SLOT 18: KLVR-AA  | AAA_ON=1540mV | AAA_OFF=1530mV | Δ=  10mV
+    ✅ SLOT 19: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1564mV | Δ=  -2mV
+    ✅ SLOT 20: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1512mV | Δ=  -4mV
+    ✅ SLOT 21: KLVR-AA  | AAA_ON=1592mV | AAA_OFF=1568mV | Δ=  24mV
+    ✅ SLOT 22: KLVR-AA  | AAA_ON=1574mV | AAA_OFF=1580mV | Δ=  -6mV
+    ✅ SLOT 23: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1570mV | Δ=   0mV
+    ✅ SLOT 24: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1536mV | Δ=  32mV
+    ✅ SLOT 25: KLVR-AA  | AAA_ON=1582mV | AAA_OFF=1548mV | Δ=  34mV
+    ✅ SLOT 26: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 27: KLVR-AA  | AAA_ON=1588mV | AAA_OFF=1568mV | Δ=  20mV
+    ✅ SLOT 28: KLVR-AA  | AAA_ON=1552mV | AAA_OFF=1556mV | Δ=  -4mV
+    ✅ SLOT 29: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1560mV | Δ=  -2mV
+    ✅ SLOT 30: KLVR-AA  | AAA_ON=1590mV | AAA_OFF=1628mV | Δ= -38mV
+    ✅ SLOT 31: KLVR-AA  | AAA_ON=1548mV | AAA_OFF=1552mV | Δ=  -4mV
+    ✅ SLOT 32: KLVR-AA  | AAA_ON=1492mV | AAA_OFF=1480mV | Δ=  12mV
+    ✅ SLOT 33: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1554mV | Δ=   4mV
+    ✅ SLOT 34: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1464mV | Δ=  24mV
+    ✅ SLOT 35: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 36: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1534mV | Δ=  16mV
+    ✅ SLOT 37: KLVR-AA  | AAA_ON=1536mV | AAA_OFF=1492mV | Δ=  44mV
+    ✅ SLOT 38: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1574mV | Δ= -10mV
+    ✅ SLOT 39: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1568mV | Δ=   0mV
+    ✅ SLOT 40: KLVR-AA  | AAA_ON=1474mV | AAA_OFF=1466mV | Δ=   8mV
+    ✅ SLOT 41: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1560mV | Δ=   8mV
+    ✅ SLOT 42: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1618mV | Δ= -48mV
+    ✅ SLOT 43: KLVR-AA  | AAA_ON=1578mV | AAA_OFF=1586mV | Δ=  -8mV
+    ✅ SLOT 44: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1582mV | Δ= -22mV
+    ✅ SLOT 45: KLVR-AA  | AAA_ON=1576mV | AAA_OFF=1582mV | Δ=  -6mV
+    ✅ SLOT 46: KLVR-AA  | AAA_ON=1518mV | AAA_OFF=1536mV | Δ= -18mV
+    ✅ SLOT 47: KLVR-AA  | AAA_ON=1516mV | AAA_OFF=1518mV | Δ=  -2mV
+# 82 13:28:57 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 83 13:28:57 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 84 13:28:58 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 85 13:28:58 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 86 13:28:59 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 87 13:29:00 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 88 13:29:00 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 89 13:29:01 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 90 13:29:01 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 91 13:29:02 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+    ✅ SLOT  0: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1574mV | Δ=  -6mV
+    ✅ SLOT  1: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1514mV | Δ=  24mV
+    ✅ SLOT  2: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1580mV | Δ= -30mV
+    ✅ SLOT  3: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1558mV | Δ=   6mV
+    ✅ SLOT  4: KLVR-AA  | AAA_ON=1586mV | AAA_OFF=1574mV | Δ=  12mV
+    ✅ SLOT  5: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1554mV | Δ=  14mV
+    ✅ SLOT  6: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1576mV | Δ= -18mV
+    ✅ SLOT  7: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1488mV | Δ=   0mV
+    ✅ SLOT  8: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1504mV | Δ=   4mV
+    ✅ SLOT  9: KLVR-AA  | AAA_ON=1490mV | AAA_OFF=1480mV | Δ=  10mV
+    ✅ SLOT 10: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1548mV | Δ=  18mV
+    ✅ SLOT 11: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1596mV | Δ= -28mV
+    ✅ SLOT 12: KLVR-AA  | AAA_ON=1600mV | AAA_OFF=1558mV | Δ=  42mV
+    ✅ SLOT 13: KLVR-AA  | AAA_ON=1580mV | AAA_OFF=1558mV | Δ=  22mV
+    ✅ SLOT 14: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1568mV | Δ=  -2mV
+    ✅ SLOT 15: KLVR-AA  | AAA_ON=1482mV | AAA_OFF=1458mV | Δ=  24mV
+    ✅ SLOT 16: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1544mV | Δ=  -6mV
+    ✅ SLOT 17: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1568mV | Δ=  -6mV
+    ✅ SLOT 18: KLVR-AA  | AAA_ON=1540mV | AAA_OFF=1530mV | Δ=  10mV
+    ✅ SLOT 19: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1564mV | Δ=  -2mV
+    ✅ SLOT 20: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1512mV | Δ=  -4mV
+    ✅ SLOT 21: KLVR-AA  | AAA_ON=1592mV | AAA_OFF=1568mV | Δ=  24mV
+    ✅ SLOT 22: KLVR-AA  | AAA_ON=1574mV | AAA_OFF=1580mV | Δ=  -6mV
+    ✅ SLOT 23: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1570mV | Δ=   0mV
+    ✅ SLOT 24: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1536mV | Δ=  32mV
+    ✅ SLOT 25: KLVR-AA  | AAA_ON=1582mV | AAA_OFF=1548mV | Δ=  34mV
+    ✅ SLOT 26: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 27: KLVR-AA  | AAA_ON=1588mV | AAA_OFF=1568mV | Δ=  20mV
+    ✅ SLOT 28: KLVR-AA  | AAA_ON=1552mV | AAA_OFF=1556mV | Δ=  -4mV
+    ✅ SLOT 29: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1560mV | Δ=  -2mV
+    ✅ SLOT 30: KLVR-AA  | AAA_ON=1590mV | AAA_OFF=1628mV | Δ= -38mV
+    ✅ SLOT 31: KLVR-AA  | AAA_ON=1548mV | AAA_OFF=1552mV | Δ=  -4mV
+    ✅ SLOT 32: KLVR-AA  | AAA_ON=1492mV | AAA_OFF=1480mV | Δ=  12mV
+    ✅ SLOT 33: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1554mV | Δ=   4mV
+    ✅ SLOT 34: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1464mV | Δ=  24mV
+    ✅ SLOT 35: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 36: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1534mV | Δ=  16mV
+    ✅ SLOT 37: KLVR-AA  | AAA_ON=1536mV | AAA_OFF=1492mV | Δ=  44mV
+    ✅ SLOT 38: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1574mV | Δ= -10mV
+    ✅ SLOT 39: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1568mV | Δ=   0mV
+    ✅ SLOT 40: KLVR-AA  | AAA_ON=1474mV | AAA_OFF=1466mV | Δ=   8mV
+    ✅ SLOT 41: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1560mV | Δ=   8mV
+    ✅ SLOT 42: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1618mV | Δ= -48mV
+    ✅ SLOT 43: KLVR-AA  | AAA_ON=1578mV | AAA_OFF=1586mV | Δ=  -8mV
+    ✅ SLOT 44: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1582mV | Δ= -22mV
+    ✅ SLOT 45: KLVR-AA  | AAA_ON=1576mV | AAA_OFF=1582mV | Δ=  -6mV
+    ✅ SLOT 46: KLVR-AA  | AAA_ON=1518mV | AAA_OFF=1536mV | Δ= -18mV
+    ✅ SLOT 47: KLVR-AA  | AAA_ON=1516mV | AAA_OFF=1518mV | Δ=  -2mV
+# 92 13:29:02 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 93 13:29:03 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 94 13:29:03 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 95 13:29:04 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 96 13:29:04 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 97 13:29:05 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 98 13:29:06 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+# 99 13:29:06 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#100 13:29:07 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#101 13:29:07 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+    ✅ SLOT  0: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1574mV | Δ=  -6mV
+    ✅ SLOT  1: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1514mV | Δ=  24mV
+    ✅ SLOT  2: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1580mV | Δ= -30mV
+    ✅ SLOT  3: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1558mV | Δ=   6mV
+    ✅ SLOT  4: KLVR-AA  | AAA_ON=1586mV | AAA_OFF=1574mV | Δ=  12mV
+    ✅ SLOT  5: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1554mV | Δ=  14mV
+    ✅ SLOT  6: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1576mV | Δ= -18mV
+    ✅ SLOT  7: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1488mV | Δ=   0mV
+    ✅ SLOT  8: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1504mV | Δ=   4mV
+    ✅ SLOT  9: KLVR-AA  | AAA_ON=1490mV | AAA_OFF=1480mV | Δ=  10mV
+    ✅ SLOT 10: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1548mV | Δ=  18mV
+    ✅ SLOT 11: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1596mV | Δ= -28mV
+    ✅ SLOT 12: KLVR-AA  | AAA_ON=1600mV | AAA_OFF=1558mV | Δ=  42mV
+    ✅ SLOT 13: KLVR-AA  | AAA_ON=1580mV | AAA_OFF=1558mV | Δ=  22mV
+    ✅ SLOT 14: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1568mV | Δ=  -2mV
+    ✅ SLOT 15: KLVR-AA  | AAA_ON=1482mV | AAA_OFF=1458mV | Δ=  24mV
+    ✅ SLOT 16: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1544mV | Δ=  -6mV
+    ✅ SLOT 17: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1568mV | Δ=  -6mV
+    ✅ SLOT 18: KLVR-AA  | AAA_ON=1540mV | AAA_OFF=1530mV | Δ=  10mV
+    ✅ SLOT 19: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1564mV | Δ=  -2mV
+    ✅ SLOT 20: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1512mV | Δ=  -4mV
+    ✅ SLOT 21: KLVR-AA  | AAA_ON=1592mV | AAA_OFF=1568mV | Δ=  24mV
+    ✅ SLOT 22: KLVR-AA  | AAA_ON=1574mV | AAA_OFF=1580mV | Δ=  -6mV
+    ✅ SLOT 23: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1570mV | Δ=   0mV
+    ✅ SLOT 24: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1536mV | Δ=  32mV
+    ✅ SLOT 25: KLVR-AA  | AAA_ON=1582mV | AAA_OFF=1548mV | Δ=  34mV
+    ✅ SLOT 26: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 27: KLVR-AA  | AAA_ON=1588mV | AAA_OFF=1568mV | Δ=  20mV
+    ✅ SLOT 28: KLVR-AA  | AAA_ON=1552mV | AAA_OFF=1556mV | Δ=  -4mV
+    ✅ SLOT 29: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1560mV | Δ=  -2mV
+    ✅ SLOT 30: KLVR-AA  | AAA_ON=1590mV | AAA_OFF=1628mV | Δ= -38mV
+    ✅ SLOT 31: KLVR-AA  | AAA_ON=1548mV | AAA_OFF=1552mV | Δ=  -4mV
+    ✅ SLOT 32: KLVR-AA  | AAA_ON=1492mV | AAA_OFF=1480mV | Δ=  12mV
+    ✅ SLOT 33: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1554mV | Δ=   4mV
+    ✅ SLOT 34: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1464mV | Δ=  24mV
+    ✅ SLOT 35: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 36: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1534mV | Δ=  16mV
+    ✅ SLOT 37: KLVR-AA  | AAA_ON=1536mV | AAA_OFF=1492mV | Δ=  44mV
+    ✅ SLOT 38: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1574mV | Δ= -10mV
+    ✅ SLOT 39: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1568mV | Δ=   0mV
+    ✅ SLOT 40: KLVR-AA  | AAA_ON=1474mV | AAA_OFF=1466mV | Δ=   8mV
+    ✅ SLOT 41: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1560mV | Δ=   8mV
+    ✅ SLOT 42: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1618mV | Δ= -48mV
+    ✅ SLOT 43: KLVR-AA  | AAA_ON=1578mV | AAA_OFF=1586mV | Δ=  -8mV
+    ✅ SLOT 44: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1582mV | Δ= -22mV
+    ✅ SLOT 45: KLVR-AA  | AAA_ON=1576mV | AAA_OFF=1582mV | Δ=  -6mV
+    ✅ SLOT 46: KLVR-AA  | AAA_ON=1518mV | AAA_OFF=1536mV | Δ= -18mV
+    ✅ SLOT 47: KLVR-AA  | AAA_ON=1516mV | AAA_OFF=1518mV | Δ=  -2mV
+#102 13:29:08 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#103 13:29:08 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#104 13:29:09 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#105 13:29:09 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#106 13:29:10 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#107 13:29:10 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#108 13:29:11 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#109 13:29:11 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#110 13:29:12 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#111 13:29:12 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+    ✅ SLOT  0: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1574mV | Δ=  -6mV
+    ✅ SLOT  1: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1514mV | Δ=  24mV
+    ✅ SLOT  2: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1580mV | Δ= -30mV
+    ✅ SLOT  3: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1558mV | Δ=   6mV
+    ✅ SLOT  4: KLVR-AA  | AAA_ON=1586mV | AAA_OFF=1574mV | Δ=  12mV
+    ✅ SLOT  5: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1554mV | Δ=  14mV
+    ✅ SLOT  6: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1576mV | Δ= -18mV
+    ✅ SLOT  7: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1488mV | Δ=   0mV
+    ✅ SLOT  8: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1504mV | Δ=   4mV
+    ✅ SLOT  9: KLVR-AA  | AAA_ON=1490mV | AAA_OFF=1480mV | Δ=  10mV
+    ✅ SLOT 10: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1548mV | Δ=  18mV
+    ✅ SLOT 11: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1596mV | Δ= -28mV
+    ✅ SLOT 12: KLVR-AA  | AAA_ON=1600mV | AAA_OFF=1558mV | Δ=  42mV
+    ✅ SLOT 13: KLVR-AA  | AAA_ON=1580mV | AAA_OFF=1558mV | Δ=  22mV
+    ✅ SLOT 14: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1568mV | Δ=  -2mV
+    ✅ SLOT 15: KLVR-AA  | AAA_ON=1482mV | AAA_OFF=1458mV | Δ=  24mV
+    ✅ SLOT 16: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1544mV | Δ=  -6mV
+    ✅ SLOT 17: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1568mV | Δ=  -6mV
+    ✅ SLOT 18: KLVR-AA  | AAA_ON=1540mV | AAA_OFF=1530mV | Δ=  10mV
+    ✅ SLOT 19: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1564mV | Δ=  -2mV
+    ✅ SLOT 20: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1512mV | Δ=  -4mV
+    ✅ SLOT 21: KLVR-AA  | AAA_ON=1592mV | AAA_OFF=1568mV | Δ=  24mV
+    ✅ SLOT 22: KLVR-AA  | AAA_ON=1574mV | AAA_OFF=1580mV | Δ=  -6mV
+    ✅ SLOT 23: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1570mV | Δ=   0mV
+    ✅ SLOT 24: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1536mV | Δ=  32mV
+    ✅ SLOT 25: KLVR-AA  | AAA_ON=1582mV | AAA_OFF=1548mV | Δ=  34mV
+    ✅ SLOT 26: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 27: KLVR-AA  | AAA_ON=1588mV | AAA_OFF=1568mV | Δ=  20mV
+    ✅ SLOT 28: KLVR-AA  | AAA_ON=1552mV | AAA_OFF=1556mV | Δ=  -4mV
+    ✅ SLOT 29: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1560mV | Δ=  -2mV
+    ✅ SLOT 30: KLVR-AA  | AAA_ON=1590mV | AAA_OFF=1628mV | Δ= -38mV
+    ✅ SLOT 31: KLVR-AA  | AAA_ON=1548mV | AAA_OFF=1552mV | Δ=  -4mV
+    ✅ SLOT 32: KLVR-AA  | AAA_ON=1492mV | AAA_OFF=1480mV | Δ=  12mV
+    ✅ SLOT 33: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1554mV | Δ=   4mV
+    ✅ SLOT 34: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1464mV | Δ=  24mV
+    ✅ SLOT 35: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 36: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1534mV | Δ=  16mV
+    ✅ SLOT 37: KLVR-AA  | AAA_ON=1536mV | AAA_OFF=1492mV | Δ=  44mV
+    ✅ SLOT 38: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1574mV | Δ= -10mV
+    ✅ SLOT 39: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1568mV | Δ=   0mV
+    ✅ SLOT 40: KLVR-AA  | AAA_ON=1474mV | AAA_OFF=1466mV | Δ=   8mV
+    ✅ SLOT 41: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1560mV | Δ=   8mV
+    ✅ SLOT 42: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1618mV | Δ= -48mV
+    ✅ SLOT 43: KLVR-AA  | AAA_ON=1578mV | AAA_OFF=1586mV | Δ=  -8mV
+    ✅ SLOT 44: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1582mV | Δ= -22mV
+    ✅ SLOT 45: KLVR-AA  | AAA_ON=1576mV | AAA_OFF=1582mV | Δ=  -6mV
+    ✅ SLOT 46: KLVR-AA  | AAA_ON=1518mV | AAA_OFF=1536mV | Δ= -18mV
+    ✅ SLOT 47: KLVR-AA  | AAA_ON=1516mV | AAA_OFF=1518mV | Δ=  -2mV
+#112 13:29:13 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#113 13:29:14 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#114 13:29:14 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#115 13:29:15 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#116 13:29:15 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#117 13:29:16 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#118 13:29:16 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#119 13:29:17 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#120 13:29:17 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#121 13:29:18 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+    ✅ SLOT  0: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1574mV | Δ=  -6mV
+    ✅ SLOT  1: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1514mV | Δ=  24mV
+    ✅ SLOT  2: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1580mV | Δ= -30mV
+    ✅ SLOT  3: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1558mV | Δ=   6mV
+    ✅ SLOT  4: KLVR-AA  | AAA_ON=1586mV | AAA_OFF=1574mV | Δ=  12mV
+    ✅ SLOT  5: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1554mV | Δ=  14mV
+    ✅ SLOT  6: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1576mV | Δ= -18mV
+    ✅ SLOT  7: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1488mV | Δ=   0mV
+    ✅ SLOT  8: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1504mV | Δ=   4mV
+    ✅ SLOT  9: KLVR-AA  | AAA_ON=1490mV | AAA_OFF=1480mV | Δ=  10mV
+    ✅ SLOT 10: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1548mV | Δ=  18mV
+    ✅ SLOT 11: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1596mV | Δ= -28mV
+    ✅ SLOT 12: KLVR-AA  | AAA_ON=1600mV | AAA_OFF=1558mV | Δ=  42mV
+    ✅ SLOT 13: KLVR-AA  | AAA_ON=1580mV | AAA_OFF=1558mV | Δ=  22mV
+    ✅ SLOT 14: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1568mV | Δ=  -2mV
+    ✅ SLOT 15: KLVR-AA  | AAA_ON=1482mV | AAA_OFF=1458mV | Δ=  24mV
+    ✅ SLOT 16: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1544mV | Δ=  -6mV
+    ✅ SLOT 17: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1568mV | Δ=  -6mV
+    ✅ SLOT 18: KLVR-AA  | AAA_ON=1540mV | AAA_OFF=1530mV | Δ=  10mV
+    ✅ SLOT 19: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1564mV | Δ=  -2mV
+    ✅ SLOT 20: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1512mV | Δ=  -4mV
+    ✅ SLOT 21: KLVR-AA  | AAA_ON=1592mV | AAA_OFF=1568mV | Δ=  24mV
+    ✅ SLOT 22: KLVR-AA  | AAA_ON=1574mV | AAA_OFF=1580mV | Δ=  -6mV
+    ✅ SLOT 23: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1570mV | Δ=   0mV
+    ✅ SLOT 24: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1536mV | Δ=  32mV
+    ✅ SLOT 25: KLVR-AA  | AAA_ON=1582mV | AAA_OFF=1548mV | Δ=  34mV
+    ✅ SLOT 26: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 27: KLVR-AA  | AAA_ON=1588mV | AAA_OFF=1568mV | Δ=  20mV
+    ✅ SLOT 28: KLVR-AA  | AAA_ON=1552mV | AAA_OFF=1556mV | Δ=  -4mV
+    ✅ SLOT 29: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1560mV | Δ=  -2mV
+    ✅ SLOT 30: KLVR-AA  | AAA_ON=1590mV | AAA_OFF=1628mV | Δ= -38mV
+    ✅ SLOT 31: KLVR-AA  | AAA_ON=1548mV | AAA_OFF=1552mV | Δ=  -4mV
+    ✅ SLOT 32: KLVR-AA  | AAA_ON=1492mV | AAA_OFF=1480mV | Δ=  12mV
+    ✅ SLOT 33: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1554mV | Δ=   4mV
+    ✅ SLOT 34: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1464mV | Δ=  24mV
+    ✅ SLOT 35: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 36: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1534mV | Δ=  16mV
+    ✅ SLOT 37: KLVR-AA  | AAA_ON=1536mV | AAA_OFF=1492mV | Δ=  44mV
+    ✅ SLOT 38: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1574mV | Δ= -10mV
+    ✅ SLOT 39: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1568mV | Δ=   0mV
+    ✅ SLOT 40: KLVR-AA  | AAA_ON=1474mV | AAA_OFF=1466mV | Δ=   8mV
+    ✅ SLOT 41: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1560mV | Δ=   8mV
+    ✅ SLOT 42: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1618mV | Δ= -48mV
+    ✅ SLOT 43: KLVR-AA  | AAA_ON=1578mV | AAA_OFF=1586mV | Δ=  -8mV
+    ✅ SLOT 44: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1582mV | Δ= -22mV
+    ✅ SLOT 45: KLVR-AA  | AAA_ON=1576mV | AAA_OFF=1582mV | Δ=  -6mV
+    ✅ SLOT 46: KLVR-AA  | AAA_ON=1518mV | AAA_OFF=1536mV | Δ= -18mV
+    ✅ SLOT 47: KLVR-AA  | AAA_ON=1516mV | AAA_OFF=1518mV | Δ=  -2mV
+#122 13:29:18 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#123 13:29:19 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#124 13:29:19 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#125 13:29:20 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#126 13:29:21 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#127 13:29:21 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#128 13:29:22 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#129 13:29:22 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#130 13:29:23 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#131 13:29:23 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+    ✅ SLOT  0: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1574mV | Δ=  -6mV
+    ✅ SLOT  1: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1514mV | Δ=  24mV
+    ✅ SLOT  2: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1580mV | Δ= -30mV
+    ✅ SLOT  3: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1558mV | Δ=   6mV
+    ✅ SLOT  4: KLVR-AA  | AAA_ON=1586mV | AAA_OFF=1574mV | Δ=  12mV
+    ✅ SLOT  5: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1554mV | Δ=  14mV
+    ✅ SLOT  6: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1576mV | Δ= -18mV
+    ✅ SLOT  7: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1488mV | Δ=   0mV
+    ✅ SLOT  8: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1504mV | Δ=   4mV
+    ✅ SLOT  9: KLVR-AA  | AAA_ON=1490mV | AAA_OFF=1480mV | Δ=  10mV
+    ✅ SLOT 10: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1548mV | Δ=  18mV
+    ✅ SLOT 11: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1596mV | Δ= -28mV
+    ✅ SLOT 12: KLVR-AA  | AAA_ON=1600mV | AAA_OFF=1558mV | Δ=  42mV
+    ✅ SLOT 13: KLVR-AA  | AAA_ON=1580mV | AAA_OFF=1558mV | Δ=  22mV
+    ✅ SLOT 14: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1568mV | Δ=  -2mV
+    ✅ SLOT 15: KLVR-AA  | AAA_ON=1482mV | AAA_OFF=1458mV | Δ=  24mV
+    ✅ SLOT 16: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1544mV | Δ=  -6mV
+    ✅ SLOT 17: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1568mV | Δ=  -6mV
+    ✅ SLOT 18: KLVR-AA  | AAA_ON=1540mV | AAA_OFF=1530mV | Δ=  10mV
+    ✅ SLOT 19: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1564mV | Δ=  -2mV
+    ✅ SLOT 20: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1512mV | Δ=  -4mV
+    ✅ SLOT 21: KLVR-AA  | AAA_ON=1592mV | AAA_OFF=1568mV | Δ=  24mV
+    ✅ SLOT 22: KLVR-AA  | AAA_ON=1574mV | AAA_OFF=1580mV | Δ=  -6mV
+    ✅ SLOT 23: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1570mV | Δ=   0mV
+    ✅ SLOT 24: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1536mV | Δ=  32mV
+    ✅ SLOT 25: KLVR-AA  | AAA_ON=1582mV | AAA_OFF=1548mV | Δ=  34mV
+    ✅ SLOT 26: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 27: KLVR-AA  | AAA_ON=1588mV | AAA_OFF=1568mV | Δ=  20mV
+    ✅ SLOT 28: KLVR-AA  | AAA_ON=1552mV | AAA_OFF=1556mV | Δ=  -4mV
+    ✅ SLOT 29: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1560mV | Δ=  -2mV
+    ✅ SLOT 30: KLVR-AA  | AAA_ON=1590mV | AAA_OFF=1628mV | Δ= -38mV
+    ✅ SLOT 31: KLVR-AA  | AAA_ON=1548mV | AAA_OFF=1552mV | Δ=  -4mV
+    ✅ SLOT 32: KLVR-AA  | AAA_ON=1492mV | AAA_OFF=1480mV | Δ=  12mV
+    ✅ SLOT 33: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1554mV | Δ=   4mV
+    ✅ SLOT 34: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1464mV | Δ=  24mV
+    ✅ SLOT 35: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 36: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1534mV | Δ=  16mV
+    ✅ SLOT 37: KLVR-AA  | AAA_ON=1536mV | AAA_OFF=1492mV | Δ=  44mV
+    ✅ SLOT 38: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1574mV | Δ= -10mV
+    ✅ SLOT 39: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1568mV | Δ=   0mV
+    ✅ SLOT 40: KLVR-AA  | AAA_ON=1474mV | AAA_OFF=1466mV | Δ=   8mV
+    ✅ SLOT 41: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1560mV | Δ=   8mV
+    ✅ SLOT 42: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1618mV | Δ= -48mV
+    ✅ SLOT 43: KLVR-AA  | AAA_ON=1578mV | AAA_OFF=1586mV | Δ=  -8mV
+    ✅ SLOT 44: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1582mV | Δ= -22mV
+    ✅ SLOT 45: KLVR-AA  | AAA_ON=1576mV | AAA_OFF=1582mV | Δ=  -6mV
+    ✅ SLOT 46: KLVR-AA  | AAA_ON=1518mV | AAA_OFF=1536mV | Δ= -18mV
+    ✅ SLOT 47: KLVR-AA  | AAA_ON=1516mV | AAA_OFF=1518mV | Δ=  -2mV
+#132 13:29:24 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#133 13:29:24 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#134 13:29:25 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#135 13:29:25 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#136 13:29:26 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#137 13:29:27 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#138 13:29:27 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#139 13:29:28 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#140 13:29:28 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#141 13:29:29 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+    ✅ SLOT  0: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1574mV | Δ=  -6mV
+    ✅ SLOT  1: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1514mV | Δ=  24mV
+    ✅ SLOT  2: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1580mV | Δ= -30mV
+    ✅ SLOT  3: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1558mV | Δ=   6mV
+    ✅ SLOT  4: KLVR-AA  | AAA_ON=1586mV | AAA_OFF=1574mV | Δ=  12mV
+    ✅ SLOT  5: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1554mV | Δ=  14mV
+    ✅ SLOT  6: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1576mV | Δ= -18mV
+    ✅ SLOT  7: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1488mV | Δ=   0mV
+    ✅ SLOT  8: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1504mV | Δ=   4mV
+    ✅ SLOT  9: KLVR-AA  | AAA_ON=1490mV | AAA_OFF=1480mV | Δ=  10mV
+    ✅ SLOT 10: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1548mV | Δ=  18mV
+    ✅ SLOT 11: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1596mV | Δ= -28mV
+    ✅ SLOT 12: KLVR-AA  | AAA_ON=1600mV | AAA_OFF=1558mV | Δ=  42mV
+    ✅ SLOT 13: KLVR-AA  | AAA_ON=1580mV | AAA_OFF=1558mV | Δ=  22mV
+    ✅ SLOT 14: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1568mV | Δ=  -2mV
+    ✅ SLOT 15: KLVR-AA  | AAA_ON=1482mV | AAA_OFF=1458mV | Δ=  24mV
+    ✅ SLOT 16: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1544mV | Δ=  -6mV
+    ✅ SLOT 17: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1568mV | Δ=  -6mV
+    ✅ SLOT 18: KLVR-AA  | AAA_ON=1540mV | AAA_OFF=1530mV | Δ=  10mV
+    ✅ SLOT 19: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1564mV | Δ=  -2mV
+    ✅ SLOT 20: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1512mV | Δ=  -4mV
+    ✅ SLOT 21: KLVR-AA  | AAA_ON=1592mV | AAA_OFF=1568mV | Δ=  24mV
+    ✅ SLOT 22: KLVR-AA  | AAA_ON=1574mV | AAA_OFF=1580mV | Δ=  -6mV
+    ✅ SLOT 23: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1570mV | Δ=   0mV
+    ✅ SLOT 24: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1536mV | Δ=  32mV
+    ✅ SLOT 25: KLVR-AA  | AAA_ON=1582mV | AAA_OFF=1548mV | Δ=  34mV
+    ✅ SLOT 26: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 27: KLVR-AA  | AAA_ON=1588mV | AAA_OFF=1568mV | Δ=  20mV
+    ✅ SLOT 28: KLVR-AA  | AAA_ON=1552mV | AAA_OFF=1556mV | Δ=  -4mV
+    ✅ SLOT 29: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1560mV | Δ=  -2mV
+    ✅ SLOT 30: KLVR-AA  | AAA_ON=1590mV | AAA_OFF=1628mV | Δ= -38mV
+    ✅ SLOT 31: KLVR-AA  | AAA_ON=1548mV | AAA_OFF=1552mV | Δ=  -4mV
+    ✅ SLOT 32: KLVR-AA  | AAA_ON=1492mV | AAA_OFF=1480mV | Δ=  12mV
+    ✅ SLOT 33: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1554mV | Δ=   4mV
+    ✅ SLOT 34: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1464mV | Δ=  24mV
+    ✅ SLOT 35: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 36: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1534mV | Δ=  16mV
+    ✅ SLOT 37: KLVR-AA  | AAA_ON=1536mV | AAA_OFF=1492mV | Δ=  44mV
+    ✅ SLOT 38: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1574mV | Δ= -10mV
+    ✅ SLOT 39: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1568mV | Δ=   0mV
+    ✅ SLOT 40: KLVR-AA  | AAA_ON=1474mV | AAA_OFF=1466mV | Δ=   8mV
+    ✅ SLOT 41: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1560mV | Δ=   8mV
+    ✅ SLOT 42: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1618mV | Δ= -48mV
+    ✅ SLOT 43: KLVR-AA  | AAA_ON=1578mV | AAA_OFF=1586mV | Δ=  -8mV
+    ✅ SLOT 44: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1582mV | Δ= -22mV
+    ✅ SLOT 45: KLVR-AA  | AAA_ON=1576mV | AAA_OFF=1582mV | Δ=  -6mV
+    ✅ SLOT 46: KLVR-AA  | AAA_ON=1518mV | AAA_OFF=1536mV | Δ= -18mV
+    ✅ SLOT 47: KLVR-AA  | AAA_ON=1516mV | AAA_OFF=1518mV | Δ=  -2mV
+#142 13:29:29 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#143 13:29:30 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#144 13:29:30 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#145 13:29:31 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#146 13:29:31 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#147 13:29:32 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#148 13:29:32 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#149 13:29:33 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#150 13:29:34 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#151 13:29:34 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+    ✅ SLOT  0: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1574mV | Δ=  -6mV
+    ✅ SLOT  1: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1514mV | Δ=  24mV
+    ✅ SLOT  2: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1580mV | Δ= -30mV
+    ✅ SLOT  3: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1558mV | Δ=   6mV
+    ✅ SLOT  4: KLVR-AA  | AAA_ON=1586mV | AAA_OFF=1574mV | Δ=  12mV
+    ✅ SLOT  5: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1554mV | Δ=  14mV
+    ✅ SLOT  6: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1576mV | Δ= -18mV
+    ✅ SLOT  7: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1488mV | Δ=   0mV
+    ✅ SLOT  8: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1504mV | Δ=   4mV
+    ✅ SLOT  9: KLVR-AA  | AAA_ON=1490mV | AAA_OFF=1480mV | Δ=  10mV
+    ✅ SLOT 10: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1548mV | Δ=  18mV
+    ✅ SLOT 11: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1596mV | Δ= -28mV
+    ✅ SLOT 12: KLVR-AA  | AAA_ON=1600mV | AAA_OFF=1558mV | Δ=  42mV
+    ✅ SLOT 13: KLVR-AA  | AAA_ON=1580mV | AAA_OFF=1558mV | Δ=  22mV
+    ✅ SLOT 14: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1568mV | Δ=  -2mV
+    ✅ SLOT 15: KLVR-AA  | AAA_ON=1482mV | AAA_OFF=1458mV | Δ=  24mV
+    ✅ SLOT 16: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1544mV | Δ=  -6mV
+    ✅ SLOT 17: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1568mV | Δ=  -6mV
+    ✅ SLOT 18: KLVR-AA  | AAA_ON=1540mV | AAA_OFF=1530mV | Δ=  10mV
+    ✅ SLOT 19: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1564mV | Δ=  -2mV
+    ✅ SLOT 20: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1512mV | Δ=  -4mV
+    ✅ SLOT 21: KLVR-AA  | AAA_ON=1592mV | AAA_OFF=1568mV | Δ=  24mV
+    ✅ SLOT 22: KLVR-AA  | AAA_ON=1574mV | AAA_OFF=1580mV | Δ=  -6mV
+    ✅ SLOT 23: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1570mV | Δ=   0mV
+    ✅ SLOT 24: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1536mV | Δ=  32mV
+    ✅ SLOT 25: KLVR-AA  | AAA_ON=1582mV | AAA_OFF=1548mV | Δ=  34mV
+    ✅ SLOT 26: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 27: KLVR-AA  | AAA_ON=1588mV | AAA_OFF=1568mV | Δ=  20mV
+    ✅ SLOT 28: KLVR-AA  | AAA_ON=1552mV | AAA_OFF=1556mV | Δ=  -4mV
+    ✅ SLOT 29: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1560mV | Δ=  -2mV
+    ✅ SLOT 30: KLVR-AA  | AAA_ON=1590mV | AAA_OFF=1628mV | Δ= -38mV
+    ✅ SLOT 31: KLVR-AA  | AAA_ON=1548mV | AAA_OFF=1552mV | Δ=  -4mV
+    ✅ SLOT 32: KLVR-AA  | AAA_ON=1492mV | AAA_OFF=1480mV | Δ=  12mV
+    ✅ SLOT 33: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1554mV | Δ=   4mV
+    ✅ SLOT 34: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1464mV | Δ=  24mV
+    ✅ SLOT 35: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 36: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1534mV | Δ=  16mV
+    ✅ SLOT 37: KLVR-AA  | AAA_ON=1536mV | AAA_OFF=1492mV | Δ=  44mV
+    ✅ SLOT 38: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1574mV | Δ= -10mV
+    ✅ SLOT 39: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1568mV | Δ=   0mV
+    ✅ SLOT 40: KLVR-AA  | AAA_ON=1474mV | AAA_OFF=1466mV | Δ=   8mV
+    ✅ SLOT 41: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1560mV | Δ=   8mV
+    ✅ SLOT 42: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1618mV | Δ= -48mV
+    ✅ SLOT 43: KLVR-AA  | AAA_ON=1578mV | AAA_OFF=1586mV | Δ=  -8mV
+    ✅ SLOT 44: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1582mV | Δ= -22mV
+    ✅ SLOT 45: KLVR-AA  | AAA_ON=1576mV | AAA_OFF=1582mV | Δ=  -6mV
+    ✅ SLOT 46: KLVR-AA  | AAA_ON=1518mV | AAA_OFF=1536mV | Δ= -18mV
+    ✅ SLOT 47: KLVR-AA  | AAA_ON=1516mV | AAA_OFF=1518mV | Δ=  -2mV
+#152 13:29:35 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#153 13:29:35 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#154 13:29:36 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#155 13:29:36 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#156 13:29:37 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#157 13:29:37 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#158 13:29:38 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#159 13:29:38 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#160 13:29:39 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#161 13:29:40 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+    ✅ SLOT  0: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1574mV | Δ=  -6mV
+    ✅ SLOT  1: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1514mV | Δ=  24mV
+    ✅ SLOT  2: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1580mV | Δ= -30mV
+    ✅ SLOT  3: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1558mV | Δ=   6mV
+    ✅ SLOT  4: KLVR-AA  | AAA_ON=1586mV | AAA_OFF=1574mV | Δ=  12mV
+    ✅ SLOT  5: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1554mV | Δ=  14mV
+    ✅ SLOT  6: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1576mV | Δ= -18mV
+    ✅ SLOT  7: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1488mV | Δ=   0mV
+    ✅ SLOT  8: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1504mV | Δ=   4mV
+    ✅ SLOT  9: KLVR-AA  | AAA_ON=1490mV | AAA_OFF=1480mV | Δ=  10mV
+    ✅ SLOT 10: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1548mV | Δ=  18mV
+    ✅ SLOT 11: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1596mV | Δ= -28mV
+    ✅ SLOT 12: KLVR-AA  | AAA_ON=1600mV | AAA_OFF=1558mV | Δ=  42mV
+    ✅ SLOT 13: KLVR-AA  | AAA_ON=1580mV | AAA_OFF=1558mV | Δ=  22mV
+    ✅ SLOT 14: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1568mV | Δ=  -2mV
+    ✅ SLOT 15: KLVR-AA  | AAA_ON=1482mV | AAA_OFF=1458mV | Δ=  24mV
+    ✅ SLOT 16: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1544mV | Δ=  -6mV
+    ✅ SLOT 17: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1568mV | Δ=  -6mV
+    ✅ SLOT 18: KLVR-AA  | AAA_ON=1540mV | AAA_OFF=1530mV | Δ=  10mV
+    ✅ SLOT 19: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1564mV | Δ=  -2mV
+    ✅ SLOT 20: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1512mV | Δ=  -4mV
+    ✅ SLOT 21: KLVR-AA  | AAA_ON=1592mV | AAA_OFF=1568mV | Δ=  24mV
+    ✅ SLOT 22: KLVR-AA  | AAA_ON=1574mV | AAA_OFF=1580mV | Δ=  -6mV
+    ✅ SLOT 23: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1570mV | Δ=   0mV
+    ✅ SLOT 24: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1536mV | Δ=  32mV
+    ✅ SLOT 25: KLVR-AA  | AAA_ON=1582mV | AAA_OFF=1548mV | Δ=  34mV
+    ✅ SLOT 26: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 27: KLVR-AA  | AAA_ON=1588mV | AAA_OFF=1568mV | Δ=  20mV
+    ✅ SLOT 28: KLVR-AA  | AAA_ON=1552mV | AAA_OFF=1556mV | Δ=  -4mV
+    ✅ SLOT 29: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1560mV | Δ=  -2mV
+    ✅ SLOT 30: KLVR-AA  | AAA_ON=1590mV | AAA_OFF=1628mV | Δ= -38mV
+    ✅ SLOT 31: KLVR-AA  | AAA_ON=1548mV | AAA_OFF=1552mV | Δ=  -4mV
+    ✅ SLOT 32: KLVR-AA  | AAA_ON=1492mV | AAA_OFF=1480mV | Δ=  12mV
+    ✅ SLOT 33: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1554mV | Δ=   4mV
+    ✅ SLOT 34: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1464mV | Δ=  24mV
+    ✅ SLOT 35: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 36: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1534mV | Δ=  16mV
+    ✅ SLOT 37: KLVR-AA  | AAA_ON=1536mV | AAA_OFF=1492mV | Δ=  44mV
+    ✅ SLOT 38: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1574mV | Δ= -10mV
+    ✅ SLOT 39: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1568mV | Δ=   0mV
+    ✅ SLOT 40: KLVR-AA  | AAA_ON=1474mV | AAA_OFF=1466mV | Δ=   8mV
+    ✅ SLOT 41: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1560mV | Δ=   8mV
+    ✅ SLOT 42: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1618mV | Δ= -48mV
+    ✅ SLOT 43: KLVR-AA  | AAA_ON=1578mV | AAA_OFF=1586mV | Δ=  -8mV
+    ✅ SLOT 44: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1582mV | Δ= -22mV
+    ✅ SLOT 45: KLVR-AA  | AAA_ON=1576mV | AAA_OFF=1582mV | Δ=  -6mV
+    ✅ SLOT 46: KLVR-AA  | AAA_ON=1518mV | AAA_OFF=1536mV | Δ= -18mV
+    ✅ SLOT 47: KLVR-AA  | AAA_ON=1516mV | AAA_OFF=1518mV | Δ=  -2mV
+#162 13:29:40 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#163 13:29:41 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#164 13:29:41 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#165 13:29:42 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#166 13:29:42 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#167 13:29:43 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#168 13:29:43 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#169 13:29:44 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#170 13:29:44 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#171 13:29:45 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+    ✅ SLOT  0: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1574mV | Δ=  -6mV
+    ✅ SLOT  1: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1514mV | Δ=  24mV
+    ✅ SLOT  2: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1580mV | Δ= -30mV
+    ✅ SLOT  3: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1558mV | Δ=   6mV
+    ✅ SLOT  4: KLVR-AA  | AAA_ON=1586mV | AAA_OFF=1574mV | Δ=  12mV
+    ✅ SLOT  5: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1554mV | Δ=  14mV
+    ✅ SLOT  6: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1576mV | Δ= -18mV
+    ✅ SLOT  7: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1488mV | Δ=   0mV
+    ✅ SLOT  8: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1504mV | Δ=   4mV
+    ✅ SLOT  9: KLVR-AA  | AAA_ON=1490mV | AAA_OFF=1480mV | Δ=  10mV
+    ✅ SLOT 10: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1548mV | Δ=  18mV
+    ✅ SLOT 11: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1596mV | Δ= -28mV
+    ✅ SLOT 12: KLVR-AA  | AAA_ON=1600mV | AAA_OFF=1558mV | Δ=  42mV
+    ✅ SLOT 13: KLVR-AA  | AAA_ON=1580mV | AAA_OFF=1558mV | Δ=  22mV
+    ✅ SLOT 14: KLVR-AA  | AAA_ON=1566mV | AAA_OFF=1568mV | Δ=  -2mV
+    ✅ SLOT 15: KLVR-AA  | AAA_ON=1482mV | AAA_OFF=1458mV | Δ=  24mV
+    ✅ SLOT 16: KLVR-AA  | AAA_ON=1538mV | AAA_OFF=1544mV | Δ=  -6mV
+    ✅ SLOT 17: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1568mV | Δ=  -6mV
+    ✅ SLOT 18: KLVR-AA  | AAA_ON=1540mV | AAA_OFF=1530mV | Δ=  10mV
+    ✅ SLOT 19: KLVR-AA  | AAA_ON=1562mV | AAA_OFF=1564mV | Δ=  -2mV
+    ✅ SLOT 20: KLVR-AA  | AAA_ON=1508mV | AAA_OFF=1512mV | Δ=  -4mV
+    ✅ SLOT 21: KLVR-AA  | AAA_ON=1592mV | AAA_OFF=1568mV | Δ=  24mV
+    ✅ SLOT 22: KLVR-AA  | AAA_ON=1574mV | AAA_OFF=1580mV | Δ=  -6mV
+    ✅ SLOT 23: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1570mV | Δ=   0mV
+    ✅ SLOT 24: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1536mV | Δ=  32mV
+    ✅ SLOT 25: KLVR-AA  | AAA_ON=1582mV | AAA_OFF=1548mV | Δ=  34mV
+    ✅ SLOT 26: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 27: KLVR-AA  | AAA_ON=1588mV | AAA_OFF=1568mV | Δ=  20mV
+    ✅ SLOT 28: KLVR-AA  | AAA_ON=1552mV | AAA_OFF=1556mV | Δ=  -4mV
+    ✅ SLOT 29: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1560mV | Δ=  -2mV
+    ✅ SLOT 30: KLVR-AA  | AAA_ON=1590mV | AAA_OFF=1628mV | Δ= -38mV
+    ✅ SLOT 31: KLVR-AA  | AAA_ON=1548mV | AAA_OFF=1552mV | Δ=  -4mV
+    ✅ SLOT 32: KLVR-AA  | AAA_ON=1492mV | AAA_OFF=1480mV | Δ=  12mV
+    ✅ SLOT 33: KLVR-AA  | AAA_ON=1558mV | AAA_OFF=1554mV | Δ=   4mV
+    ✅ SLOT 34: KLVR-AA  | AAA_ON=1488mV | AAA_OFF=1464mV | Δ=  24mV
+    ✅ SLOT 35: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1536mV | Δ=  34mV
+    ✅ SLOT 36: KLVR-AA  | AAA_ON=1550mV | AAA_OFF=1534mV | Δ=  16mV
+    ✅ SLOT 37: KLVR-AA  | AAA_ON=1536mV | AAA_OFF=1492mV | Δ=  44mV
+    ✅ SLOT 38: KLVR-AA  | AAA_ON=1564mV | AAA_OFF=1574mV | Δ= -10mV
+    ✅ SLOT 39: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1568mV | Δ=   0mV
+    ✅ SLOT 40: KLVR-AA  | AAA_ON=1474mV | AAA_OFF=1466mV | Δ=   8mV
+    ✅ SLOT 41: KLVR-AA  | AAA_ON=1568mV | AAA_OFF=1560mV | Δ=   8mV
+    ✅ SLOT 42: KLVR-AA  | AAA_ON=1570mV | AAA_OFF=1618mV | Δ= -48mV
+    ✅ SLOT 43: KLVR-AA  | AAA_ON=1578mV | AAA_OFF=1586mV | Δ=  -8mV
+    ✅ SLOT 44: KLVR-AA  | AAA_ON=1560mV | AAA_OFF=1582mV | Δ= -22mV
+    ✅ SLOT 45: KLVR-AA  | AAA_ON=1576mV | AAA_OFF=1582mV | Δ=  -6mV
+    ✅ SLOT 46: KLVR-AA  | AAA_ON=1518mV | AAA_OFF=1536mV | Δ= -18mV
+    ✅ SLOT 47: KLVR-AA  | AAA_ON=1516mV | AAA_OFF=1518mV | Δ=  -2mV
+#172 13:29:46 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#173 13:29:46 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#174 13:29:47 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#175 13:29:47 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#176 13:29:48 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#177 13:29:48 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct
+#178 13:29:49 | [AA TEST] Total: 48 | Correct AA: 48 | Misdetected as AAA:  0 | Retries: 0 | ✅ All correct

@@ -2,6 +2,27 @@
 """
 Real-time AA/AAA Battery Detection Monitor
 Monitors the KLVR charger for battery detection changes in real-time.
+
+FIRMWARE COMPATIBILITY:
+  v1.8.3-beta31+: Dual median filtering system (~600ms)
+  v1.8.3-beta29-30: True 3-cycle median detection (~600ms)
+  v1.8.3-beta28: Single baseline approach (~300ms) - DEPRECATED
+  v1.8.3-beta24-27: 6-measurement detection (~600ms) 
+  Earlier versions: Legacy detection methods
+
+DETECTION PROCESS (beta31+):
+  Stage 1 - Baseline: 3 AAA_ON measurements → median baseline
+  Stage 2 - Detection: 3 AAA_OFF measurements → median delta
+  Enhanced logging: Shows all measurements + median selection
+  Dual filtering: Both baseline and detection use median filtering
+  Total detection time: ~600ms with enhanced noise immunity
+  
+DIAGNOSTIC ENHANCEMENTS (beta31+):
+  - Full traceability: See all 3 measurements and selection logic
+  - Noise immunity: Median filtering eliminates outlier measurements
+  - Enhanced debugging: Identify measurement consistency issues
+  - Maintained ranges: AA (-50 to +50mV), AAA (280-380mV)
+
 Usage: python3 tools/battery-monitor.py [IP_ADDRESS|FULL_URL] [TEST_TYPE]
 
 TEST_TYPE options:
@@ -86,7 +107,8 @@ def analyze_detection(data, test_type='both'):
                     'voltageAA_mv': debug.get('voltageAA_mv', 0), 
                     'voltageDelta_mv': debug.get('voltageDelta_mv', 0),
                     'lastDetection_ms': debug.get('lastDetection_ms', 0),
-                    'retryCount': debug.get('retryCount', 0)
+                    'retryCount': debug.get('retryCount', 0),
+                    'medianCycleSelected': debug.get('medianCycleSelected', 0)
                 }
                 all_debug_info.append(debug_entry)
                 
@@ -239,7 +261,13 @@ def main():
                             indicator = "📊"
                         
                         retry_info = f" | Retries={debug['retryCount']}" if debug['retryCount'] > 0 else ""
-                        voltage_line = f"    {indicator} SLOT {debug['slot']:2d}: {debug['detected_type']:8} | AAA_ON={debug['voltageAAA_mv']:4d}mV | AAA_OFF={debug['voltageAA_mv']:4d}mV | Δ={debug['voltageDelta_mv']:4d}mV{retry_info}"
+                        median_info = f" | Cycle={debug['medianCycleSelected']}" if debug['medianCycleSelected'] > 0 else ""
+                        # Updated for beta31 dual median filtering system:
+                        # - voltageAAA_mv: Median AAA_ON baseline (from 3 measurements)
+                        # - voltageAA_mv: Calculated AAA_OFF (baseline - median_delta)
+                        # - voltageDelta_mv: Median delta (from 3 AAA_OFF measurements)
+                        # - medianCycleSelected: Which measurement provided the median delta
+                        voltage_line = f"    {indicator} SLOT {debug['slot']:2d}: {debug['detected_type']:8} | AAA_ON={debug['voltageAAA_mv']:4d}mV | AAA_OFF={debug['voltageAA_mv']:4d}mV | Δ={debug['voltageDelta_mv']:4d}mV{retry_info}{median_info}"
                         print(voltage_line)
                         log_file.write(voltage_line + "\n")
                 
@@ -258,7 +286,9 @@ def main():
                     # Show detailed info for each misdetection
                     for debug in analysis['misdetections']:
                         retry_info = f" | Retries={debug['retryCount']}" if debug['retryCount'] > 0 else ""
-                        detail_msg = f"    🔬 SLOT {debug['slot']} DETAILS: Detected={debug['detected_type']} | AAA_ON={debug['voltageAAA_mv']}mV | AAA_OFF={debug['voltageAA_mv']}mV | Δ={debug['voltageDelta_mv']}mV{retry_info}"
+                        median_info = f" | Cycle={debug['medianCycleSelected']}" if debug['medianCycleSelected'] > 0 else ""
+                        # Updated for beta31: Dual median filtering (baseline + detection)
+                        detail_msg = f"    🔬 SLOT {debug['slot']} DETAILS: Detected={debug['detected_type']} | AAA_ON={debug['voltageAAA_mv']}mV | AAA_OFF={debug['voltageAA_mv']}mV | Δ={debug['voltageDelta_mv']}mV{retry_info}{median_info}"
                         print(detail_msg)
                         log_file.write(detail_msg + "\n")
                 
@@ -272,7 +302,7 @@ def main():
                 log_file.flush()  # Ensure immediate write to disk
                 last_analysis = analysis
                 reading_num += 1
-                time.sleep(0.5)  # Fast testing: 0.5-second intervals
+                time.sleep(0.7)  # Optimized for beta29 600ms true 3-cycle detection
             
     except KeyboardInterrupt:
         print("\n👋 Monitoring stopped")
