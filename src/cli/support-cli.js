@@ -38,6 +38,7 @@ program
   .option('-f, --firmware-dir <path>', 'Firmware directory path', './firmware')
   .option('--main <file>', 'Specific main firmware file')
   .option('--rear <file>', 'Specific rear firmware file')
+  .option('--rear-only', 'Update only the rear board firmware')
   .option('--force', 'Force update even if same version')
   .option('--validate-only', 'Only validate firmware files, do not update')
   .option('--backup-current', 'Backup current firmware before update')

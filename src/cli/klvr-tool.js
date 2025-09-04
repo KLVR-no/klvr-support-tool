@@ -33,6 +33,7 @@ program
   .option('-f, --firmware-dir <path>', 'Firmware directory path', './firmware')
   .option('--main <file>', 'Specific main firmware file')
   .option('--rear <file>', 'Specific rear firmware file')
+  .option('--rear-only', 'Update only the rear board firmware')
   .option('--force', 'Force update even if same version')
   .action(async (target, options) => {
     const logger = new Logger(options);
@@ -48,7 +49,7 @@ program
         await deviceDiscovery.discoverAndSelect();
       
       // Get available firmware versions for selection
-      const availableVersions = await getAvailableFirmwareVersions(firmwareManager);
+      const availableVersions = await getAvailableFirmwareVersions(firmwareManager, options.rearOnly);
       
       if (availableVersions.length === 0) {
         logger.error('No firmware files found in firmware directory');
@@ -56,11 +57,15 @@ program
       }
       
       // Let user select firmware version
+      const versionMessage = options.rearOnly ? 
+        'Select rear firmware version to install:' : 
+        'Select firmware version to install:';
+      
       const { selectedVersion } = await inquirer.prompt([
         {
           type: 'list',
           name: 'selectedVersion',
-          message: 'Select firmware version to install:',
+          message: versionMessage,
           choices: availableVersions.map((version) => ({
             name: version.version,
             value: version,
@@ -72,16 +77,19 @@ program
       // Show firmware details
       console.log('\n' + chalk.cyan('📋 Firmware Details:'));
       console.log(`   Version: ${chalk.white(selectedVersion.version)}`);
-      console.log(`   Main: ${chalk.gray(selectedVersion.main.file)}`);
+      if (!options.rearOnly) {
+        console.log(`   Main: ${chalk.gray(selectedVersion.main.file)}`);
+      }
       console.log(`   Rear: ${chalk.gray(selectedVersion.rear.file)}`);
       console.log(`   Modified: ${chalk.gray(selectedVersion.mtime.toLocaleString())}`);
       
       // Confirm update
+      const updateType = options.rearOnly ? 'rear board only' : 'both boards';
       const { confirm } = await inquirer.prompt([
         {
           type: 'confirm',
           name: 'confirm',
-          message: `Install ${selectedVersion.version} firmware on ${device.deviceName}?`,
+          message: `Install ${selectedVersion.version} firmware (${updateType}) on ${device.deviceName}?`,
           default: false
         }
       ]);
@@ -94,9 +102,12 @@ program
       // Update firmware with selected version
       const firmwareOptions = {
         ...options,
-        main: selectedVersion.mainPath,
         rear: selectedVersion.rearPath
       };
+      
+      if (!options.rearOnly) {
+        firmwareOptions.main = selectedVersion.mainPath;
+      }
       
       await firmwareManager.updateDevice(device, firmwareOptions);
       
@@ -247,7 +258,8 @@ program
         name: 'action',
         message: 'What would you like to do?',
         choices: [
-          { name: '🔄 Update Firmware', value: 'firmware' },
+          { name: '🔄 Update Firmware (Both Boards)', value: 'firmware' },
+          { name: '🔧 Update Rear Board Only', value: 'firmware-rear' },
           { name: '🌐 Start Remote Support Session', value: 'remote' },
           { name: '❌ Exit', value: 'exit' }
         ]
@@ -257,6 +269,9 @@ program
     switch (action) {
       case 'firmware':
         await program.parseAsync(['node', 'klvr-tool', 'firmware-update']);
+        break;
+      case 'firmware-rear':
+        await program.parseAsync(['node', 'klvr-tool', 'firmware-update', '--rear-only']);
         break;
       case 'remote':
         await program.parseAsync(['node', 'klvr-tool', 'remote-support']);
@@ -269,7 +284,7 @@ program
   });
 
 // Helper function to get available firmware versions
-async function getAvailableFirmwareVersions(firmwareManager) {
+async function getAvailableFirmwareVersions(firmwareManager, rearOnly = false) {
   try {
     const firmwareDir = path.join(__dirname, '../../firmware');
     const fs = require('fs').promises;
@@ -279,8 +294,14 @@ async function getAvailableFirmwareVersions(firmwareManager) {
     const mainFiles = files.filter(file => file.startsWith('main_') && file.endsWith('.signed.bin'));
     const rearFiles = files.filter(file => file.startsWith('rear_') && file.endsWith('.signed.bin'));
     
-    if (mainFiles.length === 0 || rearFiles.length === 0) {
-      return [];
+    if (rearOnly) {
+      if (rearFiles.length === 0) {
+        return [];
+      }
+    } else {
+      if (mainFiles.length === 0 || rearFiles.length === 0) {
+        return [];
+      }
     }
     
     // Sort by modification time and add stats
@@ -298,10 +319,22 @@ async function getAvailableFirmwareVersions(firmwareManager) {
     const sortedMainFiles = await sortFiles(mainFiles);
     const sortedRearFiles = await sortFiles(rearFiles);
     
-    // Find matched firmware pairs using the same logic as firmware manager
-    const matchedPairs = findMatchedFirmwarePairs(sortedMainFiles, sortedRearFiles, firmwareDir);
-    
-    return matchedPairs;
+    if (rearOnly) {
+      // For rear-only updates, create version objects from rear files only
+      return sortedRearFiles.map(rearFile => {
+        const version = extractFirmwareVersion(rearFile.file);
+        return {
+          version: version || 'Unknown',
+          rear: rearFile,
+          mtime: rearFile.mtime,
+          rearPath: path.join(firmwareDir, rearFile.file)
+        };
+      });
+    } else {
+      // Find matched firmware pairs using the same logic as firmware manager
+      const matchedPairs = findMatchedFirmwarePairs(sortedMainFiles, sortedRearFiles, firmwareDir);
+      return matchedPairs;
+    }
     
   } catch (error) {
     console.error(`Failed to get firmware versions: ${error.message}`);

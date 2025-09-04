@@ -36,8 +36,10 @@ class FirmwareManager {
             // Get firmware files
             const firmwareFiles = await this.findAndSelectFirmwareFiles(options);
             
-            // Execute the update
-            const result = await this.executeFirmwareUpdate(device, firmwareFiles);
+            // Execute the update (rear-only or full)
+            const result = options.rearOnly ? 
+                await this.executeRearOnlyFirmwareUpdate(device, firmwareFiles) :
+                await this.executeFirmwareUpdate(device, firmwareFiles);
             
             return result;
         } catch (error) {
@@ -53,6 +55,13 @@ class FirmwareManager {
         const firmwareDir = options.firmwareDir || path.join(__dirname, '../../firmware');
         
         // If specific files are provided, use them
+        if (options.rearOnly && options.rear) {
+            this.logger.info('Using specified rear firmware file for rear-only update');
+            return {
+                rear: path.resolve(options.rear)
+            };
+        }
+        
         if (options.main && options.rear) {
             this.logger.info('Using specified firmware files');
             return {
@@ -68,8 +77,14 @@ class FirmwareManager {
             const mainFiles = files.filter(file => file.startsWith('main_') && file.endsWith('.signed.bin'));
             const rearFiles = files.filter(file => file.startsWith('rear_') && file.endsWith('.signed.bin'));
             
-            if (mainFiles.length === 0 || rearFiles.length === 0) {
-                throw new Error('Missing firmware files in firmware directory');
+            if (options.rearOnly) {
+                if (rearFiles.length === 0) {
+                    throw new Error('No rear firmware files found in firmware directory');
+                }
+            } else {
+                if (mainFiles.length === 0 || rearFiles.length === 0) {
+                    throw new Error('Missing firmware files in firmware directory');
+                }
             }
             
             // Sort by modification time (newest first) and add stats
@@ -87,26 +102,39 @@ class FirmwareManager {
             const sortedMainFiles = await sortFiles(mainFiles);
             const sortedRearFiles = await sortFiles(rearFiles);
             
-            // Find matched firmware pairs (same version)
-            const matchedPairs = this._findMatchedFirmwarePairs(sortedMainFiles, sortedRearFiles);
-            
-            if (matchedPairs.length === 0) {
-                throw new Error('No matching firmware pairs found. Main and rear firmware versions must match.');
+            if (options.rearOnly) {
+                // For rear-only updates, just use the latest rear firmware
+                const latestRearFile = sortedRearFiles[0];
+                const rearVersion = this._extractFirmwareVersion(latestRearFile.file);
+                
+                this.logger.info(`Found latest rear firmware version: ${rearVersion || 'Unknown'}`);
+                this.logger.debug(`Rear firmware: ${latestRearFile.file}`);
+                
+                return {
+                    rear: path.join(firmwareDir, latestRearFile.file)
+                };
+            } else {
+                // Find matched firmware pairs (same version)
+                const matchedPairs = this._findMatchedFirmwarePairs(sortedMainFiles, sortedRearFiles);
+                
+                if (matchedPairs.length === 0) {
+                    throw new Error('No matching firmware pairs found. Main and rear firmware versions must match.');
+                }
+                
+                // Use latest matched pair
+                const latestPair = matchedPairs[0];
+                const latestMainFile = path.join(firmwareDir, latestPair.main.file);
+                const latestRearFile = path.join(firmwareDir, latestPair.rear.file);
+                
+                this.logger.info(`Found latest firmware version: ${latestPair.version}`);
+                this.logger.debug(`Main firmware: ${latestPair.main.file}`);
+                this.logger.debug(`Rear firmware: ${latestPair.rear.file}`);
+                
+                return {
+                    main: latestMainFile,
+                    rear: latestRearFile
+                };
             }
-            
-            // Use latest matched pair
-            const latestPair = matchedPairs[0];
-            const latestMainFile = path.join(firmwareDir, latestPair.main.file);
-            const latestRearFile = path.join(firmwareDir, latestPair.rear.file);
-            
-            this.logger.info(`Found latest firmware version: ${latestPair.version}`);
-            this.logger.debug(`Main firmware: ${latestPair.main.file}`);
-            this.logger.debug(`Rear firmware: ${latestPair.rear.file}`);
-            
-            return {
-                main: latestMainFile,
-                rear: latestRearFile
-            };
             
         } catch (error) {
             throw new Error(`Failed to find firmware files: ${error.message}`);
@@ -213,6 +241,86 @@ class FirmwareManager {
 
         } catch (error) {
             this.logger.error('💥 FIRMWARE UPDATE FAILED');
+            throw error;
+        }
+    }
+
+    /**
+     * Execute rear-only firmware update process
+     * Updates only the rear board firmware
+     */
+    async executeRearOnlyFirmwareUpdate(device, firmwareFiles) {
+        let installedVersion = null;
+        let oldVersion = null;
+        
+        try {
+            this.logger.step('📋 Step 1/5: Getting device info...');
+            const deviceInfo = await this._getDeviceInfo(device);
+            oldVersion = deviceInfo.firmwareVersion;
+            
+            // Extract target version from rear firmware filename
+            const targetVersion = this._extractFirmwareVersion(path.basename(firmwareFiles.rear));
+            
+            this.logger.info(`Current firmware version: ${oldVersion}`);
+            if (targetVersion) {
+                this.logger.info(`Target rear firmware version: ${targetVersion}`);
+            }
+
+            this.logger.step('📁 Step 2/5: Reading rear firmware file...');
+            const rearFirmware = await fs.readFile(firmwareFiles.rear);
+            this.logger.info(`Rear firmware: ${(rearFirmware.length / 1024).toFixed(1)} KB`);
+
+            // Rear board update only
+            this.logger.step('⚡ Step 3/5: Uploading rear board firmware...');
+            const rearResponse = await this._uploadFirmware(device, rearFirmware, false);
+            if (!rearResponse.ok) {
+                throw new Error(`Rear board firmware upload failed: ${rearResponse.status}`);
+            }
+            this.logger.success('Rear board firmware uploaded successfully');
+
+            this.logger.step('⏳ Step 4/5: Processing rear board firmware...');
+            await this._wait(this.config.firmwareProcessingWait);
+            this.logger.success('Rear board firmware processed');
+
+            this.logger.step('🔄 Step 5/5: Rebooting rear board...');
+            const rearRebootResponse = await this._rebootDevice(device, 'rear');
+            if (!rearRebootResponse.ok) {
+                throw new Error(`Rear board reboot failed: ${rearRebootResponse.status}`);
+            }
+            this.logger.success('Rear board reboot initiated');
+
+            this.logger.info('Waiting for rear board reboot to complete...');
+            await this._wait(this.config.rearBoardRebootWait);
+            this.logger.success('Rear board reboot completed');
+
+            this.logger.success('🎉 REAR BOARD FIRMWARE UPDATE COMPLETED SUCCESSFULLY! 🎉');
+            
+            // Try to get new version
+            try {
+                const newDeviceInfo = await this._getDeviceInfo(device);
+                installedVersion = newDeviceInfo.firmwareVersion;
+                this.logger.info(`📊 Rear firmware updated: ${oldVersion} → ${installedVersion}`);
+                
+                return {
+                    success: true,
+                    oldVersion: oldVersion,
+                    newVersion: installedVersion,
+                    targetVersion: targetVersion,
+                    updateType: 'rear-only'
+                };
+            } catch (error) {
+                this.logger.info('⏳ Device still initializing, firmware version will be available shortly');
+                return {
+                    success: true,
+                    oldVersion: oldVersion,
+                    newVersion: targetVersion || 'Unknown',
+                    targetVersion: targetVersion,
+                    updateType: 'rear-only'
+                };
+            }
+
+        } catch (error) {
+            this.logger.error('💥 REAR BOARD FIRMWARE UPDATE FAILED');
             throw error;
         }
     }
