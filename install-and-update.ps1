@@ -1,10 +1,39 @@
 # KLVR Support Tool - One-Command Installer & Runner (PowerShell)
-# Usage: iex (iwr -useb https://raw.githubusercontent.com/KLVR-no/klvr-support-tool/main/install-and-update.ps1)
-# Alternative: Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/KLVR-no/klvr-support-tool/main/install-and-update.ps1" -UseBasicParsing).Content
+# Usage: Set-ExecutionPolicy Bypass -Scope Process -Force; iex (iwr -useb https://raw.githubusercontent.com/KLVR-no/klvr-support-tool/main/install-and-update.ps1)
+# Alternative: Run PowerShell as Administrator, then run the above command
 
 param(
     [string]$RepoUrl = "https://github.com/KLVR-no/klvr-support-tool.git"
 )
+
+# ============================================================================
+# SECURITY AND PRIVILEGE CHECKS
+# ============================================================================
+
+# Set execution policy for this session
+try {
+    Set-ExecutionPolicy Bypass -Scope Process -Force -ErrorAction Stop
+} catch {
+    Write-Host "❌ Failed to set execution policy. Please run PowerShell as Administrator." -ForegroundColor Red
+    Write-Host "ℹ️  Right-click PowerShell and select 'Run as Administrator'" -ForegroundColor Cyan
+    exit 1
+}
+
+# Check for administrator privileges
+function Test-Administrator {
+    $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = New-Object Security.Principal.WindowsPrincipal($currentUser)
+    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+if (-not (Test-Administrator)) {
+    Write-Host "❌ This script requires administrator privileges to install system dependencies." -ForegroundColor Red
+    Write-Host "ℹ️  Please run PowerShell as Administrator and try again:" -ForegroundColor Cyan
+    Write-Host "   1. Right-click on PowerShell" -ForegroundColor Yellow
+    Write-Host "   2. Select 'Run as Administrator'" -ForegroundColor Yellow
+    Write-Host "   3. Run this command again" -ForegroundColor Yellow
+    exit 1
+}
 
 # Configuration
 $TempDir = "$env:TEMP\klvr-support-tool-$(Get-Date -Format 'yyyyMMddHHmmss')"
@@ -56,25 +85,48 @@ function Test-Chocolatey {
     return (Test-CommandExists "choco")
 }
 
+# Function to refresh environment variables manually
+function Update-EnvironmentPath {
+    Write-Step "Refreshing environment variables..."
+    try {
+        $machinePath = [System.Environment]::GetEnvironmentVariable("PATH", "Machine")
+        $userPath = [System.Environment]::GetEnvironmentVariable("PATH", "User")
+        $env:PATH = "$machinePath;$userPath"
+        
+        # Also update ChocolateyInstall if it exists
+        $chocoInstall = [System.Environment]::GetEnvironmentVariable("ChocolateyInstall", "Machine")
+        if ($chocoInstall) {
+            $env:ChocolateyInstall = $chocoInstall
+        }
+        
+        Write-Success "Environment variables refreshed"
+        return $true
+    } catch {
+        Write-Warning "Failed to refresh environment variables"
+        return $false
+    }
+}
+
 # Function to install Chocolatey
 function Install-Chocolatey {
     Write-Step "Installing Chocolatey package manager..."
-    Write-Info "This requires administrator privileges"
     
     try {
-        Set-ExecutionPolicy Bypass -Scope Process -Force
         [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
         Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
         
-        # Refresh environment variables
-        $env:ChocolateyInstall = Convert-Path "$((Get-Command choco).Path)\..\.."
-        Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-        refreshenv
+        # Manual environment refresh instead of refreshenv
+        Update-EnvironmentPath
         
-        Write-Success "Chocolatey installed successfully"
-        return $true
+        # Verify installation
+        if (Test-CommandExists "choco") {
+            Write-Success "Chocolatey installed successfully"
+            return $true
+        } else {
+            throw "Chocolatey command not found after installation"
+        }
     } catch {
-        Write-Warning "Failed to install Chocolatey automatically"
+        Write-Warning "Failed to install Chocolatey automatically: $($_.Exception.Message)"
         Write-Info "Please install Chocolatey manually from: https://chocolatey.org/install"
         return $false
     }
@@ -95,14 +147,23 @@ function Install-NodeJS {
     
     try {
         Write-Info "Installing Node.js via Chocolatey..."
-        choco install nodejs -y
+        $chocoResult = choco install nodejs -y
+        if ($LASTEXITCODE -ne 0) {
+            throw "Chocolatey installation failed with exit code $LASTEXITCODE"
+        }
         
-        # Refresh environment variables
-        refreshenv
+        # Manual environment refresh
+        Update-EnvironmentPath
         
-        Write-Success "Node.js installed successfully"
+        # Verify Node.js installation
+        if (Test-CommandExists "node") {
+            $nodeVersion = node --version
+            Write-Success "Node.js $nodeVersion installed successfully"
+        } else {
+            throw "Node.js command not found after installation"
+        }
     } catch {
-        Write-Error "Failed to install Node.js via Chocolatey"
+        Write-Error "Failed to install Node.js via Chocolatey: $($_.Exception.Message)"
         Write-Info "Please install Node.js manually from: https://nodejs.org/"
         exit 1
     }
@@ -123,14 +184,23 @@ function Install-Git {
     
     try {
         Write-Info "Installing Git via Chocolatey..."
-        choco install git -y
+        $chocoResult = choco install git -y
+        if ($LASTEXITCODE -ne 0) {
+            throw "Chocolatey installation failed with exit code $LASTEXITCODE"
+        }
         
-        # Refresh environment variables
-        refreshenv
+        # Manual environment refresh
+        Update-EnvironmentPath
         
-        Write-Success "Git installed successfully"
+        # Verify Git installation
+        if (Test-CommandExists "git") {
+            $gitVersion = git --version
+            Write-Success "Git installed successfully: $gitVersion"
+        } else {
+            throw "Git command not found after installation"
+        }
     } catch {
-        Write-Error "Failed to install Git via Chocolatey"
+        Write-Error "Failed to install Git via Chocolatey: $($_.Exception.Message)"
         Write-Info "Please install Git manually from: https://git-scm.com/"
         exit 1
     }
@@ -226,23 +296,64 @@ function Install-SupportTool {
     
     try {
         # Create temporary directory
+        if (Test-Path $TempDir) {
+            Remove-Item $TempDir -Recurse -Force -ErrorAction SilentlyContinue
+        }
         New-Item -ItemType Directory -Path $TempDir -Force | Out-Null
         Set-Location $TempDir
         
-        # Clone the repository
-        git clone $RepoUrl . *>$null
-        if ($LASTEXITCODE -ne 0) {
-            throw "Git clone failed"
-        }
-        Write-Success "Repository cloned successfully"
+        # Clone the repository with retry logic
+        $maxRetries = 3
+        $retryCount = 0
+        $cloneSuccess = $false
         
-        # Install dependencies
-        Write-Step "Installing dependencies..."
-        npm install *>$null
-        if ($LASTEXITCODE -ne 0) {
-            throw "npm install failed"
+        while ($retryCount -lt $maxRetries -and -not $cloneSuccess) {
+            try {
+                Write-Info "Cloning repository (attempt $($retryCount + 1)/$maxRetries)..."
+                git clone $RepoUrl . 2>&1 | Out-Null
+                if ($LASTEXITCODE -eq 0) {
+                    $cloneSuccess = $true
+                    Write-Success "Repository cloned successfully"
+                } else {
+                    throw "Git clone failed with exit code $LASTEXITCODE"
+                }
+            } catch {
+                $retryCount++
+                if ($retryCount -lt $maxRetries) {
+                    Write-Warning "Clone attempt failed, retrying in 2 seconds..."
+                    Start-Sleep -Seconds 2
+                } else {
+                    throw "Failed to clone repository after $maxRetries attempts: $($_.Exception.Message)"
+                }
+            }
         }
-        Write-Success "Dependencies installed successfully"
+        
+        # Install dependencies with retry logic
+        Write-Step "Installing dependencies..."
+        $maxRetries = 3
+        $retryCount = 0
+        $installSuccess = $false
+        
+        while ($retryCount -lt $maxRetries -and -not $installSuccess) {
+            try {
+                Write-Info "Installing npm dependencies (attempt $($retryCount + 1)/$maxRetries)..."
+                npm install 2>&1 | Out-Null
+                if ($LASTEXITCODE -eq 0) {
+                    $installSuccess = $true
+                    Write-Success "Dependencies installed successfully"
+                } else {
+                    throw "npm install failed with exit code $LASTEXITCODE"
+                }
+            } catch {
+                $retryCount++
+                if ($retryCount -lt $maxRetries) {
+                    Write-Warning "npm install failed, retrying in 3 seconds..."
+                    Start-Sleep -Seconds 3
+                } else {
+                    throw "Failed to install dependencies after $maxRetries attempts: $($_.Exception.Message)"
+                }
+            }
+        }
         
         Write-Success "Setup completed successfully!"
         Write-Host ""
@@ -250,6 +361,7 @@ function Install-SupportTool {
     } catch {
         Write-Error "Failed to setup support tool: $($_.Exception.Message)"
         Write-Info "Please check your internet connection and repository URL"
+        Write-Info "Repository URL: $RepoUrl"
         exit 1
     }
 }
@@ -259,14 +371,34 @@ function Start-SupportTool {
     Write-Step "Starting KLVR Support Tool..."
     Write-Host ""
     
-    # Check if the script exists
-    if (-not (Test-Path $ScriptName)) {
-        Write-Error "Support tool script not found: $ScriptName"
+    try {
+        # Check if the script exists
+        if (-not (Test-Path $ScriptName)) {
+            throw "Support tool script not found: $ScriptName"
+        }
+        
+        # Verify Node.js is working
+        if (-not (Test-CommandExists "node")) {
+            throw "Node.js command not found. Please ensure Node.js is properly installed."
+        }
+        
+        # Test Node.js version
+        try {
+            $nodeVersion = node --version
+            Write-Info "Using Node.js version: $nodeVersion"
+        } catch {
+            throw "Node.js is installed but not working properly"
+        }
+        
+        # Run the support tool
+        Write-Info "Launching KLVR Support Tool..."
+        node $ScriptName interactive
+        
+    } catch {
+        Write-Error "Failed to start support tool: $($_.Exception.Message)"
+        Write-Info "You can try running the tool manually with: node $ScriptName interactive"
         exit 1
     }
-    
-    # Run the support tool
-    node $ScriptName interactive
 }
 
 # Function to cleanup

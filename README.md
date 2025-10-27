@@ -9,10 +9,17 @@ Professional support tools for KLVR Charger Pro devices - firmware updates, remo
 bash <(curl -sSL https://raw.githubusercontent.com/KLVR-no/klvr-support-tool/main/install-and-update.sh)
 ```
 
-### Windows (PowerShell)
+### Windows (PowerShell - Run as Administrator)
 ```powershell
-iex (iwr -useb https://raw.githubusercontent.com/KLVR-no/klvr-support-tool/main/install-and-update.ps1)
+Set-ExecutionPolicy Bypass -Scope Process -Force; iex (iwr -useb https://raw.githubusercontent.com/KLVR-no/klvr-support-tool/main/install-and-update.ps1)
 ```
+
+**🔴 IMPORTANT FOR WINDOWS USERS**: 
+1. **Right-click PowerShell** and select **"Run as Administrator"**
+2. **Copy the FULL command above** (including the `Set-ExecutionPolicy` part)
+3. The script will automatically handle execution policy and install all dependencies
+
+> **⚡ Quick Copy**: `Set-ExecutionPolicy Bypass -Scope Process -Force; iex (iwr -useb https://raw.githubusercontent.com/KLVR-no/klvr-support-tool/main/install-and-update.ps1)`
 
 That's it! The script will automatically:
 - ✅ **Install missing dependencies** (Node.js, npm, git)
@@ -190,6 +197,16 @@ klvr-support-tool/
 ## 🆘 Troubleshooting
 
 ### Common Issues
+
+**Windows: "Execution of scripts is disabled"**
+- Run PowerShell as Administrator
+- Use the full command: `Set-ExecutionPolicy Bypass -Scope Process -Force; iex (iwr -useb https://raw.githubusercontent.com/KLVR-no/klvr-support-tool/main/install-and-update.ps1)`
+- The script will automatically handle execution policy
+
+**Windows: "Access denied" or installation fails**
+- Ensure you're running PowerShell as Administrator
+- Check antivirus software isn't blocking the installation
+- Try disabling Windows Defender temporarily during installation
 
 **"No devices found"**
 - Ensure devices are powered on
