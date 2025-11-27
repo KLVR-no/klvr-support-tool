@@ -1,0 +1,444 @@
+const http = require('http');
+const fs = require('fs').promises;
+const path = require('path');
+
+// Configuration matching the app's exact settings
+const CONFIG = {
+    DEFAULT_PORT: 8000,
+    CONNECTION_TIMEOUT: 3000,
+    FIRMWARE_PROCESSING_WAIT: 7000,
+    SEND_REBOOT_WAIT: 1500,
+    MAIN_BOARD_REBOOT_WAIT: 7000,
+    REAR_BOARD_REBOOT_WAIT: 20000,
+    ENDPOINTS: {
+        FIRMWARE_CHARGER: '/api/v2/device/firmware_charger',
+        FIRMWARE_REAR: '/api/v2/device/firmware_rear',
+        REBOOT: '/api/v2/device/reboot',
+        INFO: '/api/v2/device/info'
+    }
+};
+
+// Subnet to scan (10.110.73.x)
+const SUBNET_BASE = '10.110.73';
+const SUBNET_START = 1;
+const SUBNET_END = 254;
+
+async function findSpecificFirmwareFiles(version = '1.8.3') {
+    const firmwareDir = path.join(__dirname, 'firmware');
+    
+    try {
+        const files = await fs.readdir(firmwareDir);
+        
+        const mainFile = `main_v${version}.signed.bin`;
+        const rearFile = `rear_v${version}.signed.bin`;
+        
+        if (!files.includes(mainFile)) {
+            throw new Error(`Main firmware file not found: ${mainFile}`);
+        }
+        if (!files.includes(rearFile)) {
+            throw new Error(`Rear firmware file not found: ${rearFile}`);
+        }
+        
+        const mainPath = path.join(firmwareDir, mainFile);
+        const rearPath = path.join(firmwareDir, rearFile);
+        
+        await fs.access(mainPath);
+        await fs.access(rearPath);
+        
+        console.log(`[FIRMWARE] Found main firmware: ${mainFile}`);
+        console.log(`[FIRMWARE] Found rear firmware: ${rearFile}`);
+        
+        return {
+            main: mainPath,
+            rear: rearPath,
+            version: version
+        };
+        
+    } catch (error) {
+        throw new Error(`Failed to find firmware files for version ${version}: ${error.message}`);
+    }
+}
+
+async function testKLVRDevice(ip) {
+    return new Promise((resolve) => {
+        const options = {
+            hostname: ip,
+            port: CONFIG.DEFAULT_PORT,
+            path: CONFIG.ENDPOINTS.INFO,
+            method: 'GET',
+            timeout: CONFIG.CONNECTION_TIMEOUT
+        };
+
+        const req = http.request(options, (res) => {
+            let data = '';
+            res.on('data', (chunk) => data += chunk);
+            res.on('end', () => {
+                try {
+                    const info = JSON.parse(data);
+                    const deviceName = info.deviceName || info.name || '';
+                    
+                    if (deviceName.toLowerCase().includes('klvr')) {
+                        resolve({
+                            ip: ip,
+                            deviceName: deviceName,
+                            firmwareVersion: info.firmwareVersion || 'Unknown',
+                            serialNumber: info.serialNumber || info.ip?.macAddress || 'Unknown',
+                            connected: true
+                        });
+                    } else {
+                        resolve(null);
+                    }
+                } catch (error) {
+                    resolve(null);
+                }
+            });
+        });
+
+        req.on('error', () => resolve(null));
+        req.on('timeout', () => {
+            req.destroy();
+            resolve(null);
+        });
+
+        req.end();
+    });
+}
+
+async function scanSubnet() {
+    console.log(`[SCAN] Scanning subnet ${SUBNET_BASE}.${SUBNET_START}-${SUBNET_END} for KLVR devices...`);
+    
+    const devices = [];
+    const batchSize = 50;
+    const allIPs = [];
+    
+    for (let i = SUBNET_START; i <= SUBNET_END; i++) {
+        allIPs.push(`${SUBNET_BASE}.${i}`);
+    }
+    
+    console.log(`[SCAN] Total IPs to scan: ${allIPs.length}`);
+    
+    for (let i = 0; i < allIPs.length; i += batchSize) {
+        const batch = allIPs.slice(i, i + batchSize);
+        const promises = batch.map(ip => testKLVRDevice(ip));
+        const results = await Promise.all(promises);
+        
+        const foundDevices = results.filter(device => device !== null);
+        devices.push(...foundDevices);
+        
+        if (foundDevices.length > 0) {
+            console.log(`[SCAN] Found ${foundDevices.length} device(s) in batch ${Math.floor(i / batchSize) + 1}`);
+            foundDevices.forEach(device => {
+                console.log(`  - ${device.deviceName} at ${device.ip} (v${device.firmwareVersion})`);
+            });
+        }
+        
+        const progress = Math.min(i + batchSize, allIPs.length);
+        const percentage = ((progress / allIPs.length) * 100).toFixed(1);
+        process.stdout.write(`\r[SCAN] Progress: ${progress}/${allIPs.length} (${percentage}%) - Found: ${devices.length} devices`);
+    }
+    
+    console.log(`\n[SCAN] Network scan completed. Found ${devices.length} KLVR device(s).`);
+    return devices;
+}
+
+async function getDeviceInfo(deviceIp) {
+    return new Promise((resolve, reject) => {
+        const options = {
+            hostname: deviceIp,
+            port: CONFIG.DEFAULT_PORT,
+            path: CONFIG.ENDPOINTS.INFO,
+            method: 'GET'
+        };
+
+        console.log(`[FIRMWARE] Getting device info from ${deviceIp}...`);
+
+        const req = http.request(options, (res) => {
+            let data = '';
+            res.on('data', (chunk) => data += chunk);
+            res.on('end', () => {
+                try {
+                    const info = JSON.parse(data);
+                    console.log(`[FIRMWARE] Current firmware version: ${info.firmwareVersion}`);
+                    resolve(info);
+                } catch (error) {
+                    reject(new Error('Failed to parse device info response'));
+                }
+            });
+        });
+
+        req.on('error', (error) => {
+            console.error(`[FIRMWARE] Device info error:`, error);
+            reject(error);
+        });
+
+        req.end();
+    });
+}
+
+async function uploadFirmware(deviceIp, firmware, isMainBoard) {
+    return new Promise((resolve, reject) => {
+        const path = isMainBoard ? CONFIG.ENDPOINTS.FIRMWARE_CHARGER : CONFIG.ENDPOINTS.FIRMWARE_REAR;
+        const boardType = isMainBoard ? 'main' : 'rear';
+        
+        const options = {
+            hostname: deviceIp,
+            port: CONFIG.DEFAULT_PORT,
+            path: path,
+            method: 'POST',
+            headers: {
+                'Content-Length': firmware.length
+            }
+        };
+
+        console.log(`[FIRMWARE] Uploading ${boardType} firmware to: ${deviceIp}, size: ${firmware.length} bytes`);
+
+        const req = http.request(options, (res) => {
+            console.log(`[FIRMWARE] Upload response status: ${res.statusCode}`);
+            
+            let data = '';
+            res.on('data', (chunk) => {
+                data += chunk;
+                console.log(`[FIRMWARE] Upload response chunk: ${chunk.toString()}`);
+            });
+            
+            res.on('end', () => {
+                console.log(`[FIRMWARE] Upload complete: ${data}`);
+                resolve({
+                    ok: res.statusCode === 200,
+                    status: res.statusCode,
+                    statusText: res.statusMessage,
+                    data: data
+                });
+            });
+        });
+
+        req.on('error', (error) => {
+            console.error(`[FIRMWARE] Upload error:`, error);
+            reject(error);
+        });
+
+        req.write(firmware);
+        req.end();
+    });
+}
+
+async function rebootDevice(deviceIp, board) {
+    return new Promise((resolve, reject) => {
+        const options = {
+            hostname: deviceIp,
+            port: CONFIG.DEFAULT_PORT,
+            path: `${CONFIG.ENDPOINTS.REBOOT}?board=${board}`,
+            method: 'POST',
+            headers: {
+                'Content-Length': 4
+            }
+        };
+
+        console.log(`[FIRMWARE] Rebooting ${board} board on device: ${deviceIp}`);
+
+        const req = http.request(options, (res) => {
+            let data = '';
+            res.on('data', (chunk) => data += chunk);
+            res.on('end', () => {
+                resolve({
+                    ok: res.statusCode === 200,
+                    status: res.statusCode,
+                    statusText: res.statusMessage,
+                    data: data
+                });
+            });
+        });
+
+        req.on('error', (error) => {
+            console.error(`[FIRMWARE] Reboot error:`, error);
+            reject(error);
+        });
+
+        req.write(board);
+        req.end();
+    });
+}
+
+async function executeFirmwareUpdate(deviceIp, mainFirmwarePath, rearFirmwarePath, targetVersion) {
+    try {
+        console.log('[FIRMWARE] Getting device info...');
+        const deviceInfo = await getDeviceInfo(deviceIp);
+        console.log(`[FIRMWARE] Current firmware version: ${deviceInfo.firmwareVersion}`);
+        console.log(`[FIRMWARE] Target firmware version: ${targetVersion}`);
+
+        console.log('[FIRMWARE] Reading firmware files...');
+        const mainFirmware = await fs.readFile(mainFirmwarePath);
+        const rearFirmware = await fs.readFile(rearFirmwarePath);
+
+        console.log('[FIRMWARE] Starting main board update...');
+        const mainResponse = await uploadFirmware(deviceIp, mainFirmware, true);
+        if (!mainResponse.ok) {
+            throw new Error(`Main board firmware upload failed: ${mainResponse.status}`);
+        }
+
+        console.log('[FIRMWARE] Waiting for main board firmware processing...');
+        await new Promise(resolve => setTimeout(resolve, CONFIG.FIRMWARE_PROCESSING_WAIT));
+
+        console.log('[FIRMWARE] Rebooting main board...');
+        const mainRebootResponse = await rebootDevice(deviceIp, 'main');
+        if (!mainRebootResponse.ok) {
+            throw new Error(`Main board reboot failed: ${mainRebootResponse.status}`);
+        }
+
+        console.log('[FIRMWARE] Waiting for reboot message to propagate...');
+        await new Promise(resolve => setTimeout(resolve, CONFIG.SEND_REBOOT_WAIT));
+
+        console.log('[FIRMWARE] Starting rear board update...');
+        const rearResponse = await uploadFirmware(deviceIp, rearFirmware, false);
+        if (!rearResponse.ok) {
+            throw new Error(`Rear board firmware upload failed: ${rearResponse.status}`);
+        }
+
+        console.log('[FIRMWARE] Waiting for rear board firmware processing...');
+        await new Promise(resolve => setTimeout(resolve, CONFIG.FIRMWARE_PROCESSING_WAIT));
+
+        console.log('[FIRMWARE] Rebooting rear board...');
+        const rearRebootResponse = await rebootDevice(deviceIp, 'rear');
+        if (!rearRebootResponse.ok) {
+            throw new Error(`Rear board reboot failed: ${rearRebootResponse.status}`);
+        }
+
+        console.log('[FIRMWARE] Waiting for rear board to complete reboot...');
+        await new Promise(resolve => setTimeout(resolve, CONFIG.REAR_BOARD_REBOOT_WAIT));
+
+        console.log(`[FIRMWARE] Firmware downgrade to ${targetVersion} completed successfully!`);
+        
+        try {
+            const newDeviceInfo = await getDeviceInfo(deviceIp);
+            console.log(`[FIRMWARE] New firmware version: ${newDeviceInfo.firmwareVersion}`);
+            return { success: true, newVersion: newDeviceInfo.firmwareVersion };
+        } catch (error) {
+            console.log('[FIRMWARE] Device still rebooting, cannot get new firmware version yet');
+            return { success: true, newVersion: 'Unknown (rebooting)' };
+        }
+
+    } catch (error) {
+        console.error('[FIRMWARE] Update failed:', error.message);
+        return { success: false, error: error.message };
+    }
+}
+
+async function scanAndDowngrade() {
+    const targetVersion = '1.8.3';
+
+    try {
+        console.log('🔍 KLVR Subnet Scanner and Firmware Downgrader');
+        console.log('=' .repeat(60));
+        console.log(`[SCAN] Target subnet: ${SUBNET_BASE}.x`);
+        console.log(`[FIRMWARE] Target version: ${targetVersion}`);
+        
+        // Step 1: Scan subnet for devices
+        const devices = await scanSubnet();
+        
+        if (devices.length === 0) {
+            console.log('[SCAN] No KLVR devices found on the subnet.');
+            return;
+        }
+
+        // Step 2: Display found devices
+        console.log('\n📋 Found KLVR Devices:');
+        console.log('=' .repeat(60));
+        devices.forEach((device, index) => {
+            console.log(`${index + 1}. ${device.deviceName} at ${device.ip}`);
+            console.log(`   Firmware: v${device.firmwareVersion}`);
+            console.log(`   Serial: ${device.serialNumber}`);
+            console.log('');
+        });
+
+        // Step 3: Check which devices need downgrading
+        const devicesToDowngrade = devices.filter(device => 
+            device.firmwareVersion !== targetVersion
+        );
+        
+        const alreadyCorrectVersion = devices.filter(device => 
+            device.firmwareVersion === targetVersion
+        );
+
+        console.log(`[FIRMWARE] Devices already on ${targetVersion}: ${alreadyCorrectVersion.length}`);
+        console.log(`[FIRMWARE] Devices needing downgrade: ${devicesToDowngrade.length}`);
+
+        if (devicesToDowngrade.length === 0) {
+            console.log(`[FIRMWARE] All devices are already running version ${targetVersion}!`);
+            return;
+        }
+
+        // Step 4: Find firmware files
+        console.log(`\n[FIRMWARE] Looking for firmware version ${targetVersion}...`);
+        const firmwareFiles = await findSpecificFirmwareFiles(targetVersion);
+
+        // Step 5: Execute downgrades
+        console.log(`\n🔧 Starting firmware downgrades...`);
+        console.log('=' .repeat(60));
+        
+        const results = [];
+        for (const device of devicesToDowngrade) {
+            console.log(`\n[${'='.repeat(50)}]`);
+            console.log(`[FIRMWARE] Processing: ${device.deviceName} at ${device.ip}`);
+            console.log(`[FIRMWARE] Current version: ${device.firmwareVersion} → Target: ${targetVersion}`);
+            console.log(`[${'='.repeat(50)}]`);
+            
+            const result = await executeFirmwareUpdate(device.ip, firmwareFiles.main, firmwareFiles.rear, targetVersion);
+            results.push({
+                ...device,
+                ...result
+            });
+            
+            if (result.success) {
+                console.log(`[FIRMWARE] ✅ Successfully downgraded ${device.deviceName} at ${device.ip}`);
+            } else {
+                console.log(`[FIRMWARE] ❌ Failed to downgrade ${device.deviceName} at ${device.ip}: ${result.error}`);
+            }
+            
+            // Wait between devices
+            if (devicesToDowngrade.indexOf(device) < devicesToDowngrade.length - 1) {
+                console.log(`[FIRMWARE] Waiting 5 seconds before next device...`);
+                await new Promise(resolve => setTimeout(resolve, 5000));
+            }
+        }
+
+        // Step 6: Final summary
+        console.log(`\n📊 FINAL SUMMARY`);
+        console.log('=' .repeat(60));
+        
+        const successful = results.filter(r => r.success);
+        const failed = results.filter(r => !r.success);
+        
+        console.log(`Total devices found: ${devices.length}`);
+        console.log(`Devices processed: ${results.length}`);
+        console.log(`Successful downgrades: ${successful.length}`);
+        console.log(`Failed downgrades: ${failed.length}`);
+        console.log(`Already correct version: ${alreadyCorrectVersion.length}`);
+        
+        if (successful.length > 0) {
+            console.log(`\n✅ Successful downgrades:`);
+            successful.forEach(device => {
+                console.log(`  - ${device.deviceName} at ${device.ip} → v${device.newVersion}`);
+            });
+        }
+        
+        if (failed.length > 0) {
+            console.log(`\n❌ Failed downgrades:`);
+            failed.forEach(device => {
+                console.log(`  - ${device.deviceName} at ${device.ip}: ${device.error}`);
+            });
+        }
+
+        console.log(`\n🎉 Scan and downgrade operation completed!`);
+        
+    } catch (error) {
+        console.error('[ERROR]', error.message);
+        process.exit(1);
+    }
+}
+
+// Run if called directly
+if (require.main === module) {
+    scanAndDowngrade();
+}
+
+module.exports = { scanAndDowngrade };
