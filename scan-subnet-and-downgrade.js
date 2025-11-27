@@ -442,3 +442,4 @@ if (require.main === module) {
 }
 
 module.exports = { scanAndDowngrade };
+
