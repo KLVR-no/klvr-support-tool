@@ -1,7 +1,7 @@
-const bonjour = require('bonjour')();
 const http = require('http');
 const https = require('https');
 const { URL } = require('url');
+const inquirer = require('inquirer');
 
 /**
  * Device Discovery and Connection Manager
@@ -10,8 +10,8 @@ const { URL } = require('url');
 class DeviceDiscovery {
     constructor(logger) {
         this.logger = logger;
-        this.discoveryTimeout = 10000; // 10 seconds
-        this.connectionTimeout = 5000;  // 5 seconds
+        this.discoveryTimeout = 5000;
+        this.connectionTimeout = 5000;
         this.bonjourService = 'klvrcharger';
         this.defaultPort = 8000;
     }
@@ -20,50 +20,51 @@ class DeviceDiscovery {
      * Discover KLVR devices on the network using Bonjour/mDNS
      */
     async discoverDevices() {
-        this.logger.step('🔍 Discovering KLVR devices...');
-        
+        this.logger.step('🔍 Searching for KLVR devices on your network...');
+
+        let bonjour;
+        try {
+            bonjour = require('bonjour')();
+        } catch (e) {
+            this.logger.debug('Bonjour not available, skipping mDNS discovery');
+            return [];
+        }
+
         return new Promise((resolve) => {
             const devices = [];
-            let foundDevices = 0;
-            
-            const timeout = setTimeout(() => {
-                this.logger.debug('Discovery timeout reached');
-                bonjour.destroy();
-                resolve(devices);
-            }, this.discoveryTimeout);
-            
-            const browser = bonjour.find({ type: this.bonjourService }, (service) => {
-                // Prefer IPv4 address if available
-                const ip = (service.addresses || []).find(addr => 
-                    addr && addr.split('.').length === 4
-                ) || service.host;
-                
-                const device = {
-                    ip: ip,
-                    deviceName: service.name,
-                    port: service.port || this.defaultPort,
-                    url: `http://${ip}:${service.port || this.defaultPort}`
-                };
-                
-                devices.push(device);
-                foundDevices++;
-                this.logger.debug(`Found device ${foundDevices}: ${service.name} at ${ip}:${device.port}`);
-            });
-            
-            // Wait for discovery to complete
-            setTimeout(() => {
-                clearTimeout(timeout);
-                browser.stop();
-                bonjour.destroy();
-                
+            let settled = false;
+
+            const finish = () => {
+                if (settled) return;
+                settled = true;
+                try { bonjour.destroy(); } catch (_) {}
                 if (devices.length > 0) {
-                    this.logger.success(`Discovery complete: Found ${devices.length} device(s)`);
-                } else {
-                    this.logger.warn('No devices found via auto-discovery');
+                    this.logger.success(`Found ${devices.length} device(s)`);
                 }
-                
                 resolve(devices);
-            }, 5000); // 5 second discovery window
+            };
+
+            try {
+                bonjour.find({ type: this.bonjourService }, (service) => {
+                    const ip = (service.addresses || []).find(addr =>
+                        addr && addr.split('.').length === 4
+                    ) || service.host;
+
+                    devices.push({
+                        ip,
+                        deviceName: service.name,
+                        port: service.port || this.defaultPort,
+                        url: `http://${ip}:${service.port || this.defaultPort}`
+                    });
+                    this.logger.debug(`Found: ${service.name} at ${ip}`);
+                });
+            } catch (e) {
+                this.logger.debug(`mDNS browse error: ${e.message}`);
+                finish();
+                return;
+            }
+
+            setTimeout(finish, this.discoveryTimeout);
         });
     }
 
@@ -85,24 +86,95 @@ class DeviceDiscovery {
     }
 
     /**
-     * Discover devices and let user select one interactively
+     * Discover devices and let user select one interactively.
+     * Falls back to manual IP entry if nothing is found.
      */
     async discoverAndSelect() {
         const devices = await this.discoverDevices();
-        
+
         if (devices.length === 0) {
-            throw new Error('No KLVR devices found. Please check device connectivity and network settings.');
+            this.logger.warn('No devices found automatically.');
+            return this._promptManualIp();
         }
-        
+
         if (devices.length === 1) {
-            this.logger.info(`Using device: ${devices[0].deviceName} at ${devices[0].ip}`);
+            this.logger.info(`Found: ${devices[0].deviceName} (${devices[0].ip})`);
             return devices[0];
         }
-        
-        // Multiple devices - let user choose
-        // For now, return first device, but this should be interactive
-        this.logger.info(`Multiple devices found, using: ${devices[0].deviceName}`);
-        return devices[0];
+
+        // Multiple devices — let user pick
+        const { chosen } = await inquirer.prompt([
+            {
+                type: 'list',
+                name: 'chosen',
+                message: `Found ${devices.length} devices — which one do you want to update?`,
+                choices: devices.map(d => ({
+                    name: `${d.deviceName}  (${d.ip})`,
+                    value: d
+                }))
+            }
+        ]);
+        return chosen;
+    }
+
+    /**
+     * Prompt the user to enter an IP address manually
+     */
+    async _promptManualIp() {
+        console.log('');
+        console.log('  Make sure the KLVR Charger Pro is:');
+        console.log('    • Powered on');
+        console.log('    • Connected to the same Wi-Fi / network as this computer');
+        console.log('');
+
+        const { choice } = await inquirer.prompt([
+            {
+                type: 'list',
+                name: 'choice',
+                message: 'What would you like to do?',
+                choices: [
+                    { name: 'Enter the device IP address manually', value: 'manual' },
+                    { name: 'Try searching again', value: 'retry' },
+                    { name: 'Cancel', value: 'cancel' }
+                ]
+            }
+        ]);
+
+        if (choice === 'cancel') {
+            throw new Error('Cancelled by user');
+        }
+
+        if (choice === 'retry') {
+            return this.discoverAndSelect();
+        }
+
+        const { ip } = await inquirer.prompt([
+            {
+                type: 'input',
+                name: 'ip',
+                message: 'Enter the device IP address (e.g. 192.168.1.50):',
+                validate: (val) => {
+                    const trimmed = val.trim();
+                    if (/^\d{1,3}(\.\d{1,3}){3}$/.test(trimmed)) return true;
+                    return 'Please enter a valid IP address like 192.168.1.50';
+                },
+                filter: (val) => val.trim()
+            }
+        ]);
+
+        this.logger.step(`Connecting to ${ip}...`);
+        const device = await this._testConnection(this._parseTarget(ip));
+
+        if (!device) {
+            console.log('');
+            this.logger.warn(`Could not reach a KLVR device at ${ip}.`);
+            console.log('  Double-check the IP and that the device is on the same network.');
+            console.log('');
+            return this._promptManualIp();
+        }
+
+        this.logger.success(`Connected to ${device.deviceName} (${device.ip})`);
+        return device;
     }
 
     /**

@@ -74,22 +74,43 @@ program
         }
       ]);
       
+      // Show current version running on device
+      let currentVersion = 'unknown';
+      try {
+        const http = require('http');
+        currentVersion = await new Promise((resolve) => {
+          const req = http.get(`http://${device.ip}:${device.port || 8000}/api/v2/device/firmware_version`,
+            { timeout: 4000 }, (res) => {
+              let data = '';
+              res.on('data', c => data += c);
+              res.on('end', () => {
+                try { resolve(JSON.parse(data).version || JSON.parse(data).firmware_version || data.trim()); }
+                catch (_) { resolve(data.trim() || 'unknown'); }
+              });
+            });
+          req.on('error', () => resolve('unknown'));
+          req.on('timeout', () => { req.destroy(); resolve('unknown'); });
+        });
+      } catch (_) {}
+
       // Show firmware details
-      console.log('\n' + chalk.cyan('📋 Firmware Details:'));
-      console.log(`   Version: ${chalk.white(selectedVersion.version)}`);
-      if (!options.rearOnly) {
-        console.log(`   Main: ${chalk.gray(selectedVersion.main.file)}`);
+      console.log('');
+      console.log(chalk.cyan('📋 Firmware update summary:'));
+      console.log(`   Device:          ${chalk.white(device.deviceName)} (${device.ip})`);
+      console.log(`   Current version: ${chalk.yellow(currentVersion)}`);
+      console.log(`   Install version: ${chalk.green(selectedVersion.version)}`);
+      if (options.rearOnly) {
+        console.log(`   Scope:           ${chalk.gray('rear board only')}`);
       }
-      console.log(`   Rear: ${chalk.gray(selectedVersion.rear.file)}`);
-      console.log(`   Modified: ${chalk.gray(selectedVersion.mtime.toLocaleString())}`);
-      
+      console.log('');
+
       // Confirm update
       const updateType = options.rearOnly ? 'rear board only' : 'both boards';
       const { confirm } = await inquirer.prompt([
         {
           type: 'confirm',
           name: 'confirm',
-          message: `Install ${selectedVersion.version} firmware (${updateType}) on ${device.deviceName}?`,
+          message: `Install ${selectedVersion.version} (${updateType}) on ${device.deviceName}?`,
           default: false
         }
       ]);
@@ -114,7 +135,14 @@ program
       logger.success('✅ Firmware update completed successfully!');
       
     } catch (error) {
-      logger.error('❌ Firmware update failed:', error.message);
+      if (error.message === 'Cancelled by user') {
+        console.log('\n👋 Update cancelled.');
+        process.exit(0);
+      }
+      console.log('');
+      logger.error(`Firmware update failed: ${error.message}`);
+      console.log('');
+      console.log('  If you need help, contact KLVR support at support@klvr.no');
       process.exit(1);
     }
   });
@@ -205,7 +233,13 @@ program
       await new Promise(() => {});
       
     } catch (error) {
-      logger.error('❌ Remote support session failed:', error.message);
+      if (error.message === 'Cancelled by user') {
+        console.log('\n👋 Cancelled.');
+        process.exit(0);
+      }
+      console.log('');
+      logger.error(`Remote support session failed: ${error.message}`);
+      console.log('  Contact KLVR support at support@klvr.no for help.');
       process.exit(1);
     }
   });
@@ -238,7 +272,12 @@ program
       }
       
     } catch (error) {
-      logger.error('❌ Failed to get device info:', error.message);
+      if (error.message === 'Cancelled by user') {
+        console.log('\n👋 Cancelled.');
+        process.exit(0);
+      }
+      console.log('');
+      logger.error(`Could not get device info: ${error.message}`);
       process.exit(1);
     }
   });
