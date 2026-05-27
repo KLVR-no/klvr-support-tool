@@ -5,7 +5,7 @@ const inquirer = require('inquirer');
 
 /**
  * Device Discovery and Connection Manager
- * Handles finding KLVR devices on network and connecting to specific targets
+ * Handles finding Klvr devices on network and connecting to specific targets
  */
 class DeviceDiscovery {
     constructor(logger) {
@@ -17,10 +17,10 @@ class DeviceDiscovery {
     }
 
     /**
-     * Discover KLVR devices on the network using Bonjour/mDNS
+     * Discover Klvr devices on the network using Bonjour/mDNS
      */
     async discoverDevices() {
-        this.logger.step('🔍 Searching for KLVR devices on your network...');
+        this.logger.step('🔍 Searching for Klvr devices on your network...');
 
         let bonjour;
         try {
@@ -122,7 +122,7 @@ class DeviceDiscovery {
      */
     async _promptManualIp() {
         console.log('');
-        console.log('  Make sure the KLVR Charger Pro is:');
+        console.log('  Make sure the Klvr Charger Pro is:');
         console.log('    • Powered on');
         console.log('    • Connected to the same Wi-Fi / network as this computer');
         console.log('');
@@ -167,7 +167,7 @@ class DeviceDiscovery {
 
         if (!device) {
             console.log('');
-            this.logger.warn(`Could not reach a KLVR device at ${ip}.`);
+            this.logger.warn(`Could not reach a Klvr device at ${ip}.`);
             console.log('  Double-check the IP and that the device is on the same network.');
             console.log('');
             return this._promptManualIp();
@@ -260,7 +260,7 @@ class DeviceDiscovery {
                                 url: parsed.baseUrl
                             });
                         } else {
-                            this.logger.warn(`Device at ${parsed.hostname} is not a KLVR device`);
+                            this.logger.warn(`Device at ${parsed.hostname} is not a Klvr device`);
                             resolve(null);
                         }
                     } catch (error) {

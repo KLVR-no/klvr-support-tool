@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Support Engineer CLI - Advanced interface for KLVR support engineers
+ * Support Engineer CLI - Advanced interface for Klvr support engineers
  * Referenced in package.json "support" script
  */
 
@@ -21,7 +21,7 @@ const program = new Command();
 // CLI Configuration
 program
   .name('klvr-support')
-  .description('KLVR Charger Pro - Support Engineer Tools')
+  .description('Klvr Charger Pro - Support Engineer Tools')
   .version('2.0.0');
 
 // Global options for support engineers

@@ -2,7 +2,7 @@
 
 /**
  * System Test Utility
- * Tests the KLVR support tool installation and functionality
+ * Tests the Klvr support tool installation and functionality
  * Referenced in package.json "test" script
  */
 
@@ -47,7 +47,7 @@ class SystemTest {
      */
     async runAllTests() {
         console.log(chalk.blue('='.repeat(60)));
-        console.log(chalk.blue('    KLVR Support Tool - System Tests'));
+        console.log(chalk.blue('    Klvr Support Tool - System Tests'));
         console.log(chalk.blue('='.repeat(60)));
         console.log('');
 

@@ -17,7 +17,7 @@ const program = new Command();
 // CLI Configuration
 program
   .name('klvr-tool')
-  .description('KLVR Charger Pro - Professional firmware updater and support tools')
+  .description('Klvr Charger Pro - Professional firmware updater and support tools')
   .version('2.0.0');
 
 // Global options
@@ -29,7 +29,7 @@ program
 // Firmware Update Command
 program
   .command('firmware-update [target]')
-  .description('Update firmware on KLVR device')
+  .description('Update firmware on Klvr device')
   .option('-f, --firmware-dir <path>', 'Firmware directory path', './firmware')
   .option('--main <file>', 'Specific main firmware file')
   .option('--rear <file>', 'Specific rear firmware file')
@@ -142,7 +142,7 @@ program
       console.log('');
       logger.error(`Firmware update failed: ${error.message}`);
       console.log('');
-      console.log('  If you need help, contact KLVR support at support@klvr.no');
+      console.log('  If you need help, contact Klvr support at stian@klvr.no');
       process.exit(1);
     }
   });
@@ -217,7 +217,7 @@ program
       
       logger.info('🎉 Remote support session active!');
       logger.info(`🔗 Tunnel URL: ${chalk.green(tunnel.url)}`);
-      logger.info('📋 Share this URL with KLVR support');
+      logger.info('📋 Share this URL with Klvr support');
       logger.info('⚠️  Keep this terminal open during support session');
       logger.info('📝 Press Ctrl+C to end session');
       
@@ -239,7 +239,7 @@ program
       }
       console.log('');
       logger.error(`Remote support session failed: ${error.message}`);
-      console.log('  Contact KLVR support at support@klvr.no for help.');
+      console.log('  Contact Klvr support at stian@klvr.no for help.');
       process.exit(1);
     }
   });
@@ -288,7 +288,7 @@ program
   .description('Start interactive mode for end users')
   .action(async () => {
     console.log(chalk.blue('='.repeat(60)));
-    console.log(chalk.blue('    KLVR Charger Pro Tools'));
+    console.log(chalk.blue('    Klvr Charger Pro Tools'));
     console.log(chalk.blue('='.repeat(60)));
     
     const { action } = await inquirer.prompt([
