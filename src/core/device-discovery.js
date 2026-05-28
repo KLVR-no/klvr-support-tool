@@ -86,10 +86,27 @@ class DeviceDiscovery {
     }
 
     /**
-     * Discover devices and let user select one interactively.
-     * Falls back to manual IP entry if nothing is found.
+     * Ask the user how they want to connect, then find the device.
+     * Users on a cabled static-IP setup can skip mDNS discovery entirely.
      */
     async discoverAndSelect() {
+        const { method } = await inquirer.prompt([
+            {
+                type: 'list',
+                name: 'method',
+                message: 'How is your Klvr Charger Pro connected?',
+                choices: [
+                    { name: 'I know the IP address  (e.g. direct cable / static IP)', value: 'manual' },
+                    { name: 'Search for it automatically on the network',               value: 'discover' }
+                ]
+            }
+        ]);
+
+        if (method === 'manual') {
+            return this._promptManualIp();
+        }
+
+        // Auto-discover
         const devices = await this.discoverDevices();
 
         if (devices.length === 0) {
