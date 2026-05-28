@@ -1,332 +1,259 @@
 #!/bin/bash
 
-# KLVR Support Tool - One-Command Installer & Runner
+# Klvr Support Tool - One-Command Installer & Runner
 # Usage: bash <(curl -sSL https://raw.githubusercontent.com/KLVR-no/klvr-support-tool/main/install-and-update.sh)
-# Alternative: curl -sSL https://raw.githubusercontent.com/KLVR-no/klvr-support-tool/main/install-and-update.sh | bash
 
-set -e  # Exit on any error
+set -e
 
-# Configuration
 REPO_URL="https://github.com/KLVR-no/klvr-support-tool.git"
 TEMP_DIR="/tmp/klvr-support-tool-$(date +%s)"
 SCRIPT_NAME="src/cli/klvr-tool.js"
 
-# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Function to print colored output
-print_step() {
-    echo -e "${BLUE}$1${NC}"
-}
+print_step()    { echo -e "${BLUE}$1${NC}"; }
+print_success() { echo -e "${GREEN}✅ $1${NC}"; }
+print_warning() { echo -e "${YELLOW}⚠️  $1${NC}"; }
+print_error()   { echo -e "${RED}❌ $1${NC}"; }
+print_info()    { echo -e "${CYAN}ℹ️  $1${NC}"; }
 
-print_success() {
-    echo -e "${GREEN}✅ $1${NC}"
-}
+command_exists() { command -v "$1" >/dev/null 2>&1; }
 
-print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
-}
-
-print_error() {
-    echo -e "${RED}❌ $1${NC}"
-}
-
-print_info() {
-    echo -e "${CYAN}ℹ️  $1${NC}"
-}
-
-# Function to check if command exists
-command_exists() {
-    command -v "$1" >/dev/null 2>&1
-}
-
-# Function to detect the operating system
 detect_os() {
     if [[ "$OSTYPE" == "darwin"* ]]; then
         echo "macos"
     elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        if command_exists apt-get; then
-            echo "debian"
-        elif command_exists yum; then
-            echo "rhel"
-        elif command_exists dnf; then
-            echo "fedora"
-        elif command_exists pacman; then
-            echo "arch"
-        else
-            echo "linux"
+        if command_exists apt-get; then echo "debian"
+        elif command_exists dnf;     then echo "fedora"
+        elif command_exists yum;     then echo "rhel"
+        elif command_exists pacman;  then echo "arch"
+        else echo "linux"
         fi
     else
         echo "unknown"
     fi
 }
 
-# Function to install Node.js based on OS
+# ── Homebrew ──────────────────────────────────────────────────────────────────
+
+ensure_brew() {
+    # Already in PATH?
+    if command_exists brew; then return; fi
+
+    # Apple Silicon installs to /opt/homebrew, Intel to /usr/local
+    for candidate in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+        if [ -x "$candidate" ]; then
+            eval "$("$candidate" shellenv)"
+            return
+        fi
+    done
+
+    print_warning "Homebrew not found — installing it now."
+    print_info "This may take a few minutes and might ask for your Mac password."
+    echo ""
+
+    # Homebrew's own installer handles Xcode Command Line Tools automatically
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    # Re-source after install
+    for candidate in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+        if [ -x "$candidate" ]; then
+            eval "$("$candidate" shellenv)"
+            break
+        fi
+    done
+
+    if ! command_exists brew; then
+        print_error "Homebrew installation failed."
+        print_info "Please install it manually from https://brew.sh and re-run this script."
+        exit 1
+    fi
+
+    print_success "Homebrew installed."
+}
+
+# ── Node.js ───────────────────────────────────────────────────────────────────
+
 install_nodejs() {
     local os=$(detect_os)
     print_step "📦 Installing Node.js..."
-    
+
     case $os in
-        "macos")
-            if command_exists brew; then
-                print_info "Installing Node.js via Homebrew..."
-                brew install node
-            else
-                print_error "Homebrew not found. Please install Homebrew first:"
-                print_info "Visit: https://brew.sh/"
-                print_info "Then run: brew install node"
-                exit 1
+        macos)
+            ensure_brew
+            brew install node
+            ;;
+        debian)
+            # Use NodeSource for a recent version rather than the often-outdated distro package
+            if command_exists curl; then
+                curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - >/dev/null 2>&1
             fi
+            sudo apt-get install -y nodejs >/dev/null 2>&1
             ;;
-        "debian")
-            print_info "Installing Node.js via apt..."
-            sudo apt-get update
-            sudo apt-get install -y nodejs npm
-            ;;
-        "rhel")
-            print_info "Installing Node.js via yum..."
-            sudo yum install -y nodejs npm
-            ;;
-        "fedora")
-            print_info "Installing Node.js via dnf..."
-            sudo dnf install -y nodejs npm
-            ;;
-        "arch")
-            print_info "Installing Node.js via pacman..."
-            sudo pacman -S nodejs npm
-            ;;
+        rhel)   sudo yum install -y nodejs npm >/dev/null 2>&1 ;;
+        fedora) sudo dnf install -y nodejs npm >/dev/null 2>&1 ;;
+        arch)   sudo pacman -S --noconfirm nodejs npm >/dev/null 2>&1 ;;
         *)
-            print_error "Unsupported operating system. Please install Node.js manually:"
-            print_info "Visit: https://nodejs.org/"
+            print_error "Unsupported OS. Please install Node.js from https://nodejs.org/ and re-run."
             exit 1
             ;;
     esac
 }
 
-# Function to install git based on OS
+# ── Git ───────────────────────────────────────────────────────────────────────
+
 install_git() {
     local os=$(detect_os)
     print_step "📦 Installing Git..."
-    
+
     case $os in
-        "macos")
-            if command_exists brew; then
-                print_info "Installing Git via Homebrew..."
-                brew install git
-            else
-                print_error "Homebrew not found. Git should be available via Xcode Command Line Tools:"
-                print_info "Run: xcode-select --install"
-                exit 1
-            fi
+        macos)
+            ensure_brew
+            brew install git
             ;;
-        "debian")
-            print_info "Installing Git via apt..."
-            sudo apt-get update
-            sudo apt-get install -y git
-            ;;
-        "rhel")
-            print_info "Installing Git via yum..."
-            sudo yum install -y git
-            ;;
-        "fedora")
-            print_info "Installing Git via dnf..."
-            sudo dnf install -y git
-            ;;
-        "arch")
-            print_info "Installing Git via pacman..."
-            sudo pacman -S git
-            ;;
+        debian) sudo apt-get install -y git >/dev/null 2>&1 ;;
+        rhel)   sudo yum install -y git >/dev/null 2>&1 ;;
+        fedora) sudo dnf install -y git >/dev/null 2>&1 ;;
+        arch)   sudo pacman -S --noconfirm git >/dev/null 2>&1 ;;
         *)
-            print_error "Unsupported operating system. Please install Git manually:"
-            print_info "Visit: https://git-scm.com/"
+            print_error "Unsupported OS. Please install Git from https://git-scm.com/ and re-run."
             exit 1
             ;;
     esac
 }
 
-# Function to check and install prerequisites
+# ── Prerequisites check ───────────────────────────────────────────────────────
+
 check_prerequisites() {
-    print_step "🔍 Checking system prerequisites..."
-    
+    print_step "🔍 Checking prerequisites..."
+
     local needs_nodejs=false
     local needs_git=false
-    
-    # Check for Node.js
+
+    # Node.js
     if ! command_exists node; then
-        print_warning "Node.js not found - will install automatically"
+        print_warning "Node.js not found — will install automatically"
         needs_nodejs=true
     else
-        local node_version=$(node --version | sed 's/v//')
-        local major_version=$(echo $node_version | cut -d. -f1)
-        if [ "$major_version" -lt 14 ]; then
-            print_warning "Node.js version $node_version found, but version 14+ required - will update"
+        local node_major
+        node_major=$(node --version | sed 's/v//' | cut -d. -f1)
+        if [ "$node_major" -lt 14 ]; then
+            print_warning "Node.js $(node --version) is too old (need v14+) — will update"
             needs_nodejs=true
         else
-            print_success "Node.js $node_version found"
+            print_success "Node.js $(node --version)"
         fi
     fi
-    
-    # Check for npm (usually comes with Node.js)
-    if ! command_exists npm && ! $needs_nodejs; then
-        print_warning "npm not found - will install with Node.js"
+
+    # npm (sanity check — normally bundled with Node)
+    if ! command_exists npm && [ "$needs_nodejs" = false ]; then
+        print_warning "npm not found — will reinstall Node.js"
         needs_nodejs=true
     elif command_exists npm; then
-        print_success "npm $(npm --version) found"
+        print_success "npm $(npm --version)"
     fi
-    
-    # Check for git
+
+    # Git
     if ! command_exists git; then
-        print_warning "Git not found - will install automatically"
+        print_warning "Git not found — will install automatically"
         needs_git=true
     else
-        print_success "git $(git --version | cut -d' ' -f3) found"
+        print_success "git $(git --version | awk '{print $3}')"
     fi
-    
-    # Check for curl (usually pre-installed)
+
+    # curl (needed to fetch Homebrew installer on macOS; almost always present)
     if ! command_exists curl; then
-        print_warning "curl not found, but continuing (git clone will work)"
-    else
-        print_success "curl found"
+        print_error "curl is required but not found. Please install curl and re-run."
+        exit 1
     fi
-    
-    # Install missing dependencies
-    if $needs_nodejs; then
-        install_nodejs
-        # Verify installation
-        if command_exists node; then
-            print_success "Node.js $(node --version) installed successfully"
-        else
-            print_error "Failed to install Node.js"
-            exit 1
-        fi
+
+    $needs_nodejs && install_nodejs
+    $needs_git    && install_git
+
+    # Verify
+    if ! command_exists node; then
+        print_error "Node.js installation failed. Please install it manually from https://nodejs.org/"
+        exit 1
     fi
-    
-    if $needs_git; then
-        install_git
-        # Verify installation
-        if command_exists git; then
-            print_success "Git $(git --version | cut -d' ' -f3) installed successfully"
-        else
-            print_error "Failed to install Git"
-            exit 1
-        fi
+    if ! command_exists git; then
+        print_error "Git installation failed. Please install it manually from https://git-scm.com/"
+        exit 1
     fi
-    
+
     print_success "All prerequisites ready!"
     echo ""
 }
 
-# Function to download and setup the firmware updater
-setup_firmware_updater() {
-    print_step "📥 Downloading KLVR Support Tool..."
-    
-    # Create temporary directory
+# ── Download & run ────────────────────────────────────────────────────────────
+
+setup_tool() {
+    print_step "📥 Downloading Klvr Support Tool..."
+
     mkdir -p "$TEMP_DIR"
     cd "$TEMP_DIR"
-    
-    # Clone the repository
-    if git clone "$REPO_URL" . >/dev/null 2>&1; then
-        print_success "Repository cloned successfully"
-    else
-        print_error "Failed to clone repository from $REPO_URL"
-        print_info "Please check your internet connection and repository URL"
+
+    if ! git clone --depth 1 "$REPO_URL" . >/dev/null 2>&1; then
+        print_error "Could not download the Klvr Support Tool."
+        print_info "Check your internet connection and try again."
         exit 1
     fi
-    
-    # Install dependencies
-    print_step "📦 Installing dependencies..."
-    if npm install >/dev/null 2>&1; then
-        print_success "Dependencies installed successfully"
-    else
-        print_error "Failed to install dependencies"
-        print_info "Please check npm configuration and try again"
-        exit 1
+    print_success "Downloaded latest version"
+
+    print_step "📦 Installing tool dependencies..."
+    if ! npm install --silent 2>/dev/null; then
+        # Retry with verbose output so the user can see what failed
+        print_warning "First attempt failed — retrying with details..."
+        npm install
     fi
-    
-    print_success "Setup completed successfully!"
+    print_success "Dependencies ready"
     echo ""
 }
 
-# Function to run the firmware updater
-run_firmware_updater() {
-    print_step "🚀 Starting KLVR Support Tool..."
+run_tool() {
+    print_step "🚀 Starting Klvr Support Tool..."
     echo ""
-    
-    # Check if the script exists
+
     if [ ! -f "$SCRIPT_NAME" ]; then
-        print_error "KLVR Support Tool script not found: $SCRIPT_NAME"
+        print_error "Tool script not found after download. Please try again."
         exit 1
     fi
-    
-    # Make sure we're in the right directory and run the tool
+
     node "$SCRIPT_NAME" interactive
 }
 
-# Function to cleanup
 cleanup() {
-    if [ -d "$TEMP_DIR" ]; then
-        print_step "🧹 Cleaning up temporary files..."
-        rm -rf "$TEMP_DIR"
-        print_success "Cleanup completed"
-    fi
+    [ -d "$TEMP_DIR" ] && rm -rf "$TEMP_DIR"
 }
 
-# Function to show header
 show_header() {
     echo ""
     echo -e "${PURPLE}============================================================${NC}"
-    echo -e "${PURPLE}    KLVR Support Tool - One-Command Installer${NC}"
+    echo -e "${PURPLE}         Klvr Charger Pro — Support Tool${NC}"
     echo -e "${PURPLE}============================================================${NC}"
-    echo -e "${CYAN}This script will:${NC}"
-    echo -e "${CYAN}  1. Download the latest KLVR support tools${NC}"
-    echo -e "${CYAN}  2. Install required dependencies${NC}"
-    echo -e "${CYAN}  3. Start the interactive support tool interface${NC}"
+    echo -e "${CYAN}  This will:${NC}"
+    echo -e "${CYAN}    1. Install any missing dependencies (Node.js, Git)${NC}"
+    echo -e "${CYAN}    2. Download the latest Klvr support tools${NC}"
+    echo -e "${CYAN}    3. Open the interactive firmware update menu${NC}"
     echo ""
-    echo -e "${YELLOW}Press Ctrl+C at any time to cancel${NC}"
-    echo -e "${PURPLE}============================================================${NC}"
-    echo ""
-}
-
-# Function to show completion message
-show_completion() {
-    echo ""
-    echo -e "${PURPLE}============================================================${NC}"
-    echo -e "${GREEN}🎉 KLVR Support Tool Installation Complete! 🎉${NC}"
-    echo -e "${PURPLE}============================================================${NC}"
-    echo ""
-    echo -e "${CYAN}To run the support tool again in the future, you can:${NC}"
-    echo -e "${CYAN}  1. Use this one-command installer again, or${NC}"
-    echo -e "${CYAN}  2. Clone the repository manually and run: node src/cli/klvr-tool.js${NC}"
-    echo ""
-    echo -e "${YELLOW}Repository: $REPO_URL${NC}"
+    echo -e "${YELLOW}  Press Ctrl+C at any time to cancel${NC}"
     echo -e "${PURPLE}============================================================${NC}"
     echo ""
 }
 
-# Main execution
 main() {
-    # Set up trap for cleanup on exit
     trap cleanup EXIT
-    
-    # Show header
     show_header
-    
-    # Run the installation process
     check_prerequisites
-    setup_firmware_updater
-    run_firmware_updater
-    
-    # Show completion message
-    show_completion
+    setup_tool
+    run_tool
 }
 
-# Check if script is being sourced or executed
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
     main "$@"
 fi
