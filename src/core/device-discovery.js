@@ -1,5 +1,6 @@
 const http = require('http');
 const https = require('https');
+const os = require('os');
 const { URL } = require('url');
 const inquirer = require('inquirer');
 
@@ -12,16 +13,47 @@ class DeviceDiscovery {
         this.logger = logger;
         this.discoveryTimeout = 5000;
         this.connectionTimeout = 5000;
+        this.scanTimeout = 2000;
         this.bonjourService = 'klvrcharger';
         this.defaultPort = 8000;
     }
 
     /**
-     * Discover Klvr devices on the network using Bonjour/mDNS
+     * Discover Klvr devices on the network.
+     *
+     * Runs mDNS (Bonjour) and a direct HTTP scan of every local network
+     * interface in parallel. This ensures the charger is found even when the
+     * computer is connected to it via a dedicated NIC on a different subnet
+     * (e.g. static IP cable) while also being connected to Wi-Fi.
+     *
+     * Results from both probes are merged and deduplicated by IP address.
      */
     async discoverDevices() {
         this.logger.step('🔍 Searching for Klvr devices on your network...');
 
+        const [mdnsDevices, scanDevices] = await Promise.all([
+            this._discoverViaMdns(),
+            this._scanNetworkInterfaces()
+        ]);
+
+        // Merge results, deduplicate by IP (mDNS wins for richer service info)
+        const byIp = new Map();
+        for (const d of [...scanDevices, ...mdnsDevices]) {
+            byIp.set(d.ip, d);
+        }
+        const devices = Array.from(byIp.values());
+
+        if (devices.length > 0) {
+            this.logger.success(`Found ${devices.length} device(s)`);
+        }
+        return devices;
+    }
+
+    /**
+     * Discover devices via mDNS/Bonjour (_klvrcharger._tcp).
+     * Works on the OS default multicast interface only.
+     */
+    async _discoverViaMdns() {
         let bonjour;
         try {
             bonjour = require('bonjour')();
@@ -38,9 +70,6 @@ class DeviceDiscovery {
                 if (settled) return;
                 settled = true;
                 try { bonjour.destroy(); } catch (_) {}
-                if (devices.length > 0) {
-                    this.logger.success(`Found ${devices.length} device(s)`);
-                }
                 resolve(devices);
             };
 
@@ -56,7 +85,7 @@ class DeviceDiscovery {
                         port: service.port || this.defaultPort,
                         url: `http://${ip}:${service.port || this.defaultPort}`
                     });
-                    this.logger.debug(`Found: ${service.name} at ${ip}`);
+                    this.logger.debug(`mDNS found: ${service.name} at ${ip}`);
                 });
             } catch (e) {
                 this.logger.debug(`mDNS browse error: ${e.message}`);
@@ -65,6 +94,112 @@ class DeviceDiscovery {
             }
 
             setTimeout(finish, this.discoveryTimeout);
+        });
+    }
+
+    /**
+     * Scan every local IPv4 network interface for Klvr devices by probing
+     * each host on the subnet directly over HTTP. Subnets larger than /24
+     * are capped to /24 to keep scan time bounded (~2 s worst case).
+     *
+     * All probes fire concurrently so the total time equals scanTimeout
+     * regardless of how many hosts are in the subnet.
+     */
+    async _scanNetworkInterfaces() {
+        const interfaces = os.networkInterfaces();
+        const allIps = [];
+
+        for (const [name, addrs] of Object.entries(interfaces)) {
+            for (const addr of addrs) {
+                if (addr.internal || addr.family !== 'IPv4') continue;
+
+                const { network, cidr } = this._calculateSubnet(addr.address, addr.netmask);
+                // Cap scan at /24 to avoid scanning thousands of addresses on
+                // corporate or wide subnets (/16, /8, etc.)
+                const effectiveCidr = Math.max(cidr, 24);
+                const ips = this._generateSubnetIps(network, effectiveCidr, addr.address);
+                this.logger.debug(`Scanning ${name} (${addr.address}/${cidr}, effective /${effectiveCidr}): ${ips.length} addresses`);
+                allIps.push(...ips);
+            }
+        }
+
+        if (allIps.length === 0) return [];
+
+        // Deduplicate across overlapping subnets, then probe all at once
+        const uniqueIps = [...new Set(allIps)];
+        const results = await Promise.all(uniqueIps.map(ip => this._testConnectionFast(ip)));
+        return results.filter(Boolean);
+    }
+
+    _calculateSubnet(ip, netmask) {
+        const ipParts = ip.split('.').map(Number);
+        const maskParts = netmask.split('.').map(Number);
+        const networkParts = ipParts.map((part, i) => part & maskParts[i]);
+        const cidr = maskParts.reduce((acc, p) => acc + p.toString(2).split('1').length - 1, 0);
+        return { network: networkParts.join('.'), cidr };
+    }
+
+    _generateSubnetIps(network, cidr, skipIp) {
+        const hostBits = 32 - cidr;
+        const base = this._ipToInt(network);
+        const count = Math.pow(2, hostBits) - 2; // exclude network + broadcast
+        const ips = [];
+        for (let i = 1; i <= count; i++) {
+            const ip = this._intToIp(base + i);
+            if (ip !== skipIp) ips.push(ip);
+        }
+        return ips;
+    }
+
+    _ipToInt(ip) {
+        return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0;
+    }
+
+    _intToIp(n) {
+        return [(n >>> 24) & 0xFF, (n >>> 16) & 0xFF, (n >>> 8) & 0xFF, n & 0xFF].join('.');
+    }
+
+    /**
+     * Fast HTTP probe used by the subnet scanner. Uses a shorter timeout than
+     * the interactive connection flow.
+     */
+    async _testConnectionFast(ip) {
+        return new Promise((resolve) => {
+            const req = http.request({
+                hostname: ip,
+                port: this.defaultPort,
+                path: '/api/v2/device/info',
+                method: 'GET',
+                timeout: this.scanTimeout
+            }, (res) => {
+                let data = '';
+                res.on('data', (chunk) => data += chunk);
+                res.on('end', () => {
+                    try {
+                        const info = JSON.parse(data);
+                        const deviceName = info.deviceName || info.name;
+                        if (deviceName && deviceName.toLowerCase().includes('klvr')) {
+                            this.logger.debug(`Subnet scan found: ${deviceName} at ${ip}`);
+                            resolve({
+                                ip,
+                                deviceName,
+                                firmwareVersion: info.firmwareVersion,
+                                serialNumber: info.serialNumber || info.ip?.macAddress || 'Unknown',
+                                port: this.defaultPort,
+                                url: `http://${ip}:${this.defaultPort}`
+                            });
+                        } else {
+                            resolve(null);
+                        }
+                    } catch (_) {
+                        resolve(null);
+                    }
+                });
+            });
+
+            req.on('error', () => resolve(null));
+            req.on('timeout', () => { req.destroy(); resolve(null); });
+            req.end();
         });
     }
 
@@ -141,7 +276,7 @@ class DeviceDiscovery {
         console.log('');
         console.log('  Make sure the Klvr Charger Pro is:');
         console.log('    • Powered on');
-        console.log('    • Connected to the same Wi-Fi / network as this computer');
+        console.log('    • Connected to this computer (Wi-Fi, direct cable, or LAN)');
         console.log('');
 
         const { choice } = await inquirer.prompt([
