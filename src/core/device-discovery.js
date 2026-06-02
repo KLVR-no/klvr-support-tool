@@ -114,11 +114,22 @@ class DeviceDiscovery {
                 if (addr.internal || addr.family !== 'IPv4') continue;
 
                 const { network, cidr } = this._calculateSubnet(addr.address, addr.netmask);
-                // Cap scan at /24 to avoid scanning thousands of addresses on
-                // corporate or wide subnets (/16, /8, etc.)
-                const effectiveCidr = Math.max(cidr, 24);
-                const ips = this._generateSubnetIps(network, effectiveCidr, addr.address);
-                this.logger.debug(`Scanning ${name} (${addr.address}/${cidr}, effective /${effectiveCidr}): ${ips.length} addresses`);
+
+                // For subnets wider than /24 (e.g. /16 from DHCP on Wi-Fi),
+                // scanning every host is impractical. Instead scan only the /24
+                // that contains our own IP — that is the segment most likely to
+                // hold the charger when it's on the same broadcast domain.
+                let scanNetwork = network;
+                let effectiveCidr = cidr;
+                if (cidr < 24) {
+                    effectiveCidr = 24;
+                    const addrInt = this._ipToInt(addr.address);
+                    const mask = (0xFFFFFFFF << (32 - 24)) >>> 0;
+                    scanNetwork = this._intToIp(addrInt & mask);
+                }
+
+                const ips = this._generateSubnetIps(scanNetwork, effectiveCidr, addr.address);
+                this.logger.debug(`Scanning ${name} (${addr.address}/${cidr}, scanning ${scanNetwork}/24): ${ips.length} addresses`);
                 allIps.push(...ips);
             }
         }
