@@ -347,13 +347,13 @@ program
 
     switch (action) {
       case 'firmware':
-        await program.parseAsync(['node', 'klvr-tool', 'firmware-update'], { from: 'user' });
+        await program.parseAsync(['firmware-update'], { from: 'user' });
         break;
       case 'firmware-rear':
-        await program.parseAsync(['node', 'klvr-tool', 'firmware-update', '--rear-only'], { from: 'user' });
+        await program.parseAsync(['firmware-update', '--rear-only'], { from: 'user' });
         break;
       case 'remote':
-        await program.parseAsync(['node', 'klvr-tool', 'remote-support'], { from: 'user' });
+        await program.parseAsync(['remote-support'], { from: 'user' });
         break;
       case 'use-target': {
         const { url } = await inquirer.prompt([
@@ -363,11 +363,11 @@ program
             message: 'IP or tunnel URL:'
           }
         ]);
-        await program.parseAsync(['node', 'klvr-tool', 'use-target', url.trim()], { from: 'user' });
+        await program.parseAsync(['use-target', url.trim()], { from: 'user' });
         break;
       }
       case 'info':
-        await program.parseAsync(['node', 'klvr-tool', 'device-info'], { from: 'user' });
+        await program.parseAsync(['device-info'], { from: 'user' });
         break;
       case 'exit':
         console.log('Goodbye!');
@@ -378,7 +378,7 @@ program
 
 if (require.main === module) {
   if (process.argv.length === 2) {
-    program.parseAsync(['node', 'klvr-tool', 'interactive'], { from: 'user' });
+    program.parseAsync(['interactive'], { from: 'user' });
   } else {
     program.parse();
   }
