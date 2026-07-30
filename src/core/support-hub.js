@@ -5,7 +5,6 @@ const DeviceDiscovery = require('./device-discovery');
 const {
   preferLocalAddress,
   isIPv4,
-  describeMultiHome,
   listExternalIPv4
 } = require('./network');
 
