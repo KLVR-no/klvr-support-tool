@@ -39,6 +39,14 @@ class SupportHub {
       });
     });
 
+    // WebSocket upgrade → charger /api/v2/ws (cloudflared forwards Upgrade)
+    this.server.on('upgrade', (req, socket, head) => {
+      this._proxyWebSocket(req, socket, head).catch((err) => {
+        this.logger.debug(`WS proxy error: ${err.message}`);
+        try { socket.destroy(); } catch (_) {}
+      });
+    });
+
     await new Promise((resolve, reject) => {
       this.server.once('error', reject);
       this.server.listen(0, '127.0.0.1', resolve);
@@ -208,17 +216,104 @@ class SupportHub {
         'GET /api/diagnostics',
         'GET /api/discover',
         'POST /api/target',
-        'GET|POST /api/v2/*  (proxied to active charger)'
+        'GET|POST /api/v2/*  (proxied to active charger)',
+        'WS /api/v2/ws  (proxied to active charger)'
       ]
     });
   }
 
-  async _proxyToCharger(req, res, path) {
+  async _ensureActive() {
     if (!this.active) {
-      // Opportunistic rediscover before failing
       await this._refreshDiscovery();
     }
-    if (!this.active) {
+    return this.active;
+  }
+
+  async _proxyWebSocket(req, clientSocket, head) {
+    const url = new URL(req.url, 'http://127.0.0.1');
+    if (!url.pathname.startsWith('/api/v2/')) {
+      clientSocket.write('HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n');
+      clientSocket.destroy();
+      return;
+    }
+
+    const active = await this._ensureActive();
+    if (!active) {
+      clientSocket.write(
+        'HTTP/1.1 503 Service Unavailable\r\nContent-Type: application/json\r\nConnection: close\r\n\r\n'
+        + JSON.stringify({ error: 'No charger selected yet' })
+      );
+      clientSocket.destroy();
+      return;
+    }
+
+    const headers = { ...req.headers };
+    headers.host = `${active.ip}:8000`;
+
+    const options = {
+      hostname: active.ip,
+      port: 8000,
+      path: req.url,
+      method: 'GET',
+      headers,
+      timeout: 15000
+    };
+    if (active.localAddress) {
+      options.localAddress = active.localAddress;
+    }
+
+    const proxyReq = http.request(options);
+    proxyReq.on('upgrade', (proxyRes, proxySocket, proxyHead) => {
+      const lines = [`HTTP/1.1 ${proxyRes.statusCode || 101} Switching Protocols`];
+      for (const [key, value] of Object.entries(proxyRes.headers)) {
+        if (Array.isArray(value)) {
+          for (const v of value) lines.push(`${key}: ${v}`);
+        } else {
+          lines.push(`${key}: ${value}`);
+        }
+      }
+      lines.push('', '');
+      clientSocket.write(lines.join('\r\n'));
+      if (proxyHead && proxyHead.length) clientSocket.write(proxyHead);
+      if (head && head.length) proxySocket.write(head);
+
+      proxySocket.pipe(clientSocket);
+      clientSocket.pipe(proxySocket);
+
+      const cleanup = () => {
+        try { proxySocket.destroy(); } catch (_) {}
+        try { clientSocket.destroy(); } catch (_) {}
+      };
+      proxySocket.on('error', cleanup);
+      clientSocket.on('error', cleanup);
+    });
+
+    proxyReq.on('response', (res) => {
+      clientSocket.write(
+        `HTTP/1.1 ${res.statusCode} ${res.statusMessage || ''}\r\nConnection: close\r\n\r\n`
+      );
+      res.pipe(clientSocket);
+    });
+
+    proxyReq.on('error', (err) => {
+      this.logger.debug(`WS upstream error: ${err.message}`);
+      try {
+        clientSocket.write('HTTP/1.1 502 Bad Gateway\r\nConnection: close\r\n\r\n');
+      } catch (_) {}
+      clientSocket.destroy();
+    });
+
+    proxyReq.on('timeout', () => {
+      proxyReq.destroy();
+      clientSocket.destroy();
+    });
+
+    proxyReq.end();
+  }
+
+  async _proxyToCharger(req, res, path) {
+    const active = await this._ensureActive();
+    if (!active) {
       res.writeHead(503, { 'Content-Type': 'application/json', ...this._cors() });
       res.end(JSON.stringify({
         error: 'No charger selected yet',
@@ -233,19 +328,18 @@ class SupportHub {
     const headers = { ...req.headers };
     delete headers.host;
     delete headers.connection;
-    // Content-Length will be recalculated
     delete headers['content-length'];
 
     const options = {
-      hostname: this.active.ip,
+      hostname: active.ip,
       port: 8000,
       path: path + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : ''),
       method: req.method,
       headers,
       timeout: 120000
     };
-    if (this.active.localAddress) {
-      options.localAddress = this.active.localAddress;
+    if (active.localAddress) {
+      options.localAddress = active.localAddress;
     }
 
     await new Promise((resolve) => {
@@ -268,7 +362,7 @@ class SupportHub {
           res.writeHead(502, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({
             error: `Charger unreachable via hub: ${err.message}`,
-            charger: this.active
+            charger: active
           }));
         }
         resolve();
