@@ -9,6 +9,7 @@ const { spawn } = require('child_process');
 const DeviceDiscovery = require('../core/device-discovery');
 const FirmwareManager = require('../core/firmware-manager');
 const TunnelManager = require('../core/tunnel-manager');
+const Doctor = require('../core/doctor');
 const Logger = require('../core/logger');
 const {
   findPython,
@@ -22,7 +23,7 @@ const program = new Command();
 program
   .name('klvr-tool')
   .description('Klvr Charger Pro - Professional firmware updater and support tools')
-  .version('2.1.0');
+  .version('2.2.0');
 
 program
   .option('-v, --verbose', 'Enable verbose logging')
@@ -315,6 +316,154 @@ program
   });
 
 program
+  .command('doctor')
+  .description('Check local network interfaces + optional charger IP reachability')
+  .option('--ip <address>', 'Charger IP to ping/probe (repeatable via comma list)')
+  .option('--json', 'Print JSON instead of text')
+  .action(async (options) => {
+    const logger = new Logger(program.opts());
+    const doctor = new Doctor(logger);
+    let targets = [];
+    if (options.ip) {
+      targets = String(options.ip).split(',').map((s) => s.trim()).filter(Boolean);
+    } else {
+      const { ip } = await inquirer.prompt([
+        {
+          type: 'input',
+          name: 'ip',
+          message: 'Charger IP to test (blank to skip ping/HTTP):',
+          default: ''
+        }
+      ]);
+      if (ip && ip.trim()) targets = [ip.trim()];
+    }
+
+    const report = await doctor.run({ targets });
+    if (options.json) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log('');
+      console.log(doctor.formatText(report));
+    }
+  });
+
+program
+  .command('remote-doctor')
+  .description('Customer: share live connection diagnostics via Cloudflare tunnel')
+  .option('--ip <address>', 'Charger IP to include in diagnostics')
+  .action(async (options) => {
+    const logger = new Logger(program.opts());
+    logger.info('Starting remote connection doctor...');
+
+    try {
+      let targets = [];
+      if (options.ip) {
+        targets = String(options.ip).split(',').map((s) => s.trim()).filter(Boolean);
+      } else {
+        const { ip } = await inquirer.prompt([
+          {
+            type: 'input',
+            name: 'ip',
+            message: 'Charger IP to test (e.g. 10.101.0.56):',
+            default: '10.101.0.56'
+          }
+        ]);
+        if (ip && ip.trim()) targets = [ip.trim()];
+      }
+
+      const doctor = new Doctor(logger);
+      const local = await doctor.startServer({ targets });
+      logger.success(`Local doctor listening on ${local.url}`);
+
+      const tunnelManager = new TunnelManager(logger);
+      const tunnel = await tunnelManager.createTunnel({
+        url: local.url,
+        deviceName: 'connection-doctor',
+        ip: 'doctor'
+      }, { reuseSession: false });
+
+      console.log('');
+      logger.success('Remote doctor session active!');
+      console.log('');
+      console.log(chalk.green('  Share this URL with Klvr support:'));
+      console.log(chalk.bold.white(`  ${tunnel.url}`));
+      console.log('');
+      console.log(chalk.cyan('  Support can then run:'));
+      console.log(`    klvr-tool diagnose ${tunnel.url}`);
+      console.log('');
+      console.log(chalk.yellow('  Keep this terminal open. Press Ctrl+C to end.'));
+      console.log('');
+
+      // Print one local snapshot immediately
+      const snapshot = await doctor.run({ targets });
+      console.log(chalk.gray(doctor.formatText(snapshot)));
+
+      process.on('SIGINT', async () => {
+        logger.info('Ending remote doctor session...');
+        await tunnelManager.closeTunnel(tunnel);
+        local.server.close();
+        logger.success('Session ended');
+        process.exit(0);
+      });
+
+      await new Promise(() => {});
+    } catch (error) {
+      if (error.message === 'Cancelled by user') {
+        process.exit(0);
+      }
+      logger.error(`Remote doctor failed: ${error.message}`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('diagnose [target]')
+  .description('Supporter: fetch remote doctor report or charger info from a tunnel URL')
+  .action(async (target) => {
+    const logger = new Logger(program.opts());
+    const doctor = new Doctor(logger);
+
+    let url = target;
+    if (!url) {
+      const saved = await loadActiveTarget();
+      if (saved && isTunnelUrl(saved)) {
+        url = saved;
+        logger.info(`Using saved target: ${url}`);
+      } else {
+        const answers = await inquirer.prompt([
+          {
+            type: 'input',
+            name: 'url',
+            message: 'Customer tunnel URL:',
+            validate: (v) => (/^https:\/\//i.test((v || '').trim())
+              ? true
+              : 'Enter the full https:// tunnel URL')
+          }
+        ]);
+        url = answers.url.trim();
+      }
+    }
+
+    try {
+      const result = await doctor.fetchRemote(url);
+      console.log('');
+      if (result.type === 'doctor') {
+        console.log(doctor.formatText(result.report));
+        await saveActiveTarget(url);
+      } else {
+        console.log(chalk.cyan('This tunnel points at a charger (not a doctor session):'));
+        console.log(`  Device: ${result.info.deviceName || result.info.name || 'Klvr'}`);
+        console.log(`  Info:   ${JSON.stringify(result.info, null, 2)}`);
+        console.log('');
+        logger.info('For connection diagnostics, ask the customer to run: remote-doctor');
+      }
+    } catch (error) {
+      logger.error(`Diagnose failed: ${error.message}`);
+      process.exit(1);
+    }
+  });
+
+program
   .command('device-info [target]')
   .description('Get device information and status')
   .option('--format <format>', 'Output format: json, table', 'table')
@@ -365,8 +514,11 @@ program
       new inquirer.Separator('── Customer (this network) ──'),
       { name: 'Update Firmware (Both Boards)', value: 'firmware' },
       { name: 'Update Rear Board Only', value: 'firmware-rear' },
-      { name: 'Start Remote Support Session', value: 'remote' },
+      { name: 'Check Connection (doctor)', value: 'doctor' },
+      { name: 'Share Connection Diagnostics (remote doctor)', value: 'remote-doctor' },
+      { name: 'Start Remote Support Session (charger tunnel)', value: 'remote' },
       new inquirer.Separator('── Klvr Support (remote) ──'),
+      { name: 'Fetch Remote Diagnostics', value: 'diagnose' },
       { name: 'Connect to Customer Tunnel', value: 'use-target' },
       { name: 'Update Firmware on Connected Target', value: 'firmware-remote' },
       { name: 'Device Info', value: 'info' },
@@ -391,6 +543,15 @@ program
         break;
       case 'firmware-remote':
         await program.parseAsync(['firmware-update', '--remote'], { from: 'user' });
+        break;
+      case 'doctor':
+        await program.parseAsync(['doctor'], { from: 'user' });
+        break;
+      case 'remote-doctor':
+        await program.parseAsync(['remote-doctor'], { from: 'user' });
+        break;
+      case 'diagnose':
+        await program.parseAsync(['diagnose'], { from: 'user' });
         break;
       case 'remote':
         await program.parseAsync(['remote-support'], { from: 'user' });

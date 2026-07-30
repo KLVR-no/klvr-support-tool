@@ -1,6 +1,6 @@
 {
   "name": "klvr-support-tool",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Professional support tools for KLVR Charger Pro devices - firmware updates, remote access, and diagnostics",
   "main": "src/cli/klvr-tool.js",
   "bin": {

@@ -2,7 +2,7 @@
 
 Professional support tools for KLVR Charger Pro — local and **remote** firmware updates, tunnels, and diagnostics.
 
-**Version:** 2.1.0
+**Version:** 2.2.0
 
 ## Quick Start (download + run)
 
@@ -38,9 +38,31 @@ klvr-tool firmware-update --local
 klvr-tool firmware-update 192.168.1.141 --version 1.8.9-beta -y
 ```
 
+## Customer: connection doctor (local or remote)
+
+When the Mac cannot reach the charger, open a **diagnostics** tunnel (does not need charger HTTP):
+
+```bash
+klvr-tool remote-doctor --ip 10.101.0.56
+```
+
+Share the URL. Support runs:
+
+```bash
+klvr-tool diagnose https://….trycloudflare.com
+```
+
+That shows the customer’s interfaces, subnet masks, ping, and `:8000` HTTP probe.
+
+Local-only (print in terminal / paste to chat):
+
+```bash
+klvr-tool doctor --ip 10.101.0.56
+```
+
 ## Customer: open a remote support tunnel
 
-Interactive → **Start Remote Support Session** (picks a local charger, then opens the tunnel).
+Interactive → **Start Remote Support Session** (needs a reachable local charger, then opens the tunnel).
 
 ```bash
 klvr-tool remote-support

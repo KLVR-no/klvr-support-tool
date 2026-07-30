@@ -229,6 +229,7 @@ systemTest.addTest('File structure validation', async () => {
         'src/core/device-discovery.js',
         'src/core/firmware-manager.js',
         'src/core/tunnel-manager.js',
+        'src/core/doctor.js',
         'src/cli/klvr-tool.js',
         'src/cli/support-cli.js'
     ];
