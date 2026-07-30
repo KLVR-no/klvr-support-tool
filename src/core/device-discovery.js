@@ -36,6 +36,13 @@ class DeviceDiscovery {
             this._scanNetworkInterfaces()
         ]);
 
+        if (mdnsDevices.length === 0 && process.platform === 'win32') {
+            this.logger.info('mDNS/Bonjour found nothing — common on Windows without Bonjour Print Services.');
+            this.logger.info('Falling back to subnet HTTP scan (and you can always enter an IP manually).');
+        } else if (mdnsDevices.length === 0) {
+            this.logger.debug('mDNS found nothing; relying on subnet scan / manual IP.');
+        }
+
         // Merge results, deduplicate by IP (mDNS wins for richer service info)
         const byIp = new Map();
         for (const d of [...scanDevices, ...mdnsDevices]) {
@@ -45,6 +52,8 @@ class DeviceDiscovery {
 
         if (devices.length > 0) {
             this.logger.success(`Found ${devices.length} device(s)`);
+        } else {
+            this.logger.warn('No devices discovered. Use a manual IP or a tunnel URL (https://….trycloudflare.com).');
         }
         return devices;
     }
@@ -243,13 +252,17 @@ class DeviceDiscovery {
                 message: 'How is your Klvr Charger Pro connected?',
                 choices: [
                     { name: 'I know the IP address  (e.g. direct cable / static IP)', value: 'manual' },
-                    { name: 'Search for it automatically on the network',               value: 'discover' }
+                    { name: 'Remote tunnel URL  (https://….trycloudflare.com)', value: 'tunnel' },
+                    { name: 'Search for it automatically on the network', value: 'discover' }
                 ]
             }
         ]);
 
         if (method === 'manual') {
             return this._promptManualIp();
+        }
+        if (method === 'tunnel') {
+            return this._promptTunnelUrl();
         }
 
         // Auto-discover
@@ -278,6 +291,23 @@ class DeviceDiscovery {
             }
         ]);
         return chosen;
+    }
+
+    async _promptTunnelUrl() {
+        const { url } = await inquirer.prompt([
+            {
+                type: 'input',
+                name: 'url',
+                message: 'Paste the customer tunnel URL:',
+                validate: (v) => {
+                    if (!v || !/^https:\/\/.+/i.test(v.trim())) {
+                        return 'Enter a full https:// URL from the customer remote-support session';
+                    }
+                    return true;
+                }
+            }
+        ]);
+        return this.connectToTarget(url.trim());
     }
 
     /**
@@ -315,29 +345,29 @@ class DeviceDiscovery {
             {
                 type: 'input',
                 name: 'ip',
-                message: 'Enter the device IP address (e.g. 192.168.1.50):',
+                message: 'Enter IP or tunnel URL (e.g. 192.168.1.50 or https://….trycloudflare.com):',
                 validate: (val) => {
                     const trimmed = val.trim();
                     if (/^\d{1,3}(\.\d{1,3}){3}$/.test(trimmed)) return true;
-                    return 'Please enter a valid IP address like 192.168.1.50';
+                    if (/^https?:\/\/.+/i.test(trimmed)) return true;
+                    return 'Enter an IP like 192.168.1.50 or a full https:// tunnel URL';
                 },
                 filter: (val) => val.trim()
             }
         ]);
 
         this.logger.step(`Connecting to ${ip}...`);
-        const device = await this._testConnection(this._parseTarget(ip));
-
-        if (!device) {
+        try {
+            const device = await this.connectToTarget(ip);
+            this.logger.success(`Connected to ${device.deviceName} (${device.ip || device.url})`);
+            return device;
+        } catch (_) {
             console.log('');
             this.logger.warn(`Could not reach a Klvr device at ${ip}.`);
-            console.log('  Double-check the IP and that the device is on the same network.');
+            console.log('  Double-check the IP/URL and that the tunnel session is still open.');
             console.log('');
             return this._promptManualIp();
         }
-
-        this.logger.success(`Connected to ${device.deviceName} (${device.ip})`);
-        return device;
     }
 
     /**

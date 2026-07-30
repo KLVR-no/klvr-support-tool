@@ -1,241 +1,127 @@
 # KLVR Support Tool
 
-Professional support tools for KLVR Charger Pro devices - firmware updates, remote access, and diagnostics.
+Professional support tools for KLVR Charger Pro — local and **remote** firmware updates, tunnels, and diagnostics.
 
-## 🚀 Quick Start (One-Command Install)
+**Version:** 2.1.0
 
-### macOS/Linux
+## Quick Start (download + run)
+
+### macOS / Linux
 ```bash
 bash <(curl -sSL https://raw.githubusercontent.com/KLVR-no/klvr-support-tool/main/install-and-update.sh)
 ```
 
-### Windows (PowerShell - Run as Administrator)
+### Windows (PowerShell)
+Admin is only required if Node.js or Git are missing. If both are already installed, run normally:
+
 ```powershell
 Set-ExecutionPolicy Bypass -Scope Process -Force; iex (iwr -useb https://raw.githubusercontent.com/KLVR-no/klvr-support-tool/main/install-and-update.ps1)
 ```
 
-**🔴 IMPORTANT FOR WINDOWS USERS**: 
-1. **Right-click PowerShell** and select **"Run as Administrator"**
-2. **Copy the FULL command above** (including the `Set-ExecutionPolicy` part)
-3. The script will automatically handle execution policy and install all dependencies
+The installer clones the latest repo (including bundled firmware), installs npm deps, and starts interactive mode.
 
-> **⚡ Quick Copy**: `Set-ExecutionPolicy Bypass -Scope Process -Force; iex (iwr -useb https://raw.githubusercontent.com/KLVR-no/klvr-support-tool/main/install-and-update.ps1)`
+## Bundled firmware
 
-That's it! The script will automatically:
-- ✅ **Install missing dependencies** (Node.js, npm, git)
-- ✅ **Download the latest support tools**
-- ✅ **Install project dependencies**
-- ✅ **Start the interactive interface**
-- ✅ **Show you exactly what operations were performed**
+| Version | Notes |
+|---------|--------|
+| `v1.8.4` | Stable baseline |
+| `v1.8.6-beta` | Beta |
+| `v1.8.7-beta` | Beta (easteregg era) |
+| `v1.8.9-beta` | Thermal policy: fans 70% @ 32°C, hard-stop 38°C |
 
-**No manual setup required!** The installer handles everything automatically.
+## Customer: local firmware update
 
-## 📊 Current Status
-
-### ✅ **Latest Updates (December 2024)**
-- **🔄 Manual Firmware Selection**: Removed auto-selection - users now choose firmware version
-- **📱 Simplified End-User Interface**: Clean 3-option menu (Update Firmware, Remote Support, Exit)
-- **🛠️ Enhanced Support Tools**: Interactive firmware selection for support engineers
-- **📦 Latest Firmware**: v1.8.3 (stable), v1.8.3-beta4 (testing)
-- **🌐 Tunnel Support**: Cloudflare quick tunnels with session tracking
-- **🔋 Battery Monitoring**: AA/AAA detection with detailed voltage logging
-
-### 🎯 **Key Improvements**
-- **No "Latest" Labels**: Clean firmware selection without auto-highlighting
-- **Manual Control**: Users have full control over firmware version selection
-- **Session Consistency**: Tunnel URLs tracked for better user experience
-- **Comprehensive Testing**: Full system validation and error handling
-
-## 🎯 Features
-
-### ✨ **For End Users:**
-- **🔄 Firmware Updates**: Interactive firmware version selection (no auto-selection)
-- **🌐 Remote Support**: Share secure tunnel with KLVR support team
-- **📱 Simple Interface**: Clean 3-option menu (Firmware Update, Remote Support, Exit)
-
-### 🛠️ **For Support Engineers:**
-- **🔧 Advanced CLI**: Full command-line interface for all operations
-- **🌐 Remote Access**: Connect to devices via secure tunnels
-- **🔋 Battery Diagnostics**: Detailed AA/AAA detection monitoring with logging
-- **📊 Firmware Management**: Interactive version selection with validation
-- **📝 Session Tracking**: Comprehensive logging and export capabilities
-- **🔍 Device Diagnostics**: Complete device health and status reporting
-
-## 💻 Usage
-
-### Interactive Mode (Recommended for End Users)
 ```bash
-# After installation, just run:
 klvr-tool
-
-# Or start interactive mode explicitly:
-klvr-tool interactive
+# → Update Firmware (Both Boards)
 ```
 
-### Command Line Interface (For Support Engineers)
+Or:
 
-#### Firmware Updates
 ```bash
-# Update firmware on discovered device
 klvr-tool firmware-update
-
-# Update firmware on specific device
-klvr-tool firmware-update 10.110.73.155
-
-# Update via remote tunnel
-klvr-tool firmware-update https://abc123.trycloudflare.com
-
-# Force update with specific firmware files
-klvr-tool firmware-update --main firmware/main_v1.8.3-beta4.signed.bin --rear firmware/rear_v1.8.3-beta4.signed.bin --force
+klvr-tool firmware-update 192.168.1.141 --version 1.8.9-beta -y
 ```
 
-#### Remote Support Sessions
+## Customer: open a remote support tunnel
+
 ```bash
-# Start remote support session (auto-discovers device)
 klvr-tool remote-support
-
-# Create tunnel with custom options
-klvr-tool remote-support --tunnel-provider cloudflare
 ```
 
-#### Battery Detection Monitoring
+Share the printed `https://….trycloudflare.com` URL with Klvr support. **Keep that terminal open** until support is done.
+
+`cloudflared` is auto-installed into `~/.klvr-support/bin` on macOS, Linux, and Windows if missing.
+
+## Supporter: upgrade a remote charger
+
+With the customer tunnel still running:
+
 ```bash
-# Monitor battery detection (auto-discovers device)
-klvr-tool battery-monitor
+# One-time: remember the tunnel URL
+klvr-tool use-target https://abc123.trycloudflare.com
 
-# Monitor specific device for AA battery testing
-klvr-tool battery-monitor 10.110.73.155 --test-type aa --duration 30
-
-# Monitor via tunnel with detailed logging
-klvr-tool battery-monitor https://abc123.trycloudflare.com --test-type aaa --export json
-```
-
-#### Device Information
-```bash
-# Get device information
+# Inspect
 klvr-tool device-info
 
-# Get info from specific device
-klvr-tool device-info 10.110.73.155
-
-# Export device info as JSON
-klvr-tool device-info --format json
+# Flash (polls until both boards report the new version)
+klvr-tool firmware-update --version 1.8.9-beta -y
 ```
 
-## 🔧 Advanced Usage
+Or in one shot:
 
-### Global Options
-All commands support these global options:
 ```bash
---verbose          # Enable detailed logging
---log-file <path>  # Save logs to specific file
---session-id <id>  # Track support session
+klvr-tool firmware-update https://abc123.trycloudflare.com --version 1.8.9-beta -y
 ```
 
-### Environment Variables
+### What the update does (safe order)
+
+1. Preflight (info + latency)
+2. Upload **main**, then **rear**
+3. Reboot **main**, then **rear** (both boards — required for RS485 baud renegotiation)
+4. Poll `/api/v2/device/firmware_version` until both match the target (or fail hard)
+
+`--force` reflash even if already on that version. Without it, same-version is skipped.
+
+## Other commands
+
 ```bash
-export KLVR_LOG_LEVEL=debug    # Set logging level
-export KLVR_LOG_DIR=./logs     # Set log directory
-export KLVR_TUNNEL_PROVIDER=cloudflare  # Default tunnel provider
+klvr-tool device-info [target]
+klvr-tool battery-monitor [target] --test-type aa
+klvr-tool clear-target
+klvr-tool firmware-update --rear-only --version 1.8.9-beta
 ```
 
-## 📁 Project Structure
+Support engineer CLI:
 
-```
-klvr-support-tool/
-├── 📁 src/
-│   ├── core/                   # Core functionality modules
-│   │   ├── device-discovery.js # Device discovery and connection
-│   │   ├── firmware-manager.js # Firmware update management
-│   │   ├── tunnel-manager.js   # Remote tunnel management
-│   │   └── logger.js           # Centralized logging
-│   ├── cli/                    # Command-line interfaces
-│   │   ├── klvr-tool.js        # Main CLI (end-users)
-│   │   └── support-cli.js      # Advanced CLI (support engineers)
-│   └── utils/                  # Utility functions
-│       └── system-test.js      # System validation tests
-├── 📁 tools/                   # Diagnostic tools
-│   └── battery-monitor.py      # Battery detection monitor
-├── 📁 firmware/                # Firmware files directory
-│   ├── main_v1.8.3.signed.bin # Stable main firmware
-│   ├── rear_v1.8.3.signed.bin # Stable rear firmware
-│   ├── main_v1.8.3-beta4.signed.bin # Beta main firmware
-│   └── rear_v1.8.3-beta4.signed.bin # Beta rear firmware
-├── 📁 logs/                    # Session logs (auto-created)
-├── 📁 scripts/                 # Build and deployment scripts
-├── 📦 package.json             # npm package configuration
-├── 🔧 install-and-update.sh    # macOS/Linux installer
-├── 🔧 install-and-update.ps1   # Windows PowerShell installer
-└── 📖 README.md                # This file
+```bash
+npm run support
+# or
+node src/cli/support-cli.js firmware-update <tunnel-url> --version 1.8.9-beta -y
 ```
 
-## 🌐 Remote Support Workflow
+## Windows notes
 
-### For End Users:
-1. **Run the installer**: One command downloads and sets up everything
-2. **Select "Remote Support"**: Choose option 2 in the interactive menu
-3. **Share the tunnel URL**: Tool automatically creates secure tunnel and displays URL
-4. **Keep terminal open**: Session stays active until you press Ctrl+C
+- **Bonjour / mDNS** is often missing → the tool falls back to subnet HTTP scan and manual IP/tunnel entry.
+- **Python** for battery monitor: either `python` or `python3` on PATH is fine.
+- **cloudflared** installs under `%USERPROFILE%\.klvr-support\bin\cloudflared.exe` (no admin).
+- Installer no longer forces Administrator when Node + Git are already present.
 
-### For Support Engineers:
-1. **Get tunnel URL** from end user
-2. **Use normal commands** with the tunnel URL:
-   ```bash
-   klvr-tool device-info https://abc123.trycloudflare.com
-   klvr-tool battery-monitor https://abc123.trycloudflare.com --test-type aa
-   klvr-tool firmware-update https://abc123.trycloudflare.com
-   ```
-3. **Access all diagnostics** as if device was local
+## macOS notes
 
-## 🛡️ Security & Privacy
+- mDNS usually works out of the box.
+- If Homebrew is available, you can also `brew install cloudflared` instead of the local install.
 
-- **Secure tunnels**: All remote access uses HTTPS encryption
-- **Temporary access**: Tunnels automatically close when session ends
-- **No data collection**: No user data is stored or transmitted to KLVR servers
-- **Local processing**: All operations happen locally on user's device
+## Development
 
-## 🆘 Troubleshooting
+```bash
+git clone https://github.com/KLVR-no/klvr-support-tool.git
+cd klvr-support-tool
+npm install
+npm test
+npm start
+```
 
-### Common Issues
+## Support
 
-**Windows: "Execution of scripts is disabled"**
-- Run PowerShell as Administrator
-- Use the full command: `Set-ExecutionPolicy Bypass -Scope Process -Force; iex (iwr -useb https://raw.githubusercontent.com/KLVR-no/klvr-support-tool/main/install-and-update.ps1)`
-- The script will automatically handle execution policy
-
-**Windows: "Access denied" or installation fails**
-- Ensure you're running PowerShell as Administrator
-- Check antivirus software isn't blocking the installation
-- Try disabling Windows Defender temporarily during installation
-
-**"No devices found"**
-- Ensure devices are powered on
-- Check network connectivity
-- Verify Bonjour/mDNS is enabled
-
-**"Connection failed"**
-- Verify IP address is correct
-- Check device is on same network
-- Ensure device is not in sleep mode
-
-**"Tunnel creation failed"**
-- Check internet connectivity
-- Verify cloudflared installation
-- Try running with `--verbose` for detailed logs
-
-### Getting Help
-
-1. **Check logs**: Use `--verbose` flag for detailed information
-2. **Session tracking**: Use `--session-id` for support correlation
-3. **Export diagnostics**: Use `--format json` to share device information
-4. **Contact support**: Include session logs when requesting help
-
-## 📄 License
-
-MIT License - Internal KLVR tool for support operations.
-
-## 📧 Support
-
-- **Issues**: [GitHub Issues](https://github.com/KLVR-no/klvr-support-tool/issues)
-- **Email**: support@klvr.no
-- **Documentation**: [Wiki](https://github.com/KLVR-no/klvr-support-tool/wiki)
+stian@klvr.no

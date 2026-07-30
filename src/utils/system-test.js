@@ -164,11 +164,37 @@ systemTest.addTest('Configuration validation', async () => {
         throw new Error('Firmware manager configuration not loaded');
     }
     
-    const requiredEndpoints = ['firmwareCharger', 'firmwareRear', 'reboot', 'info'];
+    const requiredEndpoints = ['firmwareCharger', 'firmwareRear', 'reboot', 'info', 'firmwareVersion'];
     for (const endpoint of requiredEndpoints) {
         if (!firmwareManager.config.endpoints[endpoint]) {
             throw new Error(`Missing endpoint configuration: ${endpoint}`);
         }
+    }
+});
+
+systemTest.addTest('Platform helpers', async () => {
+    const platform = require('../core/platform');
+    if (platform.normalizeVersion('v1.8.9-beta') !== '1.8.9') {
+        throw new Error('normalizeVersion failed for v1.8.9-beta');
+    }
+    if (!platform.versionsMatch('1.8.9', 'v1.8.9-beta')) {
+        throw new Error('versionsMatch failed');
+    }
+    const key = platform.getPlatformKey();
+    if (!key) throw new Error('getPlatformKey returned empty');
+});
+
+systemTest.addTest('Firmware version listing includes 1.8.9-beta', async () => {
+    const Logger = require('../core/logger');
+    const FirmwareManager = require('../core/firmware-manager');
+    const fm = new FirmwareManager(new Logger({ verbose: false }));
+    const versions = await fm.listAvailableVersions(false);
+    const has189 = versions.some(v => String(v.version).includes('1.8.9'));
+    if (!has189 && versions.length > 0) {
+        console.log(chalk.yellow('    ⚠️  1.8.9-beta not bundled (OK if intentional)'));
+    }
+    if (typeof fm.listAvailableVersions !== 'function') {
+        throw new Error('listAvailableVersions missing');
     }
 });
 

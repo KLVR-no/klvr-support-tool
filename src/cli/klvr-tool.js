@@ -2,141 +2,197 @@
 
 const { Command } = require('commander');
 const chalk = require('chalk');
-const ora = require('ora');
 const inquirer = require('inquirer');
 const path = require('path');
+const { spawn } = require('child_process');
 
-// Import core modules
 const DeviceDiscovery = require('../core/device-discovery');
 const FirmwareManager = require('../core/firmware-manager');
 const TunnelManager = require('../core/tunnel-manager');
 const Logger = require('../core/logger');
+const {
+  findPython,
+  loadActiveTarget,
+  saveActiveTarget,
+  clearActiveTarget
+} = require('../core/platform');
 
 const program = new Command();
 
-// CLI Configuration
 program
   .name('klvr-tool')
   .description('Klvr Charger Pro - Professional firmware updater and support tools')
-  .version('2.0.0');
+  .version('2.1.0');
 
-// Global options
 program
   .option('-v, --verbose', 'Enable verbose logging')
   .option('--log-file <path>', 'Save logs to file')
   .option('--session-id <id>', 'Session ID for support tracking');
 
-// Firmware Update Command
+async function resolveDevice(target, logger, deviceDiscovery) {
+  if (target) {
+    const device = await deviceDiscovery.connectToTarget(target);
+    await saveActiveTarget(target);
+    return device;
+  }
+
+  const saved = await loadActiveTarget();
+  if (saved) {
+    logger.info(`Using saved target: ${saved}`);
+    try {
+      return await deviceDiscovery.connectToTarget(saved);
+    } catch (err) {
+      logger.warn(`Saved target unreachable (${err.message}); clearing and rediscovering.`);
+      await clearActiveTarget();
+    }
+  }
+
+  return deviceDiscovery.discoverAndSelect();
+}
+
+program
+  .command('use-target <target>')
+  .description('Save an IP or tunnel URL for subsequent commands')
+  .action(async (target) => {
+    const logger = new Logger(program.opts());
+    const discovery = new DeviceDiscovery(logger);
+    try {
+      const device = await discovery.connectToTarget(target);
+      await saveActiveTarget(target);
+      logger.success(`Saved target: ${target}`);
+      logger.info(`Device: ${device.deviceName} (${device.ip || device.url})`);
+    } catch (error) {
+      logger.error(`Could not reach target: ${error.message}`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('clear-target')
+  .description('Clear the saved IP / tunnel URL')
+  .action(async () => {
+    await clearActiveTarget();
+    console.log('Cleared saved target.');
+  });
+
 program
   .command('firmware-update [target]')
-  .description('Update firmware on Klvr device')
-  .option('-f, --firmware-dir <path>', 'Firmware directory path', './firmware')
+  .description('Update firmware on Klvr device (LAN IP or remote tunnel URL)')
+  .option('-f, --firmware-dir <path>', 'Firmware directory path')
   .option('--main <file>', 'Specific main firmware file')
   .option('--rear <file>', 'Specific rear firmware file')
+  .option('--version <version>', 'Firmware version to install (e.g. 1.8.9-beta or v1.8.9-beta)')
   .option('--rear-only', 'Update only the rear board firmware')
   .option('--force', 'Force update even if same version')
+  .option('-y, --yes', 'Skip confirmation prompt')
   .action(async (target, options) => {
-    const logger = new Logger(options);
-    logger.info('🔄 Starting firmware update...');
-    
+    const logger = new Logger({ ...program.opts(), ...options });
+    logger.info('Starting firmware update...');
+
     try {
       const firmwareManager = new FirmwareManager(logger);
       const deviceDiscovery = new DeviceDiscovery(logger);
-      
-      // Discover or connect to target
-      const device = target ? 
-        await deviceDiscovery.connectToTarget(target) :
-        await deviceDiscovery.discoverAndSelect();
-      
-      // Get available firmware versions for selection
-      const availableVersions = await getAvailableFirmwareVersions(firmwareManager, options.rearOnly);
-      
-      if (availableVersions.length === 0) {
-        logger.error('No firmware files found in firmware directory');
-        process.exit(1);
-      }
-      
-      // Let user select firmware version
-      const versionMessage = options.rearOnly ? 
-        'Select rear firmware version to install:' : 
-        'Select firmware version to install:';
-      
-      const { selectedVersion } = await inquirer.prompt([
-        {
-          type: 'list',
-          name: 'selectedVersion',
-          message: versionMessage,
-          choices: availableVersions.map((version) => ({
-            name: version.version,
-            value: version,
-            short: version.version
-          }))
+      const device = await resolveDevice(target, logger, deviceDiscovery);
+
+      const firmwareDir = options.firmwareDir
+        || path.join(__dirname, '../../firmware');
+
+      let selected = null;
+      if (options.main && options.rear) {
+        selected = {
+          version: path.basename(options.main),
+          mainPath: options.main,
+          rearPath: options.rear
+        };
+      } else if (options.version) {
+        const files = await firmwareManager.findAndSelectFirmwareFiles({
+          firmwareDir,
+          version: options.version,
+          rearOnly: options.rearOnly
+        });
+        selected = {
+          version: options.version.startsWith('v') ? options.version : `v${options.version}`,
+          mainPath: files.main,
+          rearPath: files.rear
+        };
+      } else {
+        const availableVersions = await firmwareManager.listAvailableVersions(options.rearOnly);
+        if (availableVersions.length === 0) {
+          logger.error('No firmware files found in firmware directory');
+          process.exit(1);
         }
-      ]);
-      
-      // Show current version running on device
+
+        const { selectedVersion } = await inquirer.prompt([
+          {
+            type: 'list',
+            name: 'selectedVersion',
+            message: options.rearOnly
+              ? 'Select rear firmware version to install:'
+              : 'Select firmware version to install:',
+            choices: availableVersions.map((version) => ({
+              name: version.version,
+              value: version,
+              short: version.version
+            }))
+          }
+        ]);
+        selected = selectedVersion;
+      }
+
       let currentVersion = 'unknown';
       try {
-        const http = require('http');
-        currentVersion = await new Promise((resolve) => {
-          const req = http.get(`http://${device.ip}:${device.port || 8000}/api/v2/device/firmware_version`,
-            { timeout: 4000 }, (res) => {
-              let data = '';
-              res.on('data', c => data += c);
-              res.on('end', () => {
-                try { resolve(JSON.parse(data).version || JSON.parse(data).firmware_version || data.trim()); }
-                catch (_) { resolve(data.trim() || 'unknown'); }
-              });
-            });
-          req.on('error', () => resolve('unknown'));
-          req.on('timeout', () => { req.destroy(); resolve('unknown'); });
-        });
-      } catch (_) {}
+        const versions = await firmwareManager._getFirmwareVersions(device);
+        currentVersion = `rear=${versions.firmwareRear} main=${versions.firmwareMain}`;
+      } catch (_) {
+        // preflight will retry
+      }
 
-      // Show firmware details
       console.log('');
-      console.log(chalk.cyan('📋 Firmware update summary:'));
-      console.log(`   Device:          ${chalk.white(device.deviceName)} (${device.ip})`);
-      console.log(`   Current version: ${chalk.yellow(currentVersion)}`);
-      console.log(`   Install version: ${chalk.green(selectedVersion.version)}`);
+      console.log(chalk.cyan('Firmware update summary:'));
+      console.log(`   Device:          ${chalk.white(device.deviceName)} (${device.ip || device.url})`);
+      console.log(`   Current:         ${chalk.yellow(currentVersion)}`);
+      console.log(`   Install:         ${chalk.green(selected.version)}`);
+      console.log(`   Path:            ${device.url && String(device.url).startsWith('https') ? chalk.magenta('REMOTE TUNNEL') : chalk.gray('LAN')}`);
       if (options.rearOnly) {
         console.log(`   Scope:           ${chalk.gray('rear board only')}`);
       }
       console.log('');
 
-      // Confirm update
-      const updateType = options.rearOnly ? 'rear board only' : 'both boards';
-      const { confirm } = await inquirer.prompt([
-        {
-          type: 'confirm',
-          name: 'confirm',
-          message: `Install ${selectedVersion.version} (${updateType}) on ${device.deviceName}?`,
-          default: false
+      if (!options.yes) {
+        const { confirm } = await inquirer.prompt([
+          {
+            type: 'confirm',
+            name: 'confirm',
+            message: `Install ${selected.version} on ${device.deviceName}?`,
+            default: false
+          }
+        ]);
+        if (!confirm) {
+          logger.info('Firmware update cancelled by user');
+          return;
         }
-      ]);
-      
-      if (!confirm) {
-        logger.info('Firmware update cancelled by user');
-        return;
       }
-      
-      // Update firmware with selected version
+
       const firmwareOptions = {
-        ...options,
-        rear: selectedVersion.rearPath
+        firmwareDir,
+        force: !!options.force,
+        rearOnly: !!options.rearOnly,
+        rear: selected.rearPath,
+        main: selected.mainPath
       };
-      
-      if (!options.rearOnly) {
-        firmwareOptions.main = selectedVersion.mainPath;
+
+      const result = await firmwareManager.updateDevice(device, firmwareOptions);
+
+      if (result.skipped) {
+        logger.success(`Already on ${result.newVersion} — nothing to do.`);
+      } else if (result.confirmed) {
+        logger.success(`Firmware update confirmed: ${result.oldVersion} → ${result.newVersion}`);
+      } else {
+        logger.success('Firmware update completed.');
       }
-      
-      await firmwareManager.updateDevice(device, firmwareOptions);
-      
-      logger.success('✅ Firmware update completed successfully!');
-      
     } catch (error) {
       if (error.message === 'Cancelled by user') {
-        console.log('\n👋 Update cancelled.');
+        console.log('\nUpdate cancelled.');
         process.exit(0);
       }
       console.log('');
@@ -147,279 +203,185 @@ program
     }
   });
 
-// Battery Monitor Command
 program
   .command('battery-monitor [target]')
   .description('Monitor battery detection in real-time')
   .option('-t, --test-type <type>', 'Test type: aa, aaa, or both', 'both')
   .option('-d, --duration <minutes>', 'Monitor duration in minutes', '0')
-  .option('-i, --interval <ms>', 'Polling interval in milliseconds', '500')
-  .option('--export <format>', 'Export format: json, csv, txt', 'txt')
   .action(async (target, options) => {
-    const logger = new Logger(options);
-    logger.info('🔍 Starting battery detection monitor...');
-    
+    const logger = new Logger(program.opts());
+    logger.info('Starting battery detection monitor...');
+
     try {
-      const { spawn } = require('child_process');
       const deviceDiscovery = new DeviceDiscovery(logger);
-      
-      // Get target URL
-      const device = target ? 
-        await deviceDiscovery.connectToTarget(target) :
-        await deviceDiscovery.discoverAndSelect();
-      
+      const device = await resolveDevice(target, logger, deviceDiscovery);
       const targetUrl = device.url || `http://${device.ip}:8000`;
-      
-      // Launch Python monitor
+
+      const py = await findPython();
       const args = [
+        ...py.prefixArgs,
         path.join(__dirname, '../../tools/battery-monitor.py'),
         targetUrl,
         options.testType
       ];
-      
       if (options.duration !== '0') {
         args.push('--duration', options.duration);
       }
-      
-      const monitor = spawn('python3', args, { stdio: 'inherit' });
-      
+
+      const monitor = spawn(py.command, args, { stdio: 'inherit', windowsHide: true });
       process.on('SIGINT', () => {
         monitor.kill();
-        logger.info('🛑 Monitor stopped by user');
+        logger.info('Monitor stopped by user');
         process.exit(0);
       });
-      
     } catch (error) {
-      logger.error('❌ Battery monitor failed:', error.message);
+      logger.error(`Battery monitor failed: ${error.message}`);
       process.exit(1);
     }
   });
 
-// Remote Support Command
 program
   .command('remote-support')
-  .description('Start remote support session with tunnel')
-  .option('--tunnel-provider <provider>', 'Tunnel provider: cloudflare, ngrok', 'cloudflare')
-  .option('--custom-domain <domain>', 'Use custom domain for tunnel')
+  .description('Start remote support session with tunnel (customer side)')
+  .option('--tunnel-provider <provider>', 'Tunnel provider: cloudflare', 'cloudflare')
   .action(async (options) => {
-    const logger = new Logger(options);
-    logger.info('🌐 Starting remote support session...');
-    
+    const logger = new Logger(program.opts());
+    logger.info('Starting remote support session...');
+
     try {
       const tunnelManager = new TunnelManager(logger);
       const deviceDiscovery = new DeviceDiscovery(logger);
-      
-      // Discover device
       const device = await deviceDiscovery.discoverAndSelect();
-      
-      // Create tunnel
       const tunnel = await tunnelManager.createTunnel(device, options);
-      
-      logger.info('🎉 Remote support session active!');
-      logger.info(`🔗 Tunnel URL: ${chalk.green(tunnel.url)}`);
-      logger.info('📋 Share this URL with Klvr support');
-      logger.info('⚠️  Keep this terminal open during support session');
-      logger.info('📝 Press Ctrl+C to end session');
-      
-      // Keep alive
+
+      console.log('');
+      logger.success('Remote support session active!');
+      console.log('');
+      console.log(chalk.green('  Share this URL with Klvr support:'));
+      console.log(chalk.bold.white(`  ${tunnel.url}`));
+      console.log('');
+      console.log(chalk.cyan('  Support can then run:'));
+      console.log(`    klvr-tool use-target ${tunnel.url}`);
+      console.log('    klvr-tool device-info');
+      console.log('    klvr-tool firmware-update --version 1.8.9-beta -y');
+      console.log('');
+      console.log(chalk.yellow('  Keep this terminal open. Press Ctrl+C to end the session.'));
+      console.log('');
+
       process.on('SIGINT', async () => {
-        logger.info('🛑 Ending remote support session...');
+        logger.info('Ending remote support session...');
         await tunnelManager.closeTunnel(tunnel);
-        logger.success('✅ Session ended');
+        logger.success('Session ended');
         process.exit(0);
       });
-      
-      // Keep process alive
+
       await new Promise(() => {});
-      
     } catch (error) {
       if (error.message === 'Cancelled by user') {
-        console.log('\n👋 Cancelled.');
+        console.log('\nCancelled.');
         process.exit(0);
       }
       console.log('');
       logger.error(`Remote support session failed: ${error.message}`);
-      console.log('  Contact Klvr support at stian@klvr.no for help.');
       process.exit(1);
     }
   });
 
-// Device Info Command
 program
   .command('device-info [target]')
   .description('Get device information and status')
-  .option('--format <format>', 'Output format: json, table, yaml', 'table')
+  .option('--format <format>', 'Output format: json, table', 'table')
   .action(async (target, options) => {
-    const logger = new Logger(options);
-    
+    const logger = new Logger(program.opts());
     try {
       const deviceDiscovery = new DeviceDiscovery(logger);
-      const device = target ? 
-        await deviceDiscovery.connectToTarget(target) :
-        await deviceDiscovery.discoverAndSelect();
-      
+      const device = await resolveDevice(target, logger, deviceDiscovery);
       const info = await deviceDiscovery.getDetailedInfo(device);
-      
+
       if (options.format === 'json') {
         console.log(JSON.stringify(info, null, 2));
-      } else if (options.format === 'table') {
-        console.table(info);
       } else {
-        logger.info('📊 Device Information:');
+        console.log('');
         Object.entries(info).forEach(([key, value]) => {
-          logger.info(`   ${key}: ${value}`);
+          console.log(`  ${key}: ${value}`);
         });
+        console.log('');
       }
-      
     } catch (error) {
       if (error.message === 'Cancelled by user') {
-        console.log('\n👋 Cancelled.');
         process.exit(0);
       }
-      console.log('');
       logger.error(`Could not get device info: ${error.message}`);
       process.exit(1);
     }
   });
 
-// Interactive End-User Mode
 program
   .command('interactive')
-  .description('Start interactive mode for end users')
+  .description('Start interactive mode')
   .action(async () => {
     console.log(chalk.blue('='.repeat(60)));
     console.log(chalk.blue('    Klvr Charger Pro Tools'));
     console.log(chalk.blue('='.repeat(60)));
-    
+
+    const saved = await loadActiveTarget();
+    if (saved) {
+      console.log(chalk.gray(`  Saved target: ${saved}`));
+    }
+
     const { action } = await inquirer.prompt([
       {
         type: 'list',
         name: 'action',
         message: 'What would you like to do?',
         choices: [
-          { name: '🔄 Update Firmware (Both Boards)', value: 'firmware' },
-          { name: '🔧 Update Rear Board Only', value: 'firmware-rear' },
-          { name: '🌐 Start Remote Support Session', value: 'remote' },
-          { name: '❌ Exit', value: 'exit' }
+          { name: 'Update Firmware (Both Boards)', value: 'firmware' },
+          { name: 'Update Rear Board Only', value: 'firmware-rear' },
+          { name: 'Start Remote Support Session (customer)', value: 'remote' },
+          { name: 'Connect to Tunnel / IP (supporter)', value: 'use-target' },
+          { name: 'Device Info', value: 'info' },
+          { name: 'Exit', value: 'exit' }
         ]
       }
     ]);
-    
+
     switch (action) {
       case 'firmware':
-        await program.parseAsync(['node', 'klvr-tool', 'firmware-update']);
+        await program.parseAsync(['node', 'klvr-tool', 'firmware-update'], { from: 'user' });
         break;
       case 'firmware-rear':
-        await program.parseAsync(['node', 'klvr-tool', 'firmware-update', '--rear-only']);
+        await program.parseAsync(['node', 'klvr-tool', 'firmware-update', '--rear-only'], { from: 'user' });
         break;
       case 'remote':
-        await program.parseAsync(['node', 'klvr-tool', 'remote-support']);
+        await program.parseAsync(['node', 'klvr-tool', 'remote-support'], { from: 'user' });
+        break;
+      case 'use-target': {
+        const { url } = await inquirer.prompt([
+          {
+            type: 'input',
+            name: 'url',
+            message: 'IP or tunnel URL:'
+          }
+        ]);
+        await program.parseAsync(['node', 'klvr-tool', 'use-target', url.trim()], { from: 'user' });
+        break;
+      }
+      case 'info':
+        await program.parseAsync(['node', 'klvr-tool', 'device-info'], { from: 'user' });
         break;
       case 'exit':
-        console.log('👋 Goodbye!');
+        console.log('Goodbye!');
         process.exit(0);
         break;
     }
   });
 
-// Helper function to get available firmware versions
-async function getAvailableFirmwareVersions(firmwareManager, rearOnly = false) {
-  try {
-    const firmwareDir = path.join(__dirname, '../../firmware');
-    const fs = require('fs').promises;
-    const files = await fs.readdir(firmwareDir);
-    
-    // Filter for signed binary files
-    const mainFiles = files.filter(file => file.startsWith('main_') && file.endsWith('.signed.bin'));
-    const rearFiles = files.filter(file => file.startsWith('rear_') && file.endsWith('.signed.bin'));
-    
-    if (rearOnly) {
-      if (rearFiles.length === 0) {
-        return [];
-      }
-    } else {
-      if (mainFiles.length === 0 || rearFiles.length === 0) {
-        return [];
-      }
-    }
-    
-    // Sort by modification time and add stats
-    const sortFiles = async (fileList) => {
-      const filesWithStats = await Promise.all(
-        fileList.map(async (file) => {
-          const filePath = path.join(firmwareDir, file);
-          const stats = await fs.stat(filePath);
-          return { file, mtime: stats.mtime };
-        })
-      );
-      return filesWithStats.sort((a, b) => b.mtime - a.mtime);
-    };
-    
-    const sortedMainFiles = await sortFiles(mainFiles);
-    const sortedRearFiles = await sortFiles(rearFiles);
-    
-    if (rearOnly) {
-      // For rear-only updates, create version objects from rear files only
-      return sortedRearFiles.map(rearFile => {
-        const version = extractFirmwareVersion(rearFile.file);
-        return {
-          version: version || 'Unknown',
-          rear: rearFile,
-          mtime: rearFile.mtime,
-          rearPath: path.join(firmwareDir, rearFile.file)
-        };
-      });
-    } else {
-      // Find matched firmware pairs using the same logic as firmware manager
-      const matchedPairs = findMatchedFirmwarePairs(sortedMainFiles, sortedRearFiles, firmwareDir);
-      return matchedPairs;
-    }
-    
-  } catch (error) {
-    console.error(`Failed to get firmware versions: ${error.message}`);
-    return [];
+if (require.main === module) {
+  if (process.argv.length === 2) {
+    program.parseAsync(['node', 'klvr-tool', 'interactive'], { from: 'user' });
+  } else {
+    program.parse();
   }
-}
-
-// Helper function to find matched firmware pairs
-function findMatchedFirmwarePairs(mainFiles, rearFiles, firmwareDir) {
-  const pairs = [];
-  
-  for (const mainFile of mainFiles) {
-    const version = extractFirmwareVersion(mainFile.file);
-    if (!version) continue;
-    
-    const matchingRear = rearFiles.find(rearFile => {
-      const rearVersion = extractFirmwareVersion(rearFile.file);
-      return rearVersion === version;
-    });
-    
-    if (matchingRear) {
-      pairs.push({
-        version: version,
-        main: mainFile,
-        rear: matchingRear,
-        mtime: mainFile.mtime > matchingRear.mtime ? mainFile.mtime : matchingRear.mtime,
-        mainPath: path.join(firmwareDir, mainFile.file),
-        rearPath: path.join(firmwareDir, matchingRear.file)
-      });
-    }
-  }
-  
-  return pairs.sort((a, b) => b.mtime - a.mtime);
-}
-
-// Helper function to extract firmware version from filename
-function extractFirmwareVersion(filename) {
-  const match = filename.match(/_(v\d+\.\d+\.\d+(?:beta|alpha|rc)?(?:-[^.]+)?)\.signed\.bin$/);
-  return match ? match[1] : null;
-}
-
-// Default to interactive mode if no command provided
-if (process.argv.length === 2) {
-  program.parseAsync(['node', 'klvr-tool', 'interactive']);
-} else {
-  program.parse();
 }
 
 module.exports = program;

@@ -40,6 +40,8 @@ program
   .option('--rear <file>', 'Specific rear firmware file')
   .option('--rear-only', 'Update only the rear board firmware')
   .option('--force', 'Force update even if same version')
+  .option('--version <version>', 'Firmware version to install (e.g. 1.8.9-beta)')
+  .option('-y, --yes', 'Skip confirmation prompt')
   .option('--validate-only', 'Only validate firmware files, do not update')
   .option('--backup-current', 'Backup current firmware before update')
   .action(async (target, options) => {
@@ -67,27 +69,28 @@ program
         return;
       }
       
-      // If specific firmware files are provided, use them directly
-      if (options.main && options.rear) {
-        logger.info('Using specified firmware files');
-        const result = await firmwareManager.updateDevice(device, options);
-        logger.success('✅ Advanced firmware update completed!');
-        
+      // If specific firmware files or version are provided, use them directly
+      if ((options.main && options.rear) || options.version) {
+        logger.info(options.version
+          ? `Using firmware version ${options.version}`
+          : 'Using specified firmware files');
+        const result = await firmwareManager.updateDevice(device, {
+          ...options,
+          force: !!options.force
+        });
+        logger.success('Advanced firmware update completed!');
         if (result.oldVersion && result.newVersion) {
-          logger.info(`📊 Version Change: ${result.oldVersion} → ${result.newVersion}`);
+          logger.info(`Version Change: ${result.oldVersion} → ${result.newVersion}`);
         }
         return;
       }
-      
-      // Get available firmware versions for selection
-      const availableVersions = await getAvailableFirmwareVersions(firmwareManager);
-      
+
+      const availableVersions = await firmwareManager.listAvailableVersions(!!options.rearOnly);
       if (availableVersions.length === 0) {
         logger.error('No firmware files found in firmware directory');
         process.exit(1);
       }
-      
-      // Let support engineer select firmware version
+
       const { selectedVersion } = await inquirer.prompt([
         {
           type: 'list',
@@ -100,42 +103,38 @@ program
           }))
         }
       ]);
-      
-      // Show firmware details
-      console.log('\n' + chalk.cyan('📋 Firmware Details:'));
+
+      console.log('\n' + chalk.cyan('Firmware Details:'));
       console.log(`   Version: ${chalk.white(selectedVersion.version)}`);
-      console.log(`   Main: ${chalk.gray(selectedVersion.main.file)}`);
-      console.log(`   Rear: ${chalk.gray(selectedVersion.rear.file)}`);
-      console.log(`   Modified: ${chalk.gray(selectedVersion.mtime.toLocaleString())}`);
-      
-      // Confirm update
-      const { confirm } = await inquirer.prompt([
-        {
-          type: 'confirm',
-          name: 'confirm',
-          message: `Install ${selectedVersion.version} firmware on ${device.deviceName}?`,
-          default: false
-        }
-      ]);
-      
-      if (!confirm) {
-        logger.info('Firmware update cancelled by user');
-        return;
+      if (selectedVersion.mainPath) {
+        console.log(`   Main: ${chalk.gray(selectedVersion.mainPath)}`);
       }
-      
-      // Update firmware with selected version
-      const firmwareOptions = {
+      console.log(`   Rear: ${chalk.gray(selectedVersion.rearPath)}`);
+
+      if (!options.yes) {
+        const { confirm } = await inquirer.prompt([
+          {
+            type: 'confirm',
+            name: 'confirm',
+            message: `Install ${selectedVersion.version} firmware on ${device.deviceName}?`,
+            default: false
+          }
+        ]);
+        if (!confirm) {
+          logger.info('Firmware update cancelled by user');
+          return;
+        }
+      }
+
+      const result = await firmwareManager.updateDevice(device, {
         ...options,
         main: selectedVersion.mainPath,
-        rear: selectedVersion.rearPath
-      };
-      
-      const result = await firmwareManager.updateDevice(device, firmwareOptions);
-      logger.success('✅ Advanced firmware update completed!');
-      
-      // Log detailed results
+        rear: selectedVersion.rearPath,
+        force: !!options.force
+      });
+      logger.success('Advanced firmware update completed!');
       if (result.oldVersion && result.newVersion) {
-        logger.info(`📊 Version Change: ${result.oldVersion} → ${result.newVersion}`);
+        logger.info(`Version Change: ${result.oldVersion} → ${result.newVersion}`);
       }
       
     } catch (error) {

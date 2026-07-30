@@ -19,20 +19,33 @@ try {
     exit 1
 }
 
-# Check for administrator privileges
+# Check for administrator privileges (only required when installing Node/Git)
 function Test-Administrator {
     $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
     $principal = New-Object Security.Principal.WindowsPrincipal($currentUser)
     return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
-if (-not (Test-Administrator)) {
-    Write-Host "❌ This script requires administrator privileges to install system dependencies." -ForegroundColor Red
-    Write-Host "ℹ️  Please run PowerShell as Administrator and try again:" -ForegroundColor Cyan
-    Write-Host "   1. Right-click on PowerShell" -ForegroundColor Yellow
-    Write-Host "   2. Select 'Run as Administrator'" -ForegroundColor Yellow
-    Write-Host "   3. Run this command again" -ForegroundColor Yellow
+function Test-CommandExistsEarly {
+    param([string]$Command)
+    $null = Get-Command $Command -ErrorAction SilentlyContinue
+    return $?
+}
+
+$HasNode = Test-CommandExistsEarly "node"
+$HasGit = Test-CommandExistsEarly "git"
+$NeedsDeps = -not ($HasNode -and $HasGit)
+
+if ($NeedsDeps -and -not (Test-Administrator)) {
+    Write-Host "❌ Node.js and/or Git are missing, and installing them needs Administrator." -ForegroundColor Red
+    Write-Host "ℹ️  Either:" -ForegroundColor Cyan
+    Write-Host "   1. Install Node.js (https://nodejs.org) and Git, then re-run this command, OR" -ForegroundColor Yellow
+    Write-Host "   2. Right-click PowerShell → Run as Administrator → run this command again" -ForegroundColor Yellow
     exit 1
+}
+
+if (-not $NeedsDeps) {
+    Write-Host "✅ Node.js and Git already present — continuing without Administrator elevation." -ForegroundColor Green
 }
 
 # Configuration
