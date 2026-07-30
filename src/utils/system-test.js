@@ -186,6 +186,15 @@ systemTest.addTest('Platform helpers', async () => {
 
 systemTest.addTest('Multi-home network helpers', async () => {
     const net = require('../core/network');
+    if (net.netmaskToCidr('255.255.255.0') !== 24) {
+        throw new Error(`netmaskToCidr /24 failed: got ${net.netmaskToCidr('255.255.255.0')}`);
+    }
+    if (net.netmaskToCidr('255.255.0.0') !== 16) {
+        throw new Error('netmaskToCidr /16 failed');
+    }
+    if (net.netmaskToCidr('255.255.255.255') !== 32) {
+        throw new Error('netmaskToCidr /32 failed');
+    }
     if (!net.sameSubnet('10.101.0.56', '10.101.0.60', '255.255.255.0')) {
         throw new Error('sameSubnet /24 failed');
     }
@@ -195,8 +204,11 @@ systemTest.addTest('Multi-home network helpers', async () => {
     if (net.sameSubnet('10.101.0.56', '192.168.1.10', '255.255.255.0')) {
         throw new Error('sameSubnet should reject different networks');
     }
-    if (net.interfacePreference('en0') <= net.interfacePreference('Wi-Fi')) {
-        throw new Error('wired preference should beat Wi-Fi name');
+    if (net.interfacePreference('en7') <= net.interfacePreference('Wi-Fi')) {
+        throw new Error('USB/en7 preference should beat Wi-Fi');
+    }
+    if (net.interfacePreference('utun5') > -50) {
+        throw new Error('utun should be ignored/vpn preference');
     }
     const tryList = net.localAddressesToTry('10.101.0.56');
     if (!Array.isArray(tryList) || tryList.length < 1) {

@@ -30,8 +30,6 @@ class SupportHub {
   }
 
   async start() {
-    describeMultiHome(this.logger);
-
     this.server = http.createServer((req, res) => {
       this._handle(req, res).catch((err) => {
         this.logger.debug(`Hub request error: ${err.message}`);
@@ -92,7 +90,7 @@ class SupportHub {
     }
 
     try {
-      const scanned = await this.discovery.discoverDevices();
+      const scanned = await this.discovery.discoverDevices({ quiet: true });
       for (const d of scanned) {
         if (!found.some((f) => f.ip === d.ip)) found.push(d);
       }

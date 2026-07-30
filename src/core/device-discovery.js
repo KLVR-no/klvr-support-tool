@@ -35,20 +35,25 @@ class DeviceDiscovery {
      * interface in parallel. Subnet probes bind to that interface's address
      * so Wi‑Fi being up does not steal direct-cable traffic.
      */
-    async discoverDevices() {
-        this.logger.step('🔍 Searching for Klvr devices on your network...');
-        describeMultiHome(this.logger);
+    async discoverDevices(options = {}) {
+        const quiet = !!options.quiet;
+        if (!quiet) {
+            this.logger.step('🔍 Searching for Klvr devices on your network...');
+            describeMultiHome(this.logger);
+        }
 
         const [mdnsDevices, scanDevices] = await Promise.all([
             this._discoverViaMdns(),
             this._scanNetworkInterfaces()
         ]);
 
-        if (mdnsDevices.length === 0 && process.platform === 'win32') {
-            this.logger.info('mDNS/Bonjour found nothing — common on Windows without Bonjour Print Services.');
-            this.logger.info('Falling back to subnet HTTP scan (and you can always enter an IP manually).');
-        } else if (mdnsDevices.length === 0) {
-            this.logger.debug('mDNS found nothing; relying on subnet scan / manual IP.');
+        if (!quiet) {
+            if (mdnsDevices.length === 0 && process.platform === 'win32') {
+                this.logger.info('mDNS/Bonjour found nothing — common on Windows without Bonjour Print Services.');
+                this.logger.info('Falling back to subnet HTTP scan (and you can always enter an IP manually).');
+            } else if (mdnsDevices.length === 0) {
+                this.logger.debug('mDNS found nothing; relying on subnet scan / manual IP.');
+            }
         }
 
         // Attach localAddress to mDNS hits; prefer scan results (already bound).
@@ -74,8 +79,10 @@ class DeviceDiscovery {
                     this.logger.info(`  ${d.deviceName} @ ${d.ip} via local ${d.localAddress}`);
                 }
             }
-        } else {
+        } else if (!quiet) {
             this.logger.warn('No devices discovered. Enter the charger IP manually, or check the network.');
+        } else {
+            this.logger.debug('Hub discovery: no charger found yet (OK).');
         }
         return devices;
     }

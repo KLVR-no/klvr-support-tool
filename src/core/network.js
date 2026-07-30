@@ -15,7 +15,11 @@ function intToIp(n) {
 }
 
 function netmaskToCidr(netmask) {
-  return netmask.split('.').reduce((acc, p) => acc + p.toString(2).split('1').length - 1, 0);
+  if (!netmask || typeof netmask !== 'string') return 0;
+  return netmask.split('.').reduce((acc, octet) => {
+    const bits = Number(octet).toString(2);
+    return acc + (bits.match(/1/g) || []).length;
+  }, 0);
 }
 
 function isIPv4(addr) {
@@ -37,26 +41,42 @@ function sameSubnet(targetIp, localIp, netmask) {
 function interfacePreference(name) {
   const n = String(name || '').toLowerCase();
   if (/awdl|llw|bridge|utun|tun|tap|ipsec|ppp|vmnet|veth|docker|br-/.test(n)) return -100;
-  if (/wi-?fi|wlan|airport|wl|wwan|cellular|pdp_ip/.test(n)) return 10;
+  if (/wi-?fi|wlan|airport|wwan|cellular|pdp_ip/.test(n)) return 10;
+  // macOS: en0 is usually Wi‑Fi; USB ethernet is typically en5+ / eth*
+  if (/^en0$/.test(n)) return 20;
   if (/usb|en\d+|eth|lan|ethernet|nic/.test(n)) return 100;
   return 50;
 }
 
-function listExternalIPv4() {
+function interfaceKind(iface) {
+  if (iface.preference <= -50) return 'vpn/tunnel';
+  if (iface.preference >= 100) return 'wired/usb';
+  if (iface.preference <= 20) return 'wifi';
+  return 'other';
+}
+
+function isIgnorableInterface(iface) {
+  return iface.preference <= -50;
+}
+
+function listExternalIPv4(options = {}) {
+  const includeIgnored = !!options.includeIgnored;
   const raw = os.networkInterfaces();
   const list = [];
   for (const [name, addrs] of Object.entries(raw)) {
     for (const addr of addrs || []) {
       const family = addr.family === 'IPv6' || addr.family === 6 ? 'IPv6' : 'IPv4';
       if (family !== 'IPv4' || addr.internal) continue;
-      list.push({
+      const iface = {
         name,
         address: addr.address,
         netmask: addr.netmask,
         cidr: netmaskToCidr(addr.netmask),
         mac: addr.mac,
         preference: interfacePreference(name)
-      });
+      };
+      if (!includeIgnored && isIgnorableInterface(iface)) continue;
+      list.push(iface);
     }
   }
   return list;
@@ -119,15 +139,19 @@ function localAddressesToTry(targetIp) {
 
 function describeMultiHome(logger) {
   const ifaces = listExternalIPv4();
-  if (ifaces.length <= 1) return ifaces;
+  if (ifaces.length <= 1) {
+    if (logger && ifaces.length === 1) {
+      logger.debug(`Network: ${ifaces[0].name} ${ifaces[0].address}/${ifaces[0].cidr}`);
+    }
+    return ifaces;
+  }
 
   if (logger) {
     logger.warn(`Multiple networks active (${ifaces.length}) — Wi‑Fi + cable can break charger links.`);
     for (const iface of ifaces) {
-      const kind = iface.preference >= 100 ? 'wired/usb' : (iface.preference <= 10 ? 'wifi/other' : 'other');
-      logger.info(`  ${iface.name}: ${iface.address}/${iface.cidr}  (${kind})`);
+      logger.info(`  ${iface.name}: ${iface.address}/${iface.cidr}  (${interfaceKind(iface)})`);
     }
-    logger.info('Binding charger traffic to the matching adapter (not Wi‑Fi) when possible.');
+    logger.info('Binding charger traffic to the matching adapter when possible.');
   }
   return ifaces;
 }
@@ -145,6 +169,8 @@ module.exports = {
   isIPv4,
   sameSubnet,
   interfacePreference,
+  interfaceKind,
+  isIgnorableInterface,
   listExternalIPv4,
   isMultiHomed,
   matchingInterfaces,
