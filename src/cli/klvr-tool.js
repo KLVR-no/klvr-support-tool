@@ -10,6 +10,7 @@ const DeviceDiscovery = require('../core/device-discovery');
 const FirmwareManager = require('../core/firmware-manager');
 const TunnelManager = require('../core/tunnel-manager');
 const Doctor = require('../core/doctor');
+const SupportHub = require('../core/support-hub');
 const Logger = require('../core/logger');
 const {
   findPython,
@@ -23,7 +24,7 @@ const program = new Command();
 program
   .name('klvr-tool')
   .description('Klvr Charger Pro - Professional firmware updater and support tools')
-  .version('2.2.0');
+  .version('2.4.0');
 
 program
   .option('-v, --verbose', 'Enable verbose logging')
@@ -120,6 +121,13 @@ program
         ? 'local'
         : ((options.remote || isTunnelUrl(target)) ? 'support' : 'auto');
       const device = await resolveDevice(target, logger, deviceDiscovery, mode);
+
+      if (device.isSupportHub && device.hubReady === false) {
+        logger.error('Support hub is connected, but no charger is reachable on the customer network yet.');
+        logger.info('Run: klvr-tool diagnose  (pulls customer network diagnostics)');
+        logger.info('Ask customer to check cable / Wi‑Fi / static IP, then retry firmware-update.');
+        process.exit(1);
+      }
 
       const firmwareDir = options.firmwareDir
         || path.join(__dirname, '../../firmware');
@@ -269,36 +277,61 @@ program
 
 program
   .command('remote-support')
-  .description('Start remote support session with tunnel (customer side)')
+  .description('Customer: one remote support entry (diagnostics + discovery + charger tunnel)')
   .option('--tunnel-provider <provider>', 'Tunnel provider: cloudflare', 'cloudflare')
+  .option('--ip <address>', 'Optional charger IP hint for diagnostics/discovery')
   .action(async (options) => {
     const logger = new Logger(program.opts());
-    logger.info('Starting remote support session...');
+    logger.info('Starting remote support session (works even if charger is not found yet)...');
 
     try {
+      const hintIps = options.ip
+        ? String(options.ip).split(',').map((s) => s.trim()).filter(Boolean)
+        : [];
+
+      const hub = new SupportHub(logger, { hintIps });
+      const local = await hub.start();
+      logger.success(`Support hub listening on ${local.url}`);
+
       const tunnelManager = new TunnelManager(logger);
-      const deviceDiscovery = new DeviceDiscovery(logger);
-      // Customer must pick a local charger first — never a tunnel URL here.
-      const device = await deviceDiscovery.discoverAndSelect({ mode: 'local' });
-      const tunnel = await tunnelManager.createTunnel(device, options);
+      const tunnel = await tunnelManager.createTunnel({
+        url: local.url,
+        deviceName: 'klvr-support-hub',
+        ip: 'hub'
+      }, { ...options, reuseSession: false });
 
       console.log('');
       logger.success('Remote support session active!');
       console.log('');
-      console.log(chalk.green('  Share this URL with Klvr support:'));
+      console.log(chalk.green('  Share this ONE URL with Klvr support:'));
       console.log(chalk.bold.white(`  ${tunnel.url}`));
       console.log('');
-      console.log(chalk.cyan('  Support can then run:'));
+      console.log(chalk.gray('  Support can diagnose your network, find the charger, and update firmware.'));
+      console.log('');
+      console.log(chalk.cyan('  Support commands:'));
+      console.log(`    klvr-tool diagnose ${tunnel.url}`);
       console.log(`    klvr-tool use-target ${tunnel.url}`);
-      console.log('    klvr-tool device-info');
-      console.log('    klvr-tool firmware-update --version 1.8.9-beta -y');
+      console.log('    klvr-tool firmware-update --remote --version 1.8.9-beta -y');
       console.log('');
       console.log(chalk.yellow('  Keep this terminal open. Press Ctrl+C to end the session.'));
       console.log('');
 
+      // Local snapshot for the customer terminal
+      try {
+        const status = hub.getStatus();
+        if (status.charger) {
+          logger.success(`Charger already found: ${status.charger.deviceName} @ ${status.charger.ip}`);
+        } else {
+          logger.warn('No charger found yet — that is OK. Support can still see your network diagnostics.');
+        }
+      } catch (_) {
+        // ignore
+      }
+
       process.on('SIGINT', async () => {
         logger.info('Ending remote support session...');
         await tunnelManager.closeTunnel(tunnel);
+        await hub.stop();
         logger.success('Session ended');
         process.exit(0);
       });
@@ -349,79 +382,21 @@ program
 
 program
   .command('remote-doctor')
-  .description('Customer: share live connection diagnostics via Cloudflare tunnel')
-  .option('--ip <address>', 'Charger IP to include in diagnostics')
+  .description('Alias of remote-support (kept for compatibility)')
+  .option('--ip <address>', 'Optional charger IP hint')
   .action(async (options) => {
-    const logger = new Logger(program.opts());
-    logger.info('Starting remote connection doctor...');
-
-    try {
-      let targets = [];
-      if (options.ip) {
-        targets = String(options.ip).split(',').map((s) => s.trim()).filter(Boolean);
-      } else {
-        const { ip } = await inquirer.prompt([
-          {
-            type: 'input',
-            name: 'ip',
-            message: 'Charger IP to test (e.g. 10.101.0.56):',
-            default: '10.101.0.56'
-          }
-        ]);
-        if (ip && ip.trim()) targets = [ip.trim()];
-      }
-
-      const doctor = new Doctor(logger);
-      const local = await doctor.startServer({ targets });
-      logger.success(`Local doctor listening on ${local.url}`);
-
-      const tunnelManager = new TunnelManager(logger);
-      const tunnel = await tunnelManager.createTunnel({
-        url: local.url,
-        deviceName: 'connection-doctor',
-        ip: 'doctor'
-      }, { reuseSession: false });
-
-      console.log('');
-      logger.success('Remote doctor session active!');
-      console.log('');
-      console.log(chalk.green('  Share this URL with Klvr support:'));
-      console.log(chalk.bold.white(`  ${tunnel.url}`));
-      console.log('');
-      console.log(chalk.cyan('  Support can then run:'));
-      console.log(`    klvr-tool diagnose ${tunnel.url}`);
-      console.log('');
-      console.log(chalk.yellow('  Keep this terminal open. Press Ctrl+C to end.'));
-      console.log('');
-
-      // Print one local snapshot immediately
-      const snapshot = await doctor.run({ targets });
-      console.log(chalk.gray(doctor.formatText(snapshot)));
-
-      process.on('SIGINT', async () => {
-        logger.info('Ending remote doctor session...');
-        await tunnelManager.closeTunnel(tunnel);
-        local.server.close();
-        logger.success('Session ended');
-        process.exit(0);
-      });
-
-      await new Promise(() => {});
-    } catch (error) {
-      if (error.message === 'Cancelled by user') {
-        process.exit(0);
-      }
-      logger.error(`Remote doctor failed: ${error.message}`);
-      process.exit(1);
-    }
+    const args = ['remote-support'];
+    if (options.ip) args.push('--ip', options.ip);
+    await program.parseAsync(args, { from: 'user' });
   });
 
 program
   .command('diagnose [target]')
-  .description('Supporter: fetch remote doctor report or charger info from a tunnel URL')
+  .description('Supporter: fetch hub diagnostics / discover charger from customer tunnel')
   .action(async (target) => {
     const logger = new Logger(program.opts());
     const doctor = new Doctor(logger);
+    const discovery = new DeviceDiscovery(logger);
 
     let url = target;
     if (!url) {
@@ -444,18 +419,60 @@ program
       }
     }
 
+    const base = url.replace(/\/$/, '');
+
     try {
-      const result = await doctor.fetchRemote(url);
+      // Prefer support hub
+      try {
+        const statusRaw = await discovery._httpGetRaw(`${base}/api/status`, 15000);
+        const status = JSON.parse(statusRaw);
+        if (status.kind === 'klvr-support-hub') {
+          console.log('');
+          console.log(chalk.cyan('Support hub status:'));
+          console.log(`  Multi-homed: ${status.multiHomed ? 'YES' : 'no'}`);
+          console.log(`  Firmware ready: ${status.readyForFirmware ? 'YES' : 'no'}`);
+          if (status.charger) {
+            console.log(`  Charger: ${status.charger.deviceName} @ ${status.charger.ip} via ${status.charger.localAddress || 'default'}`);
+          } else {
+            console.log('  Charger: not found yet');
+          }
+          console.log('');
+          console.log('Interfaces:');
+          for (const iface of status.interfaces || []) {
+            console.log(`  ${iface.name}: ${iface.address}/${iface.cidr}`);
+          }
+
+          logger.info('Refreshing discovery on customer side...');
+          try {
+            const disc = JSON.parse(await discovery._httpGetRaw(`${base}/api/discover`, 30000));
+            console.log('');
+            console.log(`Discover: ${(disc.devices || []).length} device(s)`);
+            for (const d of disc.devices || []) {
+              console.log(`  • ${d.deviceName} @ ${d.ip}${d.localAddress ? ` via ${d.localAddress}` : ''}`);
+            }
+          } catch (err) {
+            logger.warn(`Discover failed: ${err.message}`);
+          }
+
+          const diag = JSON.parse(await discovery._httpGetRaw(`${base}/api/diagnostics`, 45000));
+          console.log('');
+          console.log(doctor.formatText(diag));
+          await saveActiveTarget(base);
+          return;
+        }
+      } catch (_) {
+        // not a hub — fall through
+      }
+
+      const result = await doctor.fetchRemote(base);
       console.log('');
       if (result.type === 'doctor') {
         console.log(doctor.formatText(result.report));
-        await saveActiveTarget(url);
+        await saveActiveTarget(base);
       } else {
-        console.log(chalk.cyan('This tunnel points at a charger (not a doctor session):'));
+        console.log(chalk.cyan('Direct charger tunnel:'));
         console.log(`  Device: ${result.info.deviceName || result.info.name || 'Klvr'}`);
         console.log(`  Info:   ${JSON.stringify(result.info, null, 2)}`);
-        console.log('');
-        logger.info('For connection diagnostics, ask the customer to run: remote-doctor');
       }
     } catch (error) {
       logger.error(`Diagnose failed: ${error.message}`);
@@ -511,13 +528,10 @@ program
     }
 
     const choices = [
-      new inquirer.Separator('── Customer (this network) ──'),
-      { name: 'Update Firmware (Both Boards)', value: 'firmware' },
-      { name: 'Update Rear Board Only', value: 'firmware-rear' },
-      { name: 'Check Connection (doctor)', value: 'doctor' },
-      { name: 'Share Connection Diagnostics (remote doctor)', value: 'remote-doctor' },
-      { name: 'Start Remote Support Session (charger tunnel)', value: 'remote' },
-      new inquirer.Separator('── Klvr Support (remote) ──'),
+      new inquirer.Separator('── Customer ──'),
+      { name: 'Update Firmware', value: 'firmware' },
+      { name: 'Start Remote Support Session', value: 'remote' },
+      new inquirer.Separator('── Klvr Support ──'),
       { name: 'Fetch Remote Diagnostics', value: 'diagnose' },
       { name: 'Connect to Customer Tunnel', value: 'use-target' },
       { name: 'Update Firmware on Connected Target', value: 'firmware-remote' },
@@ -538,17 +552,8 @@ program
       case 'firmware':
         await program.parseAsync(['firmware-update', '--local'], { from: 'user' });
         break;
-      case 'firmware-rear':
-        await program.parseAsync(['firmware-update', '--local', '--rear-only'], { from: 'user' });
-        break;
       case 'firmware-remote':
         await program.parseAsync(['firmware-update', '--remote'], { from: 'user' });
-        break;
-      case 'doctor':
-        await program.parseAsync(['doctor'], { from: 'user' });
-        break;
-      case 'remote-doctor':
-        await program.parseAsync(['remote-doctor'], { from: 'user' });
         break;
       case 'diagnose':
         await program.parseAsync(['diagnose'], { from: 'user' });
@@ -568,16 +573,25 @@ program
           }
         ]);
         await program.parseAsync(['use-target', url.trim()], { from: 'user' });
-        const { updateNow } = await inquirer.prompt([
+        const { next } = await inquirer.prompt([
           {
-            type: 'confirm',
-            name: 'updateNow',
-            message: 'Update firmware on this remote charger now?',
-            default: true
+            type: 'list',
+            name: 'next',
+            message: 'Next step:',
+            choices: [
+              { name: 'Fetch diagnostics / discover charger', value: 'diagnose' },
+              { name: 'Update firmware', value: 'firmware' },
+              { name: 'Device info', value: 'info' },
+              { name: 'Done', value: 'done' }
+            ]
           }
         ]);
-        if (updateNow) {
+        if (next === 'diagnose') {
+          await program.parseAsync(['diagnose'], { from: 'user' });
+        } else if (next === 'firmware') {
           await program.parseAsync(['firmware-update', '--remote'], { from: 'user' });
+        } else if (next === 'info') {
+          await program.parseAsync(['device-info', '--remote'], { from: 'user' });
         }
         break;
       }

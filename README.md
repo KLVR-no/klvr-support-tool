@@ -2,7 +2,7 @@
 
 Professional support tools for KLVR Charger Pro — local and **remote** firmware updates, tunnels, and diagnostics.
 
-**Version:** 2.3.0
+**Version:** 2.4.0
 
 ## Quick Start (download + run)
 
@@ -29,54 +29,45 @@ The installer clones the latest repo (including bundled firmware), installs npm 
 | `v1.8.7-beta` | Beta (easteregg era) |
 | `v1.8.9-beta` | Thermal policy: fans 70% @ 32°C, hard-stop 38°C |
 
-## Customer: local firmware update
+## Customer menu (only two choices)
 
-Interactive → **Customer** → Update Firmware. Connection is **LAN only** (IP or network search) — no Cloudflare.
+1. **Update Firmware** — local LAN update (IP or network search; no Cloudflare)
+2. **Start Remote Support Session** — always works, even if the charger is offline
+
+```bash
+klvr-tool
+```
+
+### Update Firmware
 
 ```bash
 klvr-tool firmware-update --local
 klvr-tool firmware-update 192.168.1.141 --version 1.8.9-beta -y
 ```
 
-## Customer: connection doctor (local or remote)
+### Remote Support Session (one URL for everything)
 
-When the Mac cannot reach the charger, open a **diagnostics** tunnel (does not need charger HTTP):
+Starts a local **support hub** and a Cloudflare tunnel. Does **not** require the charger to be reachable first.
 
-```bash
-klvr-tool remote-doctor --ip 10.101.0.56
-```
-
-Share the URL. Support runs:
-
-```bash
-klvr-tool diagnose https://….trycloudflare.com
-```
-
-That shows the customer’s interfaces, subnet masks, ping, and `:8000` HTTP probe.
-
-Local-only (print in terminal / paste to chat):
-
-```bash
-klvr-tool doctor --ip 10.101.0.56
-```
-
-## Customer: open a remote support tunnel
-
-Interactive → **Start Remote Support Session** (needs a reachable local charger, then opens the tunnel).
+Support can then:
+- pull network diagnostics (interfaces, masks, ping, Wi‑Fi vs USB)
+- discover / select the charger
+- update firmware through the same tunnel (hub proxies `/api/v2/*`)
 
 ```bash
 klvr-tool remote-support
+# optional IP hint:
+klvr-tool remote-support --ip 10.101.0.56
 ```
 
-Share the printed `https://….trycloudflare.com` URL with Klvr support. **Keep that terminal open** until support is done.
+Share the printed `https://….trycloudflare.com` URL. **Keep that terminal open.**
 
 `cloudflared` is auto-installed into `~/.klvr-support/bin` on macOS, Linux, and Windows if missing.
 
-## Supporter: upgrade a remote charger
-
-Interactive → **Klvr Support** → Connect to Customer Tunnel → optional firmware update.
+## Supporter
 
 ```bash
+klvr-tool diagnose https://abc123.trycloudflare.com
 klvr-tool use-target https://abc123.trycloudflare.com
 klvr-tool firmware-update --remote --version 1.8.9-beta -y
 ```
@@ -99,8 +90,8 @@ klvr-tool firmware-update https://abc123.trycloudflare.com --version 1.8.9-beta 
 ## Other commands
 
 ```bash
+klvr-tool doctor --ip 10.101.0.56   # local-only network check
 klvr-tool device-info [target]
-klvr-tool battery-monitor [target] --test-type aa
 klvr-tool clear-target
 klvr-tool firmware-update --rear-only --version 1.8.9-beta
 ```
@@ -132,10 +123,6 @@ node src/cli/support-cli.js firmware-update <tunnel-url> --version 1.8.9-beta -y
 git clone https://github.com/KLVR-no/klvr-support-tool.git
 cd klvr-support-tool
 npm install
-npm test
 npm start
+npm test
 ```
-
-## Support
-
-stian@klvr.no

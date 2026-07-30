@@ -251,6 +251,7 @@ systemTest.addTest('File structure validation', async () => {
         'src/core/tunnel-manager.js',
         'src/core/doctor.js',
         'src/core/network.js',
+        'src/core/support-hub.js',
         'src/cli/klvr-tool.js',
         'src/cli/support-cli.js'
     ];

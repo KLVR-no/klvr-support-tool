@@ -250,6 +250,21 @@ class DeviceDiscovery {
         const parsed = this._parseTarget(target);
 
         if (parsed.isUrl || !isIPv4(parsed.hostname)) {
+            // Support hub tunnel (diagnostics even when charger is offline)
+            const hubDevice = await this._trySupportHub(parsed);
+            if (hubDevice) {
+                if (hubDevice.hubReady) {
+                    this.logger.success(
+                        `Connected via support hub → ${hubDevice.deviceName} (${hubDevice.ip})`
+                    );
+                } else {
+                    this.logger.warn(
+                        'Support hub is up, but no charger found yet — diagnostics available.'
+                    );
+                }
+                return hubDevice;
+            }
+
             const device = await this._testConnection(parsed);
             if (!device) throw new Error(`Failed to connect to ${target}`);
             this.logger.success(`Connected to ${device.deviceName}`);
@@ -435,6 +450,93 @@ class DeviceDiscovery {
         } catch (error) {
             throw new Error(`Failed to get device info: ${error.message}`);
         }
+    }
+
+    /**
+     * Detect klvr-support-hub behind a tunnel URL.
+     * Works even when no charger is selected yet.
+     */
+    async _trySupportHub(parsed) {
+        if (!parsed.isUrl) return null;
+        const base = String(parsed.baseUrl || parsed.url).replace(/\/$/, '');
+        try {
+            const raw = await this._httpGetRaw(`${base}/api/status`, 12000);
+            const status = JSON.parse(raw);
+            if (!status || status.kind !== 'klvr-support-hub') return null;
+
+            // Refresh discovery on customer side
+            try {
+                await this._httpGetRaw(`${base}/api/discover`, 20000);
+            } catch (_) {
+                // ok
+            }
+
+            let refreshed = status;
+            try {
+                refreshed = JSON.parse(await this._httpGetRaw(`${base}/api/status`, 8000));
+            } catch (_) {
+                // keep first status
+            }
+
+            const charger = refreshed.charger;
+            if (charger && charger.ip) {
+                return {
+                    ip: charger.ip,
+                    deviceName: charger.deviceName || 'Klvr',
+                    firmwareVersion: charger.firmwareVersion || 'Unknown',
+                    serialNumber: 'via-hub',
+                    port: parsed.port,
+                    url: base,
+                    isSupportHub: true,
+                    hubReady: true,
+                    localAddress: undefined // binding happens on customer hub
+                };
+            }
+
+            return {
+                ip: 'hub',
+                deviceName: 'Klvr Support Hub (no charger yet)',
+                firmwareVersion: 'n/a',
+                serialNumber: 'via-hub',
+                port: parsed.port,
+                url: base,
+                isSupportHub: true,
+                hubReady: false,
+                hubStatus: refreshed
+            };
+        } catch (_) {
+            return null;
+        }
+    }
+
+    _httpGetRaw(url, timeoutMs) {
+        return new Promise((resolve, reject) => {
+            const parsed = this._parseTarget(url);
+            const httpModule = parsed.protocol === 'https:' ? https : http;
+            const req = httpModule.request({
+                hostname: parsed.hostname,
+                port: parsed.port,
+                path: new URL(url).pathname + new URL(url).search,
+                method: 'GET',
+                timeout: timeoutMs
+            }, (res) => {
+                let data = '';
+                res.on('data', (c) => { data += c; });
+                res.on('end', () => {
+                    if (res.statusCode && res.statusCode >= 400) {
+                        reject(new Error(`HTTP ${res.statusCode}`));
+                    } else {
+                        resolve(data);
+                    }
+                });
+            });
+            req.on('timeout', () => {
+                req.destroy();
+                reject(new Error('timeout'));
+            });
+            req.on('error', reject);
+            req.end();
+        });
     }
 
     /**
