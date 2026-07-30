@@ -31,19 +31,16 @@ The installer clones the latest repo (including bundled firmware), installs npm 
 
 ## Customer: local firmware update
 
-```bash
-klvr-tool
-# → Update Firmware (Both Boards)
-```
-
-Or:
+Interactive → **Customer** → Update Firmware. Connection is **LAN only** (IP or network search) — no Cloudflare.
 
 ```bash
-klvr-tool firmware-update
+klvr-tool firmware-update --local
 klvr-tool firmware-update 192.168.1.141 --version 1.8.9-beta -y
 ```
 
 ## Customer: open a remote support tunnel
+
+Interactive → **Start Remote Support Session** (picks a local charger, then opens the tunnel).
 
 ```bash
 klvr-tool remote-support
@@ -55,17 +52,11 @@ Share the printed `https://….trycloudflare.com` URL with Klvr support. **Keep 
 
 ## Supporter: upgrade a remote charger
 
-With the customer tunnel still running:
+Interactive → **Klvr Support** → Connect to Customer Tunnel → optional firmware update.
 
 ```bash
-# One-time: remember the tunnel URL
 klvr-tool use-target https://abc123.trycloudflare.com
-
-# Inspect
-klvr-tool device-info
-
-# Flash (polls until both boards report the new version)
-klvr-tool firmware-update --version 1.8.9-beta -y
+klvr-tool firmware-update --remote --version 1.8.9-beta -y
 ```
 
 Or in one shot:

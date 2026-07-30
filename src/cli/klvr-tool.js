@@ -29,8 +29,21 @@ program
   .option('--log-file <path>', 'Save logs to file')
   .option('--session-id <id>', 'Session ID for support tracking');
 
-async function resolveDevice(target, logger, deviceDiscovery) {
+function isTunnelUrl(value) {
+  return typeof value === 'string' && /^https:\/\//i.test(value.trim());
+}
+
+/**
+ * @param {'local'|'support'|'auto'} mode
+ *   local  — customer: ignore saved tunnels; LAN discover/IP only
+ *   support — Klvr: prefer saved tunnel; prompt for tunnel if none
+ *   auto   — use any saved target; else local discover
+ */
+async function resolveDevice(target, logger, deviceDiscovery, mode = 'auto') {
   if (target) {
+    if (mode === 'local' && isTunnelUrl(target)) {
+      throw new Error('Local update cannot use a tunnel URL. Use "Connect to Customer Tunnel" (supporter) instead.');
+    }
     const device = await deviceDiscovery.connectToTarget(target);
     await saveActiveTarget(target);
     return device;
@@ -38,16 +51,24 @@ async function resolveDevice(target, logger, deviceDiscovery) {
 
   const saved = await loadActiveTarget();
   if (saved) {
-    logger.info(`Using saved target: ${saved}`);
-    try {
-      return await deviceDiscovery.connectToTarget(saved);
-    } catch (err) {
-      logger.warn(`Saved target unreachable (${err.message}); clearing and rediscovering.`);
-      await clearActiveTarget();
+    if (mode === 'local' && isTunnelUrl(saved)) {
+      logger.info('Ignoring saved remote tunnel for local customer update.');
+    } else {
+      logger.info(`Using saved target: ${saved}`);
+      try {
+        return await deviceDiscovery.connectToTarget(saved);
+      } catch (err) {
+        logger.warn(`Saved target unreachable (${err.message}); clearing and rediscovering.`);
+        await clearActiveTarget();
+      }
     }
   }
 
-  return deviceDiscovery.discoverAndSelect();
+  if (mode === 'support') {
+    return deviceDiscovery.discoverAndSelect({ mode: 'support' });
+  }
+
+  return deviceDiscovery.discoverAndSelect({ mode: 'local' });
 }
 
 program
@@ -77,13 +98,15 @@ program
 
 program
   .command('firmware-update [target]')
-  .description('Update firmware on Klvr device (LAN IP or remote tunnel URL)')
+  .description('Update firmware on Klvr device (LAN for customers; tunnel URL for support)')
   .option('-f, --firmware-dir <path>', 'Firmware directory path')
   .option('--main <file>', 'Specific main firmware file')
   .option('--rear <file>', 'Specific rear firmware file')
   .option('--version <version>', 'Firmware version to install (e.g. 1.8.9-beta or v1.8.9-beta)')
   .option('--rear-only', 'Update only the rear board firmware')
   .option('--force', 'Force update even if same version')
+  .option('--local', 'Customer local update: LAN only (no Cloudflare tunnel)')
+  .option('--remote', 'Supporter remote update: use saved/pasted tunnel URL')
   .option('-y, --yes', 'Skip confirmation prompt')
   .action(async (target, options) => {
     const logger = new Logger({ ...program.opts(), ...options });
@@ -92,7 +115,10 @@ program
     try {
       const firmwareManager = new FirmwareManager(logger);
       const deviceDiscovery = new DeviceDiscovery(logger);
-      const device = await resolveDevice(target, logger, deviceDiscovery);
+      const mode = options.local
+        ? 'local'
+        : ((options.remote || isTunnelUrl(target)) ? 'support' : 'auto');
+      const device = await resolveDevice(target, logger, deviceDiscovery, mode);
 
       const firmwareDir = options.firmwareDir
         || path.join(__dirname, '../../firmware');
@@ -251,7 +277,8 @@ program
     try {
       const tunnelManager = new TunnelManager(logger);
       const deviceDiscovery = new DeviceDiscovery(logger);
-      const device = await deviceDiscovery.discoverAndSelect();
+      // Customer must pick a local charger first — never a tunnel URL here.
+      const device = await deviceDiscovery.discoverAndSelect({ mode: 'local' });
       const tunnel = await tunnelManager.createTunnel(device, options);
 
       console.log('');
@@ -291,11 +318,16 @@ program
   .command('device-info [target]')
   .description('Get device information and status')
   .option('--format <format>', 'Output format: json, table', 'table')
+  .option('--local', 'LAN only (ignore saved tunnel)')
+  .option('--remote', 'Prefer saved / pasted tunnel URL')
   .action(async (target, options) => {
     const logger = new Logger(program.opts());
     try {
       const deviceDiscovery = new DeviceDiscovery(logger);
-      const device = await resolveDevice(target, logger, deviceDiscovery);
+      const mode = options.local
+        ? 'local'
+        : ((options.remote || isTunnelUrl(target)) ? 'support' : 'auto');
+      const device = await resolveDevice(target, logger, deviceDiscovery, mode);
       const info = await deviceDiscovery.getDetailedInfo(device);
 
       if (options.format === 'json') {
@@ -329,28 +361,36 @@ program
       console.log(chalk.gray(`  Saved target: ${saved}`));
     }
 
+    const choices = [
+      new inquirer.Separator('── Customer (this network) ──'),
+      { name: 'Update Firmware (Both Boards)', value: 'firmware' },
+      { name: 'Update Rear Board Only', value: 'firmware-rear' },
+      { name: 'Start Remote Support Session', value: 'remote' },
+      new inquirer.Separator('── Klvr Support (remote) ──'),
+      { name: 'Connect to Customer Tunnel', value: 'use-target' },
+      { name: 'Update Firmware on Connected Target', value: 'firmware-remote' },
+      { name: 'Device Info', value: 'info' },
+      { name: 'Exit', value: 'exit' }
+    ];
+
     const { action } = await inquirer.prompt([
       {
         type: 'list',
         name: 'action',
         message: 'What would you like to do?',
-        choices: [
-          { name: 'Update Firmware (Both Boards)', value: 'firmware' },
-          { name: 'Update Rear Board Only', value: 'firmware-rear' },
-          { name: 'Start Remote Support Session (customer)', value: 'remote' },
-          { name: 'Connect to Tunnel / IP (supporter)', value: 'use-target' },
-          { name: 'Device Info', value: 'info' },
-          { name: 'Exit', value: 'exit' }
-        ]
+        choices
       }
     ]);
 
     switch (action) {
       case 'firmware':
-        await program.parseAsync(['firmware-update'], { from: 'user' });
+        await program.parseAsync(['firmware-update', '--local'], { from: 'user' });
         break;
       case 'firmware-rear':
-        await program.parseAsync(['firmware-update', '--rear-only'], { from: 'user' });
+        await program.parseAsync(['firmware-update', '--local', '--rear-only'], { from: 'user' });
+        break;
+      case 'firmware-remote':
+        await program.parseAsync(['firmware-update', '--remote'], { from: 'user' });
         break;
       case 'remote':
         await program.parseAsync(['remote-support'], { from: 'user' });
@@ -360,10 +400,24 @@ program
           {
             type: 'input',
             name: 'url',
-            message: 'IP or tunnel URL:'
+            message: 'Paste customer tunnel URL:',
+            validate: (v) => (/^https:\/\//i.test((v || '').trim())
+              ? true
+              : 'Enter the full https://….trycloudflare.com URL from the customer')
           }
         ]);
         await program.parseAsync(['use-target', url.trim()], { from: 'user' });
+        const { updateNow } = await inquirer.prompt([
+          {
+            type: 'confirm',
+            name: 'updateNow',
+            message: 'Update firmware on this remote charger now?',
+            default: true
+          }
+        ]);
+        if (updateNow) {
+          await program.parseAsync(['firmware-update', '--remote'], { from: 'user' });
+        }
         break;
       }
       case 'info':

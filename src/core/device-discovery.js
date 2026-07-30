@@ -53,7 +53,7 @@ class DeviceDiscovery {
         if (devices.length > 0) {
             this.logger.success(`Found ${devices.length} device(s)`);
         } else {
-            this.logger.warn('No devices discovered. Use a manual IP or a tunnel URL (https://….trycloudflare.com).');
+            this.logger.warn('No devices discovered. Enter the charger IP manually, or check the network.');
         }
         return devices;
     }
@@ -242,9 +242,18 @@ class DeviceDiscovery {
 
     /**
      * Ask the user how they want to connect, then find the device.
-     * Users on a cabled static-IP setup can skip mDNS discovery entirely.
+     *
+     * @param {{ mode?: 'local'|'support' }} [options]
+     *   local   — customer paths (firmware update, open remote-support): LAN IP / scan only
+     *   support — Klvr supporter: paste customer tunnel URL (or IP)
      */
-    async discoverAndSelect() {
+    async discoverAndSelect(options = {}) {
+        const mode = options.mode === 'support' ? 'support' : 'local';
+
+        if (mode === 'support') {
+            return this._promptTunnelUrl();
+        }
+
         const { method } = await inquirer.prompt([
             {
                 type: 'list',
@@ -252,25 +261,20 @@ class DeviceDiscovery {
                 message: 'How is your Klvr Charger Pro connected?',
                 choices: [
                     { name: 'I know the IP address  (e.g. direct cable / static IP)', value: 'manual' },
-                    { name: 'Remote tunnel URL  (https://….trycloudflare.com)', value: 'tunnel' },
                     { name: 'Search for it automatically on the network', value: 'discover' }
                 ]
             }
         ]);
 
         if (method === 'manual') {
-            return this._promptManualIp();
-        }
-        if (method === 'tunnel') {
-            return this._promptTunnelUrl();
+            return this._promptManualIp({ mode: 'local' });
         }
 
-        // Auto-discover
         const devices = await this.discoverDevices();
 
         if (devices.length === 0) {
             this.logger.warn('No devices found automatically.');
-            return this._promptManualIp();
+            return this._promptManualIp({ mode: 'local' });
         }
 
         if (devices.length === 1) {
@@ -278,12 +282,11 @@ class DeviceDiscovery {
             return devices[0];
         }
 
-        // Multiple devices — let user pick
         const { chosen } = await inquirer.prompt([
             {
                 type: 'list',
                 name: 'chosen',
-                message: `Found ${devices.length} devices — which one do you want to update?`,
+                message: `Found ${devices.length} devices — which one?`,
                 choices: devices.map(d => ({
                     name: `${d.deviceName}  (${d.ip})`,
                     value: d
@@ -311,9 +314,11 @@ class DeviceDiscovery {
     }
 
     /**
-     * Prompt the user to enter an IP address manually
+     * Prompt the user to enter an IP address manually (local / customer path).
      */
-    async _promptManualIp() {
+    async _promptManualIp(options = {}) {
+        const mode = options.mode === 'support' ? 'support' : 'local';
+
         console.log('');
         console.log('  Make sure the Klvr Charger Pro is:');
         console.log('    • Powered on');
@@ -338,19 +343,18 @@ class DeviceDiscovery {
         }
 
         if (choice === 'retry') {
-            return this.discoverAndSelect();
+            return this.discoverAndSelect({ mode });
         }
 
         const { ip } = await inquirer.prompt([
             {
                 type: 'input',
                 name: 'ip',
-                message: 'Enter IP or tunnel URL (e.g. 192.168.1.50 or https://….trycloudflare.com):',
+                message: 'Enter device IP address (e.g. 192.168.1.50):',
                 validate: (val) => {
                     const trimmed = val.trim();
                     if (/^\d{1,3}(\.\d{1,3}){3}$/.test(trimmed)) return true;
-                    if (/^https?:\/\/.+/i.test(trimmed)) return true;
-                    return 'Enter an IP like 192.168.1.50 or a full https:// tunnel URL';
+                    return 'Enter an IP like 192.168.1.50';
                 },
                 filter: (val) => val.trim()
             }
@@ -364,9 +368,9 @@ class DeviceDiscovery {
         } catch (_) {
             console.log('');
             this.logger.warn(`Could not reach a Klvr device at ${ip}.`);
-            console.log('  Double-check the IP/URL and that the tunnel session is still open.');
+            console.log('  Double-check the IP and that the charger is on this network.');
             console.log('');
-            return this._promptManualIp();
+            return this._promptManualIp({ mode });
         }
     }
 
