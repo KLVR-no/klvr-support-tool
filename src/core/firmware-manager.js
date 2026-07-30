@@ -436,6 +436,21 @@ class FirmwareManager {
         timeout
       };
 
+      // Keep firmware uploads on the same NIC that discovered the charger
+      // (critical when Wi‑Fi + USB LAN are both up).
+      const localAddress = device.localAddress || options.localAddress;
+      if (localAddress) {
+        requestOptions.localAddress = localAddress;
+      } else if (parsed.protocol === 'http:' && /^\d{1,3}(\.\d{1,3}){3}$/.test(parsed.hostname)) {
+        try {
+          const { preferLocalAddress } = require('./network');
+          const preferred = preferLocalAddress(parsed.hostname);
+          if (preferred) requestOptions.localAddress = preferred;
+        } catch (_) {
+          // optional
+        }
+      }
+
       const httpModule = parsed.protocol === 'https:' ? https : http;
       const req = httpModule.request(requestOptions, (res) => {
         const chunks = [];

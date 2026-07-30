@@ -3,6 +3,12 @@ const https = require('https');
 const os = require('os');
 const { URL } = require('url');
 const { execCommand } = require('./platform');
+const {
+  listExternalIPv4,
+  matchingInterfaces,
+  preferLocalAddress,
+  isMultiHomed
+} = require('./network');
 
 const CHARGER_PORT = 8000;
 
@@ -24,22 +30,39 @@ class Doctor {
       .filter(Boolean);
 
     const interfaces = this._listInterfaces();
+    const multiHomed = isMultiHomed();
+    const routing = [];
     const pingResults = [];
     const httpResults = [];
 
     for (const ip of targets) {
-      pingResults.push(await this._ping(ip));
-      httpResults.push(await this._probeCharger(ip));
-    }
+      const matches = matchingInterfaces(ip);
+      const preferred = preferLocalAddress(ip);
+      routing.push({
+        target: ip,
+        preferredLocal: preferred,
+        matchingInterfaces: matches.map((m) => `${m.name} ${m.address}/${m.cidr}`)
+      });
 
-    // Also probe any IPv4 that looks like a peer on USB/LAN adapters (same /24 guess)
-    if (targets.length === 0) {
-      for (const iface of interfaces) {
-        if (iface.internal || iface.family !== 'IPv4') continue;
-        const guess = this._guessGateway(iface.address);
-        if (guess && !targets.includes(guess)) {
-          pingResults.push(await this._ping(guess));
+      // Ping/HTTP via each matching NIC, then unbound — shows Wi‑Fi vs USB clearly
+      const bindList = preferred
+        ? [preferred, ...matches.map((m) => m.address).filter((a) => a !== preferred)]
+        : [undefined];
+      // Also try other external IPs when nothing matches (mask mismatch cases)
+      if (!preferred) {
+        for (const iface of listExternalIPv4()) {
+          if (!bindList.includes(iface.address)) bindList.push(iface.address);
         }
+        bindList.push(undefined);
+      }
+
+      const seenBind = new Set();
+      for (const bind of bindList) {
+        const key = String(bind);
+        if (seenBind.has(key)) continue;
+        seenBind.add(key);
+        pingResults.push(await this._ping(ip, bind));
+        httpResults.push(await this._probeCharger(ip, bind));
       }
     }
 
@@ -48,10 +71,12 @@ class Doctor {
       generatedAt: new Date().toISOString(),
       platform: `${os.platform()} ${os.release()} (${os.arch()})`,
       hostname: os.hostname(),
+      multiHomed,
       interfaces,
+      routing,
       ping: pingResults,
       chargerHttp: httpResults,
-      summary: this._summarize(interfaces, pingResults, httpResults)
+      summary: this._summarize(interfaces, pingResults, httpResults, multiHomed)
     };
 
     return report;
@@ -64,6 +89,10 @@ class Doctor {
     lines.push(`Host:      ${report.hostname}`);
     lines.push(`Platform:  ${report.platform}`);
     lines.push('');
+    if (report.multiHomed) {
+      lines.push('WARNING: Multiple networks active (Wi‑Fi + cable). Tool will bind to the matching adapter.');
+      lines.push('');
+    }
     lines.push('Network interfaces:');
     if (report.interfaces.length === 0) {
       lines.push('  (none)');
@@ -76,13 +105,28 @@ class Doctor {
         );
       }
     }
+    if (report.routing && report.routing.length) {
+      lines.push('');
+      lines.push('Routing (which adapter owns the charger IP):');
+      for (const r of report.routing) {
+        lines.push(
+          `  ${r.target} → preferred bind ${r.preferredLocal || '(none — will try all NICs)'}`
+        );
+        if (r.matchingInterfaces && r.matchingInterfaces.length) {
+          for (const m of r.matchingInterfaces) {
+            lines.push(`      match: ${m}`);
+          }
+        }
+      }
+    }
     lines.push('');
     lines.push('Ping:');
     if (report.ping.length === 0) {
       lines.push('  (no targets)');
     } else {
       for (const p of report.ping) {
-        lines.push(`  ${p.target}: ${p.ok ? 'OK' : 'FAIL'}${p.detail ? ` — ${p.detail}` : ''}`);
+        const via = p.via ? ` via ${p.via}` : ' via default-route';
+        lines.push(`  ${p.target}${via}: ${p.ok ? 'OK' : 'FAIL'}${p.detail ? ` — ${p.detail}` : ''}`);
       }
     }
     lines.push('');
@@ -91,13 +135,14 @@ class Doctor {
       lines.push('  (no targets)');
     } else {
       for (const h of report.chargerHttp) {
+        const via = h.via ? ` via ${h.via}` : ' via default-route';
         if (h.ok) {
           lines.push(
-            `  ${h.target}: OK — ${h.deviceName || 'device'}`
+            `  ${h.target}${via}: OK — ${h.deviceName || 'device'}`
             + `  fw=${h.firmware || '?'}`
           );
         } else {
-          lines.push(`  ${h.target}: FAIL — ${h.error}`);
+          lines.push(`  ${h.target}${via}: FAIL — ${h.error}`);
         }
       }
     }
@@ -200,17 +245,23 @@ class Doctor {
     return list;
   }
 
-  async _ping(target) {
+  async _ping(target, sourceAddress) {
     const platform = process.platform;
     let args;
     if (platform === 'win32') {
-      args = ['-n', '2', '-w', '2000', target];
+      args = sourceAddress
+        ? ['-n', '2', '-w', '2000', '-S', sourceAddress, target]
+        : ['-n', '2', '-w', '2000', target];
     } else if (platform === 'darwin') {
-      // macOS -W is milliseconds
-      args = ['-c', '2', '-W', '2000', target];
+      // macOS: -S source, -W timeout ms
+      args = sourceAddress
+        ? ['-c', '2', '-W', '2000', '-S', sourceAddress, target]
+        : ['-c', '2', '-W', '2000', target];
     } else {
-      // Linux -W is seconds
-      args = ['-c', '2', '-W', '2', target];
+      // Linux: -I source/iface, -W timeout seconds
+      args = sourceAddress
+        ? ['-c', '2', '-W', '2', '-I', sourceAddress, target]
+        : ['-c', '2', '-W', '2', target];
     }
     try {
       const { stdout } = await execCommand('ping', args, { timeout: 8000 });
@@ -220,23 +271,28 @@ class Doctor {
       const timeMatch = stdout.match(/time[=<]([\d.]+)\s*ms/i);
       return {
         target,
+        via: sourceAddress || null,
         ok,
         detail: timeMatch ? `${timeMatch[1]}ms` : (ok ? 'reachable' : 'no reply')
       };
     } catch (err) {
-      return { target, ok: false, detail: 'no reply' };
+      return { target, via: sourceAddress || null, ok: false, detail: 'no reply' };
     }
   }
 
-  async _probeCharger(ip) {
+  async _probeCharger(ip, localAddress) {
     const base = `http://${ip}:${CHARGER_PORT}`;
     try {
       const started = Date.now();
-      const infoBody = await this._httpGet(`${base}/api/v2/device/info`, 5000);
+      const infoBody = await this._httpGet(`${base}/api/v2/device/info`, 5000, localAddress);
       const info = JSON.parse(infoBody);
       let firmware = info.firmwareVersion || info.firmware || null;
       try {
-        const verBody = await this._httpGet(`${base}/api/v2/device/firmware_version`, 5000);
+        const verBody = await this._httpGet(
+          `${base}/api/v2/device/firmware_version`,
+          5000,
+          localAddress
+        );
         const ver = JSON.parse(verBody);
         firmware = `rear=${ver.firmwareRear || ver.rear || '?'} main=${ver.firmwareMain || ver.main || '?'}`;
       } catch (_) {
@@ -244,23 +300,34 @@ class Doctor {
       }
       return {
         target: ip,
+        via: localAddress || null,
         ok: true,
         latencyMs: Date.now() - started,
         deviceName: info.deviceName || info.name || 'Klvr',
         firmware
       };
     } catch (err) {
-      return { target: ip, ok: false, error: err.message };
+      return { target: ip, via: localAddress || null, ok: false, error: err.message };
     }
   }
 
-  _httpGet(url, timeoutMs) {
+  _httpGet(url, timeoutMs, localAddress) {
     return new Promise((resolve, reject) => {
       const mod = url.startsWith('https') ? https : http;
-      const req = mod.get(url, { timeout: timeoutMs }, (res) => {
+      const parsed = new URL(url);
+      const options = {
+        protocol: parsed.protocol,
+        hostname: parsed.hostname,
+        port: parsed.port || (parsed.protocol === 'https:' ? 443 : 80),
+        path: parsed.pathname + parsed.search,
+        timeout: timeoutMs
+      };
+      if (localAddress) options.localAddress = localAddress;
+
+      const req = mod.get(options, (res) => {
         if ([301, 302, 307, 308].includes(res.statusCode) && res.headers.location) {
           res.resume();
-          this._httpGet(res.headers.location, timeoutMs).then(resolve, reject);
+          this._httpGet(res.headers.location, timeoutMs, localAddress).then(resolve, reject);
           return;
         }
         let data = '';
@@ -281,28 +348,24 @@ class Doctor {
     });
   }
 
-  _guessGateway(address) {
-    const parts = address.split('.').map(Number);
-    if (parts.length !== 4 || parts.some((n) => Number.isNaN(n))) return null;
-    // Common static direct-cable pattern: host .60 / charger .56 — don't invent; skip
-    return null;
-  }
-
-  _summarize(interfaces, pingResults, httpResults) {
+  _summarize(interfaces, pingResults, httpResults, multiHomed) {
     const externalV4 = interfaces.filter((i) => i.family === 'IPv4' && !i.internal);
     if (externalV4.length === 0) {
       return 'NO usable IPv4 interface — check USB LAN / cable.';
     }
     const httpOk = httpResults.filter((h) => h.ok);
     if (httpOk.length > 0) {
-      return `Charger API reachable at ${httpOk.map((h) => h.target).join(', ')}.`;
+      const via = httpOk[0].via ? ` via ${httpOk[0].via}` : '';
+      return `Charger API reachable at ${httpOk[0].target}${via}.`
+        + (multiHomed ? ' Multi-homed: tool binds to the working adapter.' : '');
     }
     const pingOk = pingResults.filter((p) => p.ok);
     if (pingOk.length > 0) {
-      return `Ping OK to ${pingOk.map((p) => p.target).join(', ')} but charger HTTP :8000 failed — wrong device or firmware API down.`;
+      return `Ping OK to ${pingOk[0].target} but charger HTTP :8000 failed — wrong device or firmware API down.`;
     }
     if (pingResults.length > 0) {
-      return 'No ping reply to tested IPs — Mac and charger are not linking on this cable/subnet.';
+      return 'No ping/HTTP via any adapter — check cable, APPLY on charger, and Mac subnet mask (use 255.255.255.0).'
+        + (multiHomed ? ' Tip: temporarily disable Wi‑Fi and retry.' : '');
     }
     return 'Collected interface list only. Pass a charger IP (e.g. 10.101.0.56) for ping/HTTP tests.';
   }

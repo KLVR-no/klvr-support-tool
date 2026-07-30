@@ -1,12 +1,22 @@
 const http = require('http');
 const https = require('https');
-const os = require('os');
 const { URL } = require('url');
 const inquirer = require('inquirer');
+const {
+    listExternalIPv4,
+    preferLocalAddress,
+    localAddressesToTry,
+    describeMultiHome,
+    isIPv4,
+    ipToInt,
+    intToIp,
+    netmaskToCidr
+} = require('./network');
 
 /**
  * Device Discovery and Connection Manager
- * Handles finding Klvr devices on network and connecting to specific targets
+ * Handles finding Klvr devices on network and connecting to specific targets.
+ * Multi-homed hosts (Wi‑Fi + USB LAN): binds HTTP to the matching adapter.
  */
 class DeviceDiscovery {
     constructor(logger) {
@@ -22,14 +32,12 @@ class DeviceDiscovery {
      * Discover Klvr devices on the network.
      *
      * Runs mDNS (Bonjour) and a direct HTTP scan of every local network
-     * interface in parallel. This ensures the charger is found even when the
-     * computer is connected to it via a dedicated NIC on a different subnet
-     * (e.g. static IP cable) while also being connected to Wi-Fi.
-     *
-     * Results from both probes are merged and deduplicated by IP address.
+     * interface in parallel. Subnet probes bind to that interface's address
+     * so Wi‑Fi being up does not steal direct-cable traffic.
      */
     async discoverDevices() {
         this.logger.step('🔍 Searching for Klvr devices on your network...');
+        describeMultiHome(this.logger);
 
         const [mdnsDevices, scanDevices] = await Promise.all([
             this._discoverViaMdns(),
@@ -43,15 +51,29 @@ class DeviceDiscovery {
             this.logger.debug('mDNS found nothing; relying on subnet scan / manual IP.');
         }
 
-        // Merge results, deduplicate by IP (mDNS wins for richer service info)
+        // Attach localAddress to mDNS hits; prefer scan results (already bound).
+        for (const d of mdnsDevices) {
+            if (!d.localAddress && isIPv4(d.ip)) {
+                d.localAddress = preferLocalAddress(d.ip) || undefined;
+            }
+        }
+
         const byIp = new Map();
-        for (const d of [...scanDevices, ...mdnsDevices]) {
-            byIp.set(d.ip, d);
+        for (const d of [...mdnsDevices, ...scanDevices]) {
+            const prev = byIp.get(d.ip);
+            if (!prev || (d.localAddress && !prev.localAddress)) {
+                byIp.set(d.ip, d);
+            }
         }
         const devices = Array.from(byIp.values());
 
         if (devices.length > 0) {
             this.logger.success(`Found ${devices.length} device(s)`);
+            for (const d of devices) {
+                if (d.localAddress) {
+                    this.logger.info(`  ${d.deviceName} @ ${d.ip} via local ${d.localAddress}`);
+                }
+            }
         } else {
             this.logger.warn('No devices discovered. Enter the charger IP manually, or check the network.');
         }
@@ -107,91 +129,81 @@ class DeviceDiscovery {
     }
 
     /**
-     * Scan every local IPv4 network interface for Klvr devices by probing
-     * each host on the subnet directly over HTTP. Subnets larger than /24
-     * are capped to /24 to keep scan time bounded (~2 s worst case).
-     *
-     * All probes fire concurrently so the total time equals scanTimeout
-     * regardless of how many hosts are in the subnet.
+     * Scan every local IPv4 interface for Klvr devices. Each probe binds to
+     * that interface so dual Wi‑Fi + USB setups reach the cable side.
+     * Subnets wider than /24 are capped to the containing /24.
      */
     async _scanNetworkInterfaces() {
-        const interfaces = os.networkInterfaces();
-        const allIps = [];
+        const interfaces = listExternalIPv4();
+        const probes = [];
 
-        for (const [name, addrs] of Object.entries(interfaces)) {
-            for (const addr of addrs) {
-                if (addr.internal || addr.family !== 'IPv4') continue;
+        for (const iface of interfaces) {
+            const cidr = iface.cidr || netmaskToCidr(iface.netmask);
+            const networkInt = ipToInt(iface.address) & ipToInt(iface.netmask);
+            let scanNetwork = intToIp(networkInt);
+            let effectiveCidr = cidr;
+            if (cidr < 24) {
+                effectiveCidr = 24;
+                const mask = (0xFFFFFFFF << (32 - 24)) >>> 0;
+                scanNetwork = intToIp(ipToInt(iface.address) & mask);
+            }
 
-                const { network, cidr } = this._calculateSubnet(addr.address, addr.netmask);
-
-                // For subnets wider than /24 (e.g. /16 from DHCP on Wi-Fi),
-                // scanning every host is impractical. Instead scan only the /24
-                // that contains our own IP — that is the segment most likely to
-                // hold the charger when it's on the same broadcast domain.
-                let scanNetwork = network;
-                let effectiveCidr = cidr;
-                if (cidr < 24) {
-                    effectiveCidr = 24;
-                    const addrInt = this._ipToInt(addr.address);
-                    const mask = (0xFFFFFFFF << (32 - 24)) >>> 0;
-                    scanNetwork = this._intToIp(addrInt & mask);
-                }
-
-                const ips = this._generateSubnetIps(scanNetwork, effectiveCidr, addr.address);
-                this.logger.debug(`Scanning ${name} (${addr.address}/${cidr}, scanning ${scanNetwork}/24): ${ips.length} addresses`);
-                allIps.push(...ips);
+            const ips = this._generateSubnetIps(scanNetwork, effectiveCidr, iface.address);
+            this.logger.debug(
+                `Scanning ${iface.name} (${iface.address}/${cidr} → ${scanNetwork}/${effectiveCidr}): ${ips.length} hosts, bind ${iface.address}`
+            );
+            for (const ip of ips) {
+                probes.push({ ip, localAddress: iface.address });
             }
         }
 
-        if (allIps.length === 0) return [];
+        if (probes.length === 0) return [];
 
-        // Deduplicate across overlapping subnets, then probe all at once
-        const uniqueIps = [...new Set(allIps)];
-        const results = await Promise.all(uniqueIps.map(ip => this._testConnectionFast(ip)));
+        // Deduplicate identical bind+target pairs
+        const seen = new Set();
+        const unique = [];
+        for (const p of probes) {
+            const key = `${p.localAddress}->${p.ip}`;
+            if (seen.has(key)) continue;
+            seen.add(key);
+            unique.push(p);
+        }
+
+        const results = await Promise.all(
+            unique.map((p) => this._testConnectionFast(p.ip, p.localAddress))
+        );
         return results.filter(Boolean);
-    }
-
-    _calculateSubnet(ip, netmask) {
-        const ipParts = ip.split('.').map(Number);
-        const maskParts = netmask.split('.').map(Number);
-        const networkParts = ipParts.map((part, i) => part & maskParts[i]);
-        const cidr = maskParts.reduce((acc, p) => acc + p.toString(2).split('1').length - 1, 0);
-        return { network: networkParts.join('.'), cidr };
     }
 
     _generateSubnetIps(network, cidr, skipIp) {
         const hostBits = 32 - cidr;
-        const base = this._ipToInt(network);
-        const count = Math.pow(2, hostBits) - 2; // exclude network + broadcast
+        const base = ipToInt(network);
+        const count = Math.pow(2, hostBits) - 2;
         const ips = [];
         for (let i = 1; i <= count; i++) {
-            const ip = this._intToIp(base + i);
+            const ip = intToIp(base + i);
             if (ip !== skipIp) ips.push(ip);
         }
         return ips;
     }
 
-    _ipToInt(ip) {
-        return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0;
-    }
-
-    _intToIp(n) {
-        return [(n >>> 24) & 0xFF, (n >>> 16) & 0xFF, (n >>> 8) & 0xFF, n & 0xFF].join('.');
-    }
-
     /**
-     * Fast HTTP probe used by the subnet scanner. Uses a shorter timeout than
-     * the interactive connection flow.
+     * Fast HTTP probe used by the subnet scanner.
+     * @param {string} ip
+     * @param {string} [localAddress] bind to this NIC
      */
-    async _testConnectionFast(ip) {
+    async _testConnectionFast(ip, localAddress) {
         return new Promise((resolve) => {
-            const req = http.request({
+            const options = {
                 hostname: ip,
                 port: this.defaultPort,
                 path: '/api/v2/device/info',
                 method: 'GET',
                 timeout: this.scanTimeout
-            }, (res) => {
+            };
+            if (localAddress) options.localAddress = localAddress;
+
+            const req = http.request(options, (res) => {
                 let data = '';
                 res.on('data', (chunk) => data += chunk);
                 res.on('end', () => {
@@ -199,14 +211,18 @@ class DeviceDiscovery {
                         const info = JSON.parse(data);
                         const deviceName = info.deviceName || info.name;
                         if (deviceName && deviceName.toLowerCase().includes('klvr')) {
-                            this.logger.debug(`Subnet scan found: ${deviceName} at ${ip}`);
+                            this.logger.debug(
+                                `Subnet scan found: ${deviceName} at ${ip}`
+                                + (localAddress ? ` via ${localAddress}` : '')
+                            );
                             resolve({
                                 ip,
                                 deviceName,
                                 firmwareVersion: info.firmwareVersion,
                                 serialNumber: info.serialNumber || info.ip?.macAddress || 'Unknown',
                                 port: this.defaultPort,
-                                url: `http://${ip}:${this.defaultPort}`
+                                url: `http://${ip}:${this.defaultPort}`,
+                                localAddress: localAddress || undefined
                             });
                         } else {
                             resolve(null);
@@ -224,20 +240,43 @@ class DeviceDiscovery {
     }
 
     /**
-     * Connect to a specific target (IP address or URL)
+     * Connect to a specific target (IP address or URL).
+     * For LAN IPs, tries each local NIC bind so Wi‑Fi does not steal the route.
      */
     async connectToTarget(target) {
         this.logger.step(`🔗 Connecting to target: ${target}`);
-        
+        describeMultiHome(this.logger);
+
         const parsed = this._parseTarget(target);
-        const device = await this._testConnection(parsed);
-        
-        if (!device) {
-            throw new Error(`Failed to connect to ${target}`);
+
+        if (parsed.isUrl || !isIPv4(parsed.hostname)) {
+            const device = await this._testConnection(parsed);
+            if (!device) throw new Error(`Failed to connect to ${target}`);
+            this.logger.success(`Connected to ${device.deviceName}`);
+            return device;
         }
-        
-        this.logger.success(`Connected to ${device.deviceName}`);
-        return device;
+
+        const candidates = localAddressesToTry(parsed.hostname);
+        let lastError = null;
+        for (const localAddress of candidates) {
+            const label = localAddress || 'default-route';
+            this.logger.debug(`Trying ${parsed.hostname} via ${label}...`);
+            const device = await this._testConnection({ ...parsed, localAddress });
+            if (device) {
+                if (localAddress) {
+                    this.logger.info(`Using local adapter ${localAddress} → ${parsed.hostname}`);
+                }
+                this.logger.success(`Connected to ${device.deviceName}`);
+                return device;
+            }
+            lastError = label;
+        }
+
+        throw new Error(
+            `Failed to connect to ${target}`
+            + (lastError ? ` (tried binds including ${lastError})` : '')
+            + '. If Wi‑Fi and USB LAN are both on, keep trying — or temporarily disable Wi‑Fi.'
+        );
     }
 
     /**
@@ -253,6 +292,8 @@ class DeviceDiscovery {
         if (mode === 'support') {
             return this._promptTunnelUrl();
         }
+
+        describeMultiHome(this.logger);
 
         const { method } = await inquirer.prompt([
             {
@@ -388,7 +429,8 @@ class DeviceDiscovery {
                 'Firmware Version': info.firmwareVersion || 'Unknown',
                 'Serial Number': info.serialNumber || info.ip?.macAddress || 'Unknown',
                 'Status': 'Connected',
-                'Connection': device.url
+                'Connection': device.url,
+                'Local adapter': device.localAddress || 'default-route'
             };
         } catch (error) {
             throw new Error(`Failed to get device info: ${error.message}`);
@@ -436,6 +478,9 @@ class DeviceDiscovery {
                 method: 'GET',
                 timeout: this.connectionTimeout
             };
+            if (parsed.localAddress) {
+                options.localAddress = parsed.localAddress;
+            }
 
             const httpModule = parsed.protocol === 'https:' ? https : http;
 
@@ -446,7 +491,7 @@ class DeviceDiscovery {
                     try {
                         const info = JSON.parse(data);
                         const deviceName = info.deviceName || info.name;
-                        
+
                         if (deviceName && deviceName.toLowerCase().includes('klvr')) {
                             resolve({
                                 ip: parsed.hostname,
@@ -454,7 +499,8 @@ class DeviceDiscovery {
                                 firmwareVersion: info.firmwareVersion,
                                 serialNumber: info.serialNumber || info.ip?.macAddress || 'Unknown',
                                 port: parsed.port,
-                                url: parsed.baseUrl
+                                url: parsed.baseUrl,
+                                localAddress: parsed.localAddress || preferLocalAddress(parsed.hostname) || undefined
                             });
                         } else {
                             this.logger.warn(`Device at ${parsed.hostname} is not a Klvr device`);
@@ -468,7 +514,11 @@ class DeviceDiscovery {
             });
 
             req.on('error', (error) => {
-                this.logger.debug(`Connection failed to ${parsed.hostname}: ${error.message}`);
+                this.logger.debug(
+                    `Connection failed to ${parsed.hostname}`
+                    + (parsed.localAddress ? ` via ${parsed.localAddress}` : '')
+                    + `: ${error.message}`
+                );
                 resolve(null);
             });
 
@@ -488,7 +538,7 @@ class DeviceDiscovery {
     async _makeRequest(device, path, options = {}) {
         return new Promise((resolve, reject) => {
             const parsed = this._parseTarget(device.url || `http://${device.ip}:${device.port}`);
-            
+
             const requestOptions = {
                 hostname: parsed.hostname,
                 port: parsed.port,
@@ -497,6 +547,11 @@ class DeviceDiscovery {
                 headers: options.headers || {},
                 timeout: this.connectionTimeout
             };
+            const localAddress = device.localAddress
+                || (!parsed.isUrl && isIPv4(parsed.hostname) ? preferLocalAddress(parsed.hostname) : null);
+            if (localAddress) {
+                requestOptions.localAddress = localAddress;
+            }
 
             const httpModule = parsed.protocol === 'https:' ? https : http;
             const req = httpModule.request(requestOptions, (res) => {
@@ -514,7 +569,7 @@ class DeviceDiscovery {
             if (options.body) {
                 req.write(options.body);
             }
-            
+
             req.end();
         });
     }

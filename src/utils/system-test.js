@@ -184,6 +184,26 @@ systemTest.addTest('Platform helpers', async () => {
     if (!key) throw new Error('getPlatformKey returned empty');
 });
 
+systemTest.addTest('Multi-home network helpers', async () => {
+    const net = require('../core/network');
+    if (!net.sameSubnet('10.101.0.56', '10.101.0.60', '255.255.255.0')) {
+        throw new Error('sameSubnet /24 failed');
+    }
+    if (!net.sameSubnet('10.101.0.56', '10.101.0.60', '255.255.0.0')) {
+        throw new Error('sameSubnet /16 failed');
+    }
+    if (net.sameSubnet('10.101.0.56', '192.168.1.10', '255.255.255.0')) {
+        throw new Error('sameSubnet should reject different networks');
+    }
+    if (net.interfacePreference('en0') <= net.interfacePreference('Wi-Fi')) {
+        throw new Error('wired preference should beat Wi-Fi name');
+    }
+    const tryList = net.localAddressesToTry('10.101.0.56');
+    if (!Array.isArray(tryList) || tryList.length < 1) {
+        throw new Error('localAddressesToTry empty');
+    }
+});
+
 systemTest.addTest('Firmware version listing includes 1.8.9-beta', async () => {
     const Logger = require('../core/logger');
     const FirmwareManager = require('../core/firmware-manager');
@@ -230,6 +250,7 @@ systemTest.addTest('File structure validation', async () => {
         'src/core/firmware-manager.js',
         'src/core/tunnel-manager.js',
         'src/core/doctor.js',
+        'src/core/network.js',
         'src/cli/klvr-tool.js',
         'src/cli/support-cli.js'
     ];

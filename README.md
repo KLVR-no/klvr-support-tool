@@ -2,7 +2,7 @@
 
 Professional support tools for KLVR Charger Pro — local and **remote** firmware updates, tunnels, and diagnostics.
 
-**Version:** 2.2.0
+**Version:** 2.3.0
 
 ## Quick Start (download + run)
 
@@ -124,6 +124,7 @@ node src/cli/support-cli.js firmware-update <tunnel-url> --version 1.8.9-beta -y
 
 - mDNS usually works out of the box.
 - If Homebrew is available, you can also `brew install cloudflared` instead of the local install.
+- **Wi‑Fi + USB LAN:** the tool detects multi-homing, warns, and binds charger HTTP (scan / connect / firmware upload) to the adapter that shares a subnet with the charger — so Wi‑Fi being up should not steal the direct-cable path.
 
 ## Development
 
