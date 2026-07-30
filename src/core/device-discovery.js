@@ -260,8 +260,8 @@ class DeviceDiscovery {
                 name: 'method',
                 message: 'How is your Klvr Charger Pro connected?',
                 choices: [
-                    { name: 'I know the IP address  (e.g. direct cable / static IP)', value: 'manual' },
-                    { name: 'Search for it automatically on the network', value: 'discover' }
+                    { name: 'Search for it automatically on the network', value: 'discover' },
+                    { name: 'I know the IP address  (e.g. direct cable / static IP)', value: 'manual' }
                 ]
             }
         ]);
