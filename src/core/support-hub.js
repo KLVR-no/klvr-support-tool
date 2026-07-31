@@ -328,7 +328,14 @@ class SupportHub {
     const headers = { ...req.headers };
     delete headers.host;
     delete headers.connection;
+    // Drop hop-by-hop / encoding headers; we buffer the body and must send a
+    // real Content-Length. Charger OTA rejects requests without it (HTTP 400
+    // "Invalid content length given") — Cloudflare/tunnel often arrives as
+    // chunked, which previously left the upstream charger with no length.
     delete headers['content-length'];
+    delete headers['transfer-encoding'];
+    delete headers['content-encoding'];
+    headers['Content-Length'] = String(body.length);
 
     const options = {
       hostname: active.ip,
@@ -336,7 +343,8 @@ class SupportHub {
       path: path + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : ''),
       method: req.method,
       headers,
-      timeout: 120000
+      // Firmware OTA over tunnel can exceed 2 minutes on slow links
+      timeout: path.includes('/firmware_') ? 600000 : 120000
     };
     if (active.localAddress) {
       options.localAddress = active.localAddress;
