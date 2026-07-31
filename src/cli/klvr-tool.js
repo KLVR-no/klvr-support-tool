@@ -104,7 +104,7 @@ program
   .option('-f, --firmware-dir <path>', 'Firmware directory path')
   .option('--main <file>', 'Specific main firmware file')
   .option('--rear <file>', 'Specific rear firmware file')
-  .option('--version <version>', 'Firmware version to install (e.g. 1.8.9-beta or v1.8.9-beta)')
+  .option('--version <version>', 'Firmware version to install (e.g. 1.8.92-beta or v1.8.92-beta)')
   .option('--rear-only', 'Update only the rear board firmware')
   .option('--force', 'Force update even if same version')
   .option('--local', 'Customer local update: LAN only (no Cloudflare tunnel)')
@@ -311,7 +311,7 @@ program
       console.log(chalk.cyan('  Support commands:'));
       console.log(`    klvr-tool diagnose ${tunnel.url}`);
       console.log(`    klvr-tool use-target ${tunnel.url}`);
-      console.log('    klvr-tool firmware-update --remote --version 1.8.9-beta -y');
+      console.log('    klvr-tool firmware-update --remote --version 1.8.92-beta -y');
       console.log('');
       console.log(chalk.yellow('  Keep this terminal open. Press Ctrl+C to end the session.'));
       console.log('');

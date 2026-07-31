@@ -116,7 +116,7 @@ function commandExists(bin) {
 
 /**
  * Normalize firmware version strings for comparison.
- * "v1.8.9-beta" / "1.8.9" / "1.8.9-beta" → "1.8.9"
+ * "v1.8.92-beta" / "1.8.92" / "1.8.92-beta" → "1.8.92"
  */
 function normalizeVersion(version) {
   if (!version) return '';

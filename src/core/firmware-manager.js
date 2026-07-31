@@ -287,7 +287,7 @@ class FirmwareManager {
   }
 
   _extractFirmwareVersion(filename) {
-    // main_v1.8.9-beta.signed.bin → v1.8.9-beta
+    // main_v1.8.92-beta.signed.bin → v1.8.92-beta
     const match = filename.match(/_(v\d+\.\d+\.\d+(?:beta|alpha|rc)?(?:-[^.]+)?)\.signed\.bin$/);
     return match ? match[1] : null;
   }

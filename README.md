@@ -27,7 +27,7 @@ The installer clones the latest repo (including bundled firmware), installs npm 
 | `v1.8.4` | Stable baseline |
 | `v1.8.6-beta` | Beta |
 | `v1.8.7-beta` | Beta (easteregg era) |
-| `v1.8.9-beta` | Thermal policy: fans 70% @ 32°C, hard-stop 38°C |
+| `v1.8.92-beta` | Thermal policy: fans 70% @ 32°C, hard-stop 38°C |
 
 ## Customer menu (only two choices)
 
@@ -42,7 +42,7 @@ klvr-tool
 
 ```bash
 klvr-tool firmware-update --local
-klvr-tool firmware-update 192.168.1.141 --version 1.8.9-beta -y
+klvr-tool firmware-update 192.168.1.141 --version 1.8.92-beta -y
 ```
 
 ### Remote Support Session (one URL for everything)
@@ -69,13 +69,13 @@ Share the printed `https://….trycloudflare.com` URL. **Keep that terminal open
 ```bash
 klvr-tool diagnose https://abc123.trycloudflare.com
 klvr-tool use-target https://abc123.trycloudflare.com
-klvr-tool firmware-update --remote --version 1.8.9-beta -y
+klvr-tool firmware-update --remote --version 1.8.92-beta -y
 ```
 
 Or in one shot:
 
 ```bash
-klvr-tool firmware-update https://abc123.trycloudflare.com --version 1.8.9-beta -y
+klvr-tool firmware-update https://abc123.trycloudflare.com --version 1.8.92-beta -y
 ```
 
 ### What the update does (safe order)
@@ -93,7 +93,7 @@ klvr-tool firmware-update https://abc123.trycloudflare.com --version 1.8.9-beta 
 klvr-tool doctor --ip 10.101.0.56   # local-only network check
 klvr-tool device-info [target]
 klvr-tool clear-target
-klvr-tool firmware-update --rear-only --version 1.8.9-beta
+klvr-tool firmware-update --rear-only --version 1.8.92-beta
 ```
 
 Support engineer CLI:
@@ -101,7 +101,7 @@ Support engineer CLI:
 ```bash
 npm run support
 # or
-node src/cli/support-cli.js firmware-update <tunnel-url> --version 1.8.9-beta -y
+node src/cli/support-cli.js firmware-update <tunnel-url> --version 1.8.92-beta -y
 ```
 
 ## Windows notes
