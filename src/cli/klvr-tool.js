@@ -24,7 +24,8 @@ const program = new Command();
 program
   .name('klvr-tool')
   .description('Klvr Charger Pro - Professional firmware updater and support tools')
-  .version('2.4.0');
+  // Keep -V for tool version; --version is reserved for firmware-update target FW.
+  .version('2.4.0', '-V, --klvr-tool-version', 'output the support-tool version');
 
 program
   .option('-v, --verbose', 'Enable verbose logging')
