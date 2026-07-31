@@ -40,7 +40,7 @@ program
   .option('--rear <file>', 'Specific rear firmware file')
   .option('--rear-only', 'Update only the rear board firmware')
   .option('--force', 'Force update even if same version')
-  .option('--version <version>', 'Firmware version to install (e.g. 1.8.92-beta)')
+  .option('--version <version>', 'Firmware version to install (e.g. 1.8.93-beta)')
   .option('-y, --yes', 'Skip confirmation prompt')
   .option('--validate-only', 'Only validate firmware files, do not update')
   .option('--backup-current', 'Backup current firmware before update')

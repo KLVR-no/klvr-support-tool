@@ -174,10 +174,10 @@ systemTest.addTest('Configuration validation', async () => {
 
 systemTest.addTest('Platform helpers', async () => {
     const platform = require('../core/platform');
-    if (platform.normalizeVersion('v1.8.92-beta') !== '1.8.92') {
-        throw new Error('normalizeVersion failed for v1.8.92-beta');
+    if (platform.normalizeVersion('v1.8.93-beta') !== '1.8.93') {
+        throw new Error('normalizeVersion failed for v1.8.93-beta');
     }
-    if (!platform.versionsMatch('1.8.92', 'v1.8.92-beta')) {
+    if (!platform.versionsMatch('1.8.93', 'v1.8.93-beta')) {
         throw new Error('versionsMatch failed');
     }
     const key = platform.getPlatformKey();
@@ -216,14 +216,14 @@ systemTest.addTest('Multi-home network helpers', async () => {
     }
 });
 
-systemTest.addTest('Firmware version listing includes 1.8.92-beta', async () => {
+systemTest.addTest('Firmware version listing includes 1.8.93-beta', async () => {
     const Logger = require('../core/logger');
     const FirmwareManager = require('../core/firmware-manager');
     const fm = new FirmwareManager(new Logger({ verbose: false }));
     const versions = await fm.listAvailableVersions(false);
-    const has189 = versions.some(v => String(v.version).includes('1.8.92'));
+    const has189 = versions.some(v => String(v.version).includes('1.8.93'));
     if (!has189 && versions.length > 0) {
-        console.log(chalk.yellow('    ⚠️  1.8.92-beta not bundled (OK if intentional)'));
+        console.log(chalk.yellow('    ⚠️  1.8.93-beta not bundled (OK if intentional)'));
     }
     if (typeof fm.listAvailableVersions !== 'function') {
         throw new Error('listAvailableVersions missing');
