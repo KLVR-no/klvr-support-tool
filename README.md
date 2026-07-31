@@ -25,9 +25,7 @@ The installer clones the latest repo (including bundled firmware), installs npm 
 | Version | Notes |
 |---------|--------|
 | `v1.8.4` | Stable baseline |
-| `v1.8.6-beta` | Beta |
-| `v1.8.7-beta` | Beta (easteregg era) |
-| `v1.8.93-beta` | Thermal: fans, throttle avg 36/35, hard-stop 38 |
+| `v1.8.93-beta` | Thermal: soak fans 40%, throttle avg 36/35, hard-stop 38, `fanSpeedPercent` API |
 
 ## Customer menu (only two choices)
 
